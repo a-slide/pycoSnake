@@ -3,27 +3,54 @@
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.4.2-brightgreen.svg)](https://snakemake.bitbucket.io)
 [![Build Status](https://travis-ci.org/snakemake-workflows/snakemake_nanopore_DNA_methylation.svg?branch=master)](https://travis-ci.org/snakemake-workflows/snakemake_nanopore_DNA_methylation)
 
-This is the template for a new Snakemake workflow. Replace this text with a comprehensive description covering the purpose and domain.
-Insert your code into the respective folders, i.e. `scripts`, `rules`, and `envs`. Define the entry point of the workflow in the `Snakefile` and the main configuration in the `config.yaml` file.
-
 ## Authors
 
 * Adrien Leger (@a-slide)
 
 ## Usage
 
-### Step 1: Install workflow
+### Step 1: Install conda package manager
 
-If you simply want to use this workflow, download and extract the [latest release](https://github.com/snakemake-workflows/snakemake_nanopore_DNA_methylation/releases).
-If you intend to modify and further develop this workflow, fork this repository. Please consider providing any generally applicable modifications via a pull request.
+Conda is the only dependency that you need to install manually.
 
-In any case, if you use this workflow in a paper, don't forget to give credits to the authors by citing the URL of this repository and, if available, its DOI (see above).
+All the other packages and external program needed for this pipeline will then be automatically handled by conda itself.
+
+Install conda following the official documentation for you system
+
+https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
+
+### Step 2: Install workflow
+
+#### Initial installation
+
+If you simply want to use this workflow, clone the repository locally:
+
+`git clone git@github.com:a-slide/snakemake_nanopore_DNA_methylation.git`
+
+`cd snakemake_nanopore_DNA_methylation`
+
+Then create a virtual environment to deploy the workflow
+
+`conda env create -f global_env.yml`
+
+
+#### Update workflow
+
+From the package directory
+
+`git pull`
+
+`conda env update -f global_env.yml`
 
 ### Step 2: Configure workflow
 
 Configure the workflow according to your needs via editing the file `config.yaml`.
 
 ### Step 3: Execute workflow
+
+First activate the conda virtual environment
+
+`conda activate snakemake_nanopore_DNA_methylation`
 
 Test your configuration by performing a dry-run via
 
@@ -33,13 +60,6 @@ Execute the workflow locally via
 
     snakemake --cores $N
 
-using `$N` cores or run it in a cluster environment via
-
-    snakemake --cluster qsub --jobs 100
-
-or
-
-    snakemake --drmaa --jobs 100
 
 See the [Snakemake documentation](https://snakemake.readthedocs.io) for further details.
 
