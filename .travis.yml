@@ -1,7 +1,4 @@
 language: python
-python:
-  # We don't actually use the Travis Python, but this keeps it organized.
-  - "3.6"
 
 install:
   - sudo apt-get update
@@ -13,15 +10,9 @@ install:
   - conda update -q conda
   # Useful for debugging any issues with conda
   - conda info -a
-  - conda config --add channels defaults
-  - conda config --add channels conda-forge
-  - conda config --add channels bioconda
   # create snakemake env
-  - conda create -q -n snakemake snakemake python=$TRAVIS_PYTHON_VERSION
-  # add additional stuff to setup below
+  - conda env create -f global_env.yml
 
 script:
-  - source activate snakemake
-  # run the workflow
-  # put a test case into the subfolder .test (e.g., use https://github.com/snakemake-workflows/ngs-test-data as a submodule)
+  - source activate snakemake_nanopore_DNA_methylation
   - snakemake --use-conda --directory .test

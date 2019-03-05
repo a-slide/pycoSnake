@@ -1,0 +1,11 @@
+# Use with  
+
+name: snakemake_nanopore_DNA_methylation
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+dependencies:
+  - python>=3.6
+  - snakemake>=5.4.2
+  - pandas>=0.24.1
