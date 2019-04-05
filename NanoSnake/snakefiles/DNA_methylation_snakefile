@@ -1,0 +1,59 @@
+# -*- coding: utf-8 -*-
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Imports~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+# Std lib
+from glob import glob
+from os import path
+
+# Third party lib
+import pandas as pd
+from snakemake.utils import min_version
+
+# set minimum snakemake version
+min_version("5.4.2")
+
+#~~~~~~~~~~~~~~~~~~~~~~~Load sample sheets and shortcuts~~~~~~~~~~~~~~~~~~~~~~~#
+sample_df = pd.read_csv (config["sample_sheet"], comment="#", skip_blank_lines=True, sep="\t", index_col=0)
+SAMPLES = sample_df.index
+ENVS_DIR = config["envs_dir"]
+SCRIPTS_DIR = config["scripts_dir"]
+RULES_DIR = config["rules_dir"]
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Rules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+def get_fastq (wildcards):
+    return glob (sample_df.loc[wildcards.sample, "fastq"])
+
+def get_fast5_dir (wildcards):
+    return glob (sample_df.loc[wildcards.sample, "fast5_dir"])
+
+def get_seq_summary (wildcards):
+    return glob (sample_df.loc[wildcards.sample, "seq_summary"])
+
+rule all:
+    input:
+        expand("results/fastq/{sample}_merged.fastq", sample=SAMPLES)
+
+rule merge_fastq:
+    input:
+        fastq = get_fastq
+    output:
+        fastq = "results/01_fastq_merged/{sample}.fastq"
+    shell:
+        "cat {input.fastq} > {output.fastq}"
+#
+# rule fastqc:
+#     input:
+#         rule:merge_fastq.output.fastq
+#     output:
+#         fastq = "results/02_fastqc/{sample}.html"
+#     shell:
+#         "fastqc {input.fastq} > {output.fastq}"
+#
+# rule align:
+#     input:
+#         rule:merge_fastq.output.fastq
+#     output:
+#         fastq = "results/03_minimap/{sample}.bam"
+#     shell:
+#         "minimap"

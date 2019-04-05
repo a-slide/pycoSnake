@@ -1,7 +1,7 @@
-# Snakemake workflow: snakemake_nanopore_DNA_methylation
+# Snakemake workflow: NanoSnake
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.4.2-brightgreen.svg)](https://snakemake.bitbucket.io)
-[![Build Status](https://travis-ci.org/snakemake-workflows/snakemake_nanopore_DNA_methylation.svg?branch=master)](https://travis-ci.org/snakemake-workflows/snakemake_nanopore_DNA_methylation)
+[![Build Status](https://travis-ci.org/snakemake-workflows/NanoSnake.svg?branch=master)](https://travis-ci.org/snakemake-workflows/NanoSnake)
 
 ## Authors
 
@@ -25,13 +25,13 @@ https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
 If you simply want to use this workflow, clone the repository locally:
 
-`git clone git@github.com:a-slide/snakemake_nanopore_DNA_methylation.git`
+`git clone git@github.com:a-slide/NanoSnake.git`
 
-`cd snakemake_nanopore_DNA_methylation`
+`cd NanoSnake`
 
 Then create a virtual environment to deploy the workflow
 
-`conda env create -f global_env.yml`
+`conda env create -f conda_env.yml`
 
 
 #### Update workflow
@@ -40,7 +40,7 @@ From the package directory
 
 `git pull`
 
-`conda env update -f global_env.yml`
+`conda env update -f conda_env.yml`
 
 ### Step 2: Configure workflow
 
@@ -50,7 +50,7 @@ Configure the workflow according to your needs via editing the file `config.yaml
 
 First activate the conda virtual environment
 
-`conda activate snakemake_nanopore_DNA_methylation`
+`conda activate NanoSnake`
 
 Test your configuration by performing a dry-run via
 

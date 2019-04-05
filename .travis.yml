@@ -8,11 +8,12 @@ install:
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
+
   # Useful for debugging any issues with conda
   - conda info -a
   # create snakemake env
-  - conda env create -f global_env.yml
+  - conda env create -f conda_env.yml
 
 script:
-  - source activate snakemake_nanopore_DNA_methylation
+  - source activate NanoSnake
   - snakemake --use-conda --directory .test
