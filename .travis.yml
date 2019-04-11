@@ -12,8 +12,12 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
   # create snakemake env
-  - conda env create -f conda_env.yml
+  - conda env create -f environment.yml
+  # Install local package in dev mode
+  - source activate NanoSnake
+  - pip install -e ./
+  - source deactivate
 
 script:
   - source activate NanoSnake
-  - snakemake --use-conda --directory .test
+  - NanoSnake DNA_methylation -h

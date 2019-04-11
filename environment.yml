@@ -1,4 +1,3 @@
-# Use with
 name: NanoSnake
 
 channels:
@@ -10,3 +9,4 @@ dependencies:
   - python=3.6
   - snakemake>=5.4.2
   - pandas>=0.24.1
+  - pip>=19.0.3
