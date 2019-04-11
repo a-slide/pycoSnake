@@ -24,6 +24,6 @@ setup_dict = {
     "packages": [__name__],
     "package_dir": {__name__: __name__},
     "package_data": {__name__: ['envs/*', 'rules/*', 'scripts/*', 'snakefiles/*', 'templates/*']},
-    "entry_points": {'console_scripts': ['NanoSnake=NanoSnake.cli:main']
+    "entry_points": {'console_scripts': ['NanoSnake=NanoSnake.__main__:main']
     }
 }

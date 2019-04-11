@@ -1,24 +1,23 @@
-# Required input files and dirs
-sample_sheet: ""
-reference: ""
+# Fastq options
+merge_fastq:
+    outdir: "01_merge_fastq"
 
-# Default directories
-envs_dir: "../envs/"
-scripts_dir: "../scripts/"
-rules_dir: "../rules/"
-
-# FastqQC options
-fastqc:
-    cmd_opt: ""
-    outdir: "01_fastqc"
+# FastQC options
+fastQC:
+    params: "--nano"
+    outdir: "02_fastQC"
 
 # Alignment
-align:
-    minimap2_opt: "-ax map-ont"
-    samtools_opt: ""
-    outdir: "02_align"
+minimap2_index:
+    params: ""
+    outdir: "03_minimap2_index"
 
-# Nanopolish
-nanopolish:
-    nanopolish_index_opt: ""
-    outdir: "03_nanopolish"
+# Alignment
+minimap2_align:
+    params: "-ax map-ont"
+    outdir: "04_minimap2_align"
+
+# Samtools_stats
+samtools_stats:
+    params: ""
+    outdir: "05_samtools_stats"
