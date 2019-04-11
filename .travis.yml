@@ -14,10 +14,10 @@ install:
   # create snakemake env
   - conda env create -f environment.yml
   # Install local package in dev mode
-  - conda activate NanoSnake
+  - source activate NanoSnake
   - pip install -e ./
-  - conda deactivate
+  - source deactivate
 
 script:
-  - conda activate NanoSnake
+  - source activate NanoSnake
   - NanoSnake DNA_methylation -h
