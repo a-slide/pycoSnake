@@ -1,7 +1,7 @@
 # Snakemake workflow: NanoSnake
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.4.2-brightgreen.svg)](https://snakemake.bitbucket.io)
-[![Build Status](https://travis-ci.org/snakemake-workflows/NanoSnake.svg?branch=master)](https://travis-ci.org/snakemake-workflows/NanoSnake)
+[![Build Status](https://travis-ci.org/a-slide/NanoSnake.svg?branch=master)](https://travis-ci.com/a-slide/NanoSnake#)
 
 ---
 
@@ -27,48 +27,63 @@ https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
 ### Step 2: Install workflow
 
-#### Initial installation
+#### Develop mode
 
-If you simply want to use this workflow, clone the repository locally:
+If you want to install the package in develop mode (installed and editable at the same time), clone the repository locally:
 
-`git clone git@github.com:a-slide/NanoSnake.git`
+```
+git clone git@github.com:a-slide/NanoSnake.git
 
-`cd NanoSnake`
+cd NanoSnake
+```
 
-Then create a virtual environment to deploy the workflow
+Create a virtual environment to deploy the package
 
-`conda env create -f conda_env.yml`
+```
+conda env create -f environment.yml
+```
 
+Activate the conda environment and install NanoSnake with pip
+
+```
+conda activate NanoSnake
+pip install -e ./
+```
 
 #### Update workflow
 
 From the package directory
 
-`git pull`
+```
+git pull
+conda env update -f conda_env.yml
+conda activate NanoSnake
+pip install -e ./ -U
+```
 
-`conda env update -f conda_env.yml`
+### Step 3: Configure workflow
 
-### Step 2: Configure workflow
+Generate the sample sheet and config template files required for the workflow you want to run.
 
-Configure the workflow according to your needs via editing the file `config.yaml`.
+```
+conda activate NanoSnake
 
-### Step 3: Execute workflow
+NanoSnake generate_template {PIPELINE NAME}
+```
 
-First activate the conda virtual environment
+The `samples.tsv` file needs to be filled with the required informations detailed in the file header.
 
-`conda activate NanoSnake`
+The `config.yaml` can be modified and passed to NanoSnake upon execution, but it is recommended to stick to the default parameters.
 
-Test your configuration by performing a dry-run via
 
-    snakemake -n
+### Step 4: Execute workflow
 
-Execute the workflow locally via
+Call NanoSnake and choose your workflow
 
-    snakemake --cores $N
+```
+conda activate NanoSnake
 
+NanoSnake {PIPELINE NAME}
+```
 
 See the [Snakemake documentation](https://snakemake.readthedocs.io) for further details.
-
-## Testing
-
-Tests cases are in the subfolder `.test`. They should be executed via continuous integration with Travis CI.
