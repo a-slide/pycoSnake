@@ -7,7 +7,6 @@ import os
 import sys
 import argparse
 import pkg_resources
-import logging
 import shutil
 from collections import *
 import inspect
@@ -22,15 +21,14 @@ from NanoSnake import __description__ as package_description
 from NanoSnake.common import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~LOGGING INFO~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+import logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(package_name)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~GLOBAL DIRS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-ENVS_DIR = pkg_resources.resource_filename (package_name, "envs")
-SCRIPTS_DIR = pkg_resources.resource_filename (package_name, "scripts")
-RULES_DIR = pkg_resources.resource_filename (package_name, "rules")
 SNAKEFILES_DIR = pkg_resources.resource_filename (package_name, "snakefiles")
 TEMPLATES_DIR = pkg_resources.resource_filename (package_name, "templates")
+WRAPPERS_DIR = pkg_resources.resource_filename (package_name, "wrappers")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CLI ENTRY POINT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -185,9 +183,7 @@ def DNA_methylation (args):
     config = {
         "sample_sheet": args.sample_sheet,
         "reference": args.reference,
-        "envs_dir": ENVS_DIR,
-        "scripts_dir": SCRIPTS_DIR,
-        "rules_dir": RULES_DIR}
+        "WRAPPERS_DIR":WRAPPERS_DIR}
     logger.debug (config)
 
     # Default config if not given
