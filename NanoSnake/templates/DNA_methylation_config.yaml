@@ -4,20 +4,24 @@ merge_fastq:
 
 # FastQC options
 fastQC:
-    params: "--nano"
+    opt: ""
+    threads: 2
     outdir: "02_fastQC"
 
 # Alignment
 minimap2_index:
-    params: ""
+    opt: ""
+    threads: 2
     outdir: "03_minimap2_index"
 
 # Alignment
 minimap2_align:
-    params: "-ax map-ont"
+    opt: "-x map-ont"
+    threads: 2
     outdir: "04_minimap2_align"
 
 # Samtools_stats
-samtools_stats:
-    params: ""
+samtools_qc:
     outdir: "05_samtools_stats"
+
+# samtools_view_opt: "-q 10 -F 3844"
