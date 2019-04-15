@@ -16,9 +16,7 @@ min_version("5.4.2")
 
 sample_df = pd.read_csv (config["sample_sheet"], comment="#", skip_blank_lines=True, sep="\t", index_col=0)
 SAMPLES = sample_df.index
-ENVS_DIR = config["envs_dir"]
-SCRIPTS_DIR = config["scripts_dir"]
-RULES_DIR = config["rules_dir"]
+WRAPPERS_DIR = config["WRAPPERS_DIR"]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Rules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -32,68 +30,76 @@ def get_seq_summary (wildcards):
 rule all:
     input:
         expand(path.join("results", config["merge_fastq"]["outdir"],"{sample}.fastq.gz"), sample=SAMPLES),
-        expand(path.join("results", config["fastQC"]["outdir"],"{sample}.html"), sample=SAMPLES),
+        expand(path.join("results", config["fastqc"]["outdir"],"{sample}_fastqc.html"), sample=SAMPLES),
+        expand(path.join("results", config["fastqc"]["outdir"],"{sample}_fastqc.zip"), sample=SAMPLES),
         expand(path.join("results", config["minimap2_index"]["outdir"],"ref.mmi")),
-        expand(path.join("results", config["minimap2_align"]["outdir"],"{sample}.sam"), sample=SAMPLES),
-        expand(path.join("results", config["samtools_stats"]["outdir"],"{sample}.txt"), sample=SAMPLES),
+        expand(path.join("results", config["minimap2_align"]["outdir"],"{sample}.bam"), sample=SAMPLES),
+        # expand(path.join("results", config["samtools_stats"]["outdir"],"{sample}.txt"), sample=SAMPLES),
 
-rule merge_fastq:
+rule concat_files:
     input:
         get_fastq
     output:
         path.join("results", config["merge_fastq"]["outdir"],"{sample}.fastq.gz")
     log:
         path.join("logs", config["merge_fastq"]["outdir"],"{sample}.log")
-    shell:
-        "cat {input} | gzip -c > {output} 2> {log}"
-
-rule fastQC:
-    input:
-        rules.merge_fastq.output
-    output:
-        html=path.join("results", config["fastQC"]["outdir"],"{sample}.html"),
-        zip=path.join("results", config["fastQC"]["outdir"],"{sample}.zip")
-    params:
-        config["fastQC"]["params"]
-    log:
-        path.join("logs", config["fastQC"]["outdir"],"{sample}.log")
     wrapper:
-        "0.31.1/bio/fastqc"
+        "file:"+ path.join(WRAPPERS_DIR, "concat_files")
+
+rule fastqc:
+    input:
+        rules.concat_files.output
+    output:
+        html=path.join("results", config["fastqc"]["outdir"],"{sample}_fastqc.html"),
+        zip=path.join("results", config["fastqc"]["outdir"],"{sample}_fastqc.zip")
+    log:
+        path.join("results", config["fastqc"]["outdir"],"{sample}_fastqc.log")
+    params:
+        opt=config["fastqc"]["opt"]
+    threads:
+        config["fastqc"]["threads"]
+    wrapper:
+        "file:"+ path.join(WRAPPERS_DIR, "fastqc")
 
 rule minimap2_index:
     input:
-        target=config["reference"]
+        config["reference"]
     output:
         path.join("results", config["minimap2_index"]["outdir"],"ref.mmi")
     log:
-        path.join("logs", config["minimap2_index"]["outdir"],"index.log")
+        path.join("logs", config["minimap2_index"]["outdir"],"ref.log")
     params:
-        extra=config["minimap2_index"]["params"]
-    #threads: 3
+        opt=config["minimap2_index"]["opt"]
+    threads:
+        config["minimap2_index"]["threads"]
     wrapper:
-        "0.31.1/bio/minimap2/index"
+        "file:"+ path.join(WRAPPERS_DIR, "minimap2", "index")
 
 rule minimap2_align:
     input:
-        target=rules.minimap2_index.output,
-        query= rules.merge_fastq.output
+        index=rules.minimap2_index.output,
+        fastq=rules.concat_files.output
     output:
-        path.join("results", config["minimap2_align"]["outdir"],"{sample}.sam")
+        path.join("results", config["minimap2_align"]["outdir"],"{sample}.bam")
     log:
         path.join("logs", config["minimap2_align"]["outdir"],"{sample}.log")
     params:
-        extra=config["minimap2_align"]["params"]
+        opt=config["minimap2_align"]["opt"],
+    threads:
+        config["minimap2_align"]["threads"]
     wrapper:
-        "0.31.1/bio/minimap2/aligner"
+        "file:"+ path.join(WRAPPERS_DIR, "minimap2", "align")
 
-rule samtools_stats:
+rule samtools_qc:
     input:
-        rules.minimap2_align.output,
+        rules.minimap2_align.output.bam,
     output:
-        path.join("results", config["samtools_stats"]["outdir"],"{sample}.txt")
+        stats=path.join("results", config["samtools_qc"]["outdir"],"{sample}_stats.txt"),
+        flagstat=path.join("results", config["samtools_qc"]["outdir"],"{sample}_flagstat.txt"),
+        idxstats=path.join("results", config["samtools_qc"]["outdir"],"{sample}_idxstats.txt"),
     log:
-        path.join("logs", config["samtools_stats"]["outdir"],"{sample}.log")
+        path.join("logs", config["samtools_qc"]["outdir"],"{sample}.log")
     params:
-        extra=config["samtools_stats"]["params"]
+        opt=config["samtools_qc"]["opt"]
     wrapper:
-        "0.31.1/bio/samtools/stats"
+        "file:"+ path.join(WRAPPERS_DIR, "samtools_qc")
