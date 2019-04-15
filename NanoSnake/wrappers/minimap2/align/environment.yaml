@@ -1,0 +1,11 @@
+name: NanoSnake_minimap2_align
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - python==3.6
+  - minimap2==2.15
+  - samtools==1.9

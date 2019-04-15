@@ -1,0 +1,10 @@
+name: NanoSnake_fastqc
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - python=3.6
+  - fastqc=0.11.8

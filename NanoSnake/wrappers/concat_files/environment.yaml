@@ -1,0 +1,7 @@
+name: NanoSnake_concat_files
+
+channels:
+  - defaults
+
+dependencies:
+  - python=3.6
