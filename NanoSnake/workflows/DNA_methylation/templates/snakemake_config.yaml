@@ -3,12 +3,12 @@ merge_fastq:
     outdir: "01_merge_fastq"
 
 # FastQC options
-fastQC:
+fastqc:
     opt: ""
     threads: 2
     outdir: "02_fastQC"
 
-# Alignment
+# Genome indexing
 minimap2_index:
     opt: ""
     threads: 2
@@ -17,11 +17,15 @@ minimap2_index:
 # Alignment
 minimap2_align:
     opt: "-x map-ont"
-    threads: 2
+    threads: 4
     outdir: "04_minimap2_align"
 
-# Samtools_stats
-samtools_qc:
-    outdir: "05_samtools_stats"
+# QC with qualimap + samtools stats flagstat and idxstat
+bamqc:
+    outdir: "05_bamqc"
 
-# samtools_view_opt: "-q 10 -F 3844"
+# Bam filtering with samtools view + sort and index
+samtools_filter:
+    opt: "-q 10 -F 2308"
+    threads: 4
+    outdir: "06_samtools_filter"
