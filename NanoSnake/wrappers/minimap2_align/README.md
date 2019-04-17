@@ -18,5 +18,5 @@ rule minimap2_align:
     threads:
         10
     wrapper:
-        "file://path/to/wrappers/minimap2/align"
+        "file://path/to/wrappers/minimap2_align"
 ```
