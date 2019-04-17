@@ -26,9 +26,8 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(package_name)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~GLOBAL DIRS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-SNAKEFILES_DIR = pkg_resources.resource_filename (package_name, "snakefiles")
-TEMPLATES_DIR = pkg_resources.resource_filename (package_name, "templates")
-WRAPPERS_DIR = pkg_resources.resource_filename (package_name, "wrappers")
+WRAPPER_DIR = pkg_resources.resource_filename (package_name, "wrappers")
+WORKFLOW_DIR = pkg_resources.resource_filename (package_name, "workflows")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CLI ENTRY POINT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -43,18 +42,12 @@ def main(args=None):
     subparsers = parser.add_subparsers (description="NanoSnake implements the following subcommands", dest="subcommands")
     subparsers.required = True
 
-    # Template subparser
-    subparser_t = subparsers.add_parser("generate_template", description="Generate teample files corresponding to the indicated workflow")
-    subparser_t.set_defaults(func=generate_template)
-    subparser_t.add_argument('subcommands_name', type=str, choices=['DNA_methylation', 'RNA_counts'], help="Workflow to generate template files for.")
-    subparser_t.add_argument("--outdir", default="./", type=str, help="Path where to write the template files (default: %(default)s).")
-    subparser_t.add_argument("--overwrite", action="store_true", default=False, help="Overwrite existing files if they already exist (default: %(default)s).")
-
     # DNA_methylation subparser
     subparser_dm = subparsers.add_parser("DNA_methylation", description="Workflow to evaluate DNA methylation in Nanopore data using Nanopolish")
     subparser_dm.set_defaults(func=DNA_methylation)
     subparser_dm_IO = subparser_dm.add_argument_group("input/output options")
-    subparser_dm_IO.add_argument("--reference", "-r", required=True, type=str, help="Path to a Fasta reference file to be used for read mapping (Required if neither `config_template` nor `sample_template` is given)")
+    subparser_dm_IO.add_argument("--reference", "-r", default=None, type=str, help="Path to a Fasta reference file to be used for read mapping (required to run the worflow)")
+    subparser_dm_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required to run the worflow)")
 
     # RNA_counts subparser
     subparser_rc = subparsers.add_parser("RNA_counts", description="Workflow aligning RNA on the transcriptome an generating estimated counts")
@@ -63,9 +56,12 @@ def main(args=None):
     # Add common group parsers
     for sp in [subparser_dm, subparser_rc]:
         sp_IO = add_argument_group (sp, "input/output options")
-        sp_IO.add_argument("--sample_sheet", "-s", required=True, type=str, help="Path to a tabulated sample sheet")
-        sp_IO.add_argument("--config_file", "-c", default=None, type=str, help="Snakemake configuration YAML file (default: %(default)s)")
+        sp_IO.add_argument("--snakemake_config", "-c", default=None, type=str, help="Snakemake configuration YAML file (default: %(default)s)")
+        sp_IO.add_argument("--multiqc_config", "-m", default=None, type=str, help="MultiQC configuration YAML file (default: %(default)s)")
         sp_IO.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
+        sp_template = add_argument_group (sp, "Template options")
+        sp_template.add_argument("--generate_template", action="store_true", default=False, help="Generate template files (configs + sample_sheet) in workdir and exit (default: %(default)s)")
+        sp_template.add_argument("--overwrite_template", action="store_true", default=False, help="Overwrite existing template files if they already exist (default: %(default)s).")
         sp_verbosity = sp.add_mutually_exclusive_group()
         sp_verbosity.add_argument("--verbose", "-v", action="store_true", default=False, help="Show additional debug output (default: %(default)s)")
         sp_verbosity.add_argument("--quiet", "-q", action="store_true", default=False, help="Reduce overall output (default: %(default)s)")
@@ -151,46 +147,43 @@ def main(args=None):
     # Parse args and call subfunction
     args = parser.parse_args()
 
-    # Alter logging level if required
-    if args.subcommands != "generate_template":
-        if args.verbose:
-            logger.setLevel (logging.DEBUG)
-        elif args.quiet:
-            logger.setLevel (logging.WARNING)
+    # Define overall verbose level
+    if args.verbose:
+        logger.setLevel (logging.DEBUG)
+    elif args.quiet:
+        logger.setLevel (logging.WARNING)
 
-    args.func(args)
+    # Generate template if required
+    if args.generate_template:
+        logger.warning (f"Generate template files in working directory")
+        generate_template (workflow=args.subcommands, outdir=args.workdir, overwrite=args.overwrite_template)
+
+    else:
+        args.func(args)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SUBPARSERS FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-def generate_template (args):
-    """"""
-    for fn in ("samples.tsv", "config.yaml"):
-        dest_file = os.path.join(args.outdir, fn)
-        if os.path.isfile(dest_file) and not args.overwrite:
-            raise NanoSnakeError (f"Template file {dest_file} already exists. Please use --overwrite if you want to replace the existing file")
-        else:
-            src_file = os.path.join (TEMPLATES_DIR, "{}_{}".format(args.subcommands_name, fn))
-            logger.info (f"Create template file {dest_file} ")
-            shutil.copyfile (src_file, dest_file)
-
 def DNA_methylation (args):
     """"""
-    # Define default package files and dir
-    snake_fn = os.path.join (SNAKEFILES_DIR, "DNA_methylation_snakefile.py")
+    # Get config files
+    snakemake_config_fn = get_config_fn (workflow="DNA_methylation", fn=args.snakemake_config, name="snakemake_config.yaml", workdir=args.workdir)
+    sample_sheet_fn =  get_config_fn (workflow="DNA_methylation", fn=args.sample_sheet, name="sample_sheet.tsv", workdir=args.workdir)
+    multiqc_config_fn = get_config_fn (workflow="DNA_methylation", fn=args.multiqc_config, name="multiqc_config.yaml", workdir=args.workdir)
 
-    # Add additional config options
+    # Verify that the reference was given by the user and is readeable
+    if not args.reference:
+        raise NanoSnakeError (f"--reference is required to run the workflow")
+    if not access_file(args.reference):
+        raise NanoSnakeError (f"The reference file {args.reference} is not readeable")
+
+    # Store additionnal options to pass to snakemake
     logger.info ("Build config dict for snakemake")
     config = {
-        "sample_sheet": args.sample_sheet,
         "reference": args.reference,
-        "WRAPPERS_DIR":WRAPPERS_DIR}
+        "sample_sheet": sample_sheet_fn,
+        "multiqc_config":multiqc_config_fn,
+        "wrappers_dir":WRAPPER_DIR}
     logger.debug (config)
-
-    # Default config if not given
-    if args.config_file:
-        config_file = args.config_file
-    else:
-        config_file = os.path.join (TEMPLATES_DIR, "DNA_methylation_config.yaml")
 
     # Filter other args option compatible with snakemake API
     kwargs = filter_valid_snakemake_options (args)
@@ -198,7 +191,12 @@ def DNA_methylation (args):
 
     # Run Snakemake through the API
     logger.warning ("RUNING SNAKEMAKE PIPELINE")
-    snakemake (snakefile=snake_fn, configfile=config_file, config=config, use_conda=True, **kwargs)
+    snakemake (
+        snakefile= os.path.join (WORKFLOW_DIR, "DNA_methylation", "snakefile.py"),
+        configfile=snakemake_config_fn,
+        config=config,
+        use_conda=True,
+        **kwargs)
 
 def RNA_counts (args):
     """"""
@@ -221,6 +219,39 @@ def filter_valid_snakemake_options (args):
         if k in valid_options:
             valid_kwargs[k] = v
     return valid_kwargs
+
+def generate_template (workflow, outdir="./", overwrite=False):
+    """"""
+    # Copy file one by one and verify if they already exist
+    for src_fn in os.scandir(os.path.join (WORKFLOW_DIR, workflow, "templates")):
+        dest_fn = os.path.join(outdir, os.path.basename(src_fn))
+
+        if os.path.isfile(dest_fn) and not overwrite:
+            logger.warning (f"\tTemplate file {dest_fn} already exists in working directory")
+            logger.warning (f"\tPlease use --overwrite_template if you want to replace the existing file")
+        else:
+            logger.debug (f"\tCreate template file {dest_fn} ")
+            shutil.copy2 (src_fn, dest_fn)
+
+def get_config_fn (workflow, fn, name, workdir):
+    """"""
+    # Command line arg
+    if fn and access_file (fn):
+        logger.debug (f"Config file {name}: Use command line option value")
+        return fn
+
+    # Local file
+    fn = os.path.join(workdir, name)
+    if access_file(fn):
+        logger.debug (f"Config file {name}: Use local file")
+        return fn
+    # Default template files
+    fn = os.path.join (WORKFLOW_DIR, workflow, "templates", name)
+    if access_file(fn):
+        logger.debug (f"Config file {name}: Use default package file")
+        return fn
+    # Nothing worked for some cryptic reason
+    raise NanoSnakeError ("Cannot read the default package file !")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SCRIPT ENTRY POINT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
