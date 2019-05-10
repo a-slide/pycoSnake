@@ -94,7 +94,8 @@ rule minimap2_index:
     threads:
         config["minimap2_index"]["threads"]
     resources:
-        mem_mb = config["minimap2_index"]["memory"]
+        M = config["minimap2_index"]["memory"]
+        R = config["minimap2_index"]["rusage"]
     wrapper:
         "minimap2_index"
 
@@ -161,5 +162,6 @@ rule genomecov:
         config["genomecov"]["threads"]
     resources:
         mem_mb = config["genomecov"]["memory"]
+        rusage
     wrapper:
         "genomecov"

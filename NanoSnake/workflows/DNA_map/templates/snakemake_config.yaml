@@ -3,7 +3,7 @@ merge_fastq:
     opt: ""
     outdir: "01_merge_fastq"
     threads: 1
-    #resources: "\"select[mem>1000] rusage[mem=1000] span[hosts=1]\""
+    #rusage: "\"select[mem>1000] rusage[mem=1000] span[hosts=1]\""
     memory: 1000
 
 # FastQC options
@@ -11,7 +11,6 @@ fastqc:
     opt: ""
     outdir: "02_fastQC"
     threads: 6
-    #resources: "\"select[mem>1000] rusage[mem=1000] span[hosts=1]\""
     memory: 1000
 
 # Genome indexing
@@ -21,6 +20,7 @@ minimap2_index:
     threads: 1
     #resources: "\"select[mem>15000] rusage[mem=15000] span[hosts=1]\""
     memory: 15000
+    rusage: "\"select[mem>1000] rusage[mem=1000] span[hosts=1]\""
 
 # Alignment
 minimap2_align:
