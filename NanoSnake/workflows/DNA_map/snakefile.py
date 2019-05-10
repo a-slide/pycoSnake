@@ -78,7 +78,7 @@ rule fastqc:
     threads:
         config["fastqc"]["threads"]
     resources:
-        mem_mb = config["merge_fastq"]["memory"]
+        mem_mb = config["fastqc"]["memory"]
     wrapper:
         "fastqc"
 
@@ -94,7 +94,7 @@ rule minimap2_index:
     threads:
         config["minimap2_index"]["threads"]
     resources:
-        mem_mb = config["merge_fastq"]["memory"]
+        mem_mb = config["minimap2_index"]["memory"]
     wrapper:
         "minimap2_index"
 
@@ -111,7 +111,7 @@ rule minimap2_align:
     threads:
         config["minimap2_align"]["threads"]
     resources:
-        mem_mb = config["merge_fastq"]["memory"]
+        mem_mb = config["minimap2_align"]["memory"]
     wrapper:
         "minimap2_align"
 
@@ -128,7 +128,7 @@ rule bamqc:
     threads:
         config["bamqc"]["threads"]
     resources:
-        mem_mb = config["merge_fastq"]["memory"]
+        mem_mb = config["bamqc"]["memory"]
     wrapper:
         "bamqc"
 
@@ -144,7 +144,7 @@ rule samtools_filter:
     threads:
         config["samtools_filter"]["threads"]
     resources:
-        mem_mb = config["merge_fastq"]["memory"]
+        mem_mb = config["samtools_filter"]["memory"]
     wrapper:
         "samtools_filter"
 
@@ -160,6 +160,6 @@ rule genomecov:
     threads:
         config["genomecov"]["threads"]
     resources:
-        mem_mb = config["merge_fastq"]["memory"]
+        mem_mb = config["genomecov"]["memory"]
     wrapper:
         "genomecov"
