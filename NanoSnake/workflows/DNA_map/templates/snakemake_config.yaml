@@ -38,10 +38,3 @@ samtools_filter:
 genomecov:
     opt: "-bg"
     outdir: "07_genomecov"
-
-# Call CpG methylation with Nanopolish
-nanopolish_call_methylation:
-    opt_nanopolish: "--methylation cpg"
-    opt_nanopolishcomp: "--min_llr 2 --min_depth 20 --min_meth_freq 0.1 --split_group --motif cpg"
-    threads: 4
-    outdir: "08_nanopolish"

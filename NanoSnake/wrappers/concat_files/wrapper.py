@@ -7,7 +7,7 @@ __license__ = "MIT"
 from snakemake.shell import shell
 from snakemake.shell import shell
 
-# Define command depending on weither the output has to be gzipped or not
+# Define command depending on whether the output has to be gzipped or not
 if snakemake.output[0].endswith(".gz"):
     cmd = "cat {snakemake.input} | gzip -c > {snakemake.output} 2> {snakemake.log}"
 else:

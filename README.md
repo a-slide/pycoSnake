@@ -13,9 +13,9 @@
 
 * Adrien Leger (@a-slide)
 
-## Usage
+## Installation
 
-### Step 1: Install conda package manager
+### Install conda package manager
 
 Conda is the only dependency that you need to install manually.
 
@@ -25,9 +25,7 @@ Install conda following the official documentation for you system
 
 https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
-### Step 2: Install workflow
-
-#### Develop mode
+### Deploy conda env and install NanoSnake
 
 If you want to install the package in develop mode (installed and editable at the same time), clone the repository locally:
 
@@ -50,9 +48,7 @@ conda activate NanoSnake
 pip install -e ./
 ```
 
-#### Update workflow
-
-From the package directory
+To update the package, from the package directory
 
 ```
 git pull
@@ -61,14 +57,21 @@ conda activate NanoSnake
 pip install -e ./ -U
 ```
 
-### Step 3: Configure workflow
+## Usage
+
+At the moment there are 3 workflows available in NanoSnake:
+* DNA_map
+* DNA_methylation
+* RNA_counts
+
+## Configure workflow
 
 Generate the sample sheet and config template files required for the workflow you want to run.
 
 ```
 conda activate NanoSnake
 
-NanoSnake generate_template {PIPELINE NAME}
+NanoSnake {WORKFLOW NAME} --generate_template --overwrite_template
 ```
 
 The `samples.tsv` file needs to be filled with the required informations detailed in the file header.
@@ -83,7 +86,5 @@ Call NanoSnake and choose your workflow
 ```
 conda activate NanoSnake
 
-NanoSnake {PIPELINE NAME}
+NanoSnake {PIPELINE NAME} {OPTIONS}
 ```
-
-See the [Snakemake documentation](https://snakemake.readthedocs.io) for further details.
