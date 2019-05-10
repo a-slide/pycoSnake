@@ -1,0 +1,11 @@
+name: test
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.6
+  - nanopolish=0.11.1
+  - pip=19.1
+  - pip:
+    - NanopolishComp==0.6.1

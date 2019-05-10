@@ -39,22 +39,29 @@ def main(args=None):
     # Parser and subparsers for command
     parser = argparse.ArgumentParser (description=package_description)
     parser.add_argument("--version", action="version", version="{} v{}".format(package_name, package_version))
-    subparsers = parser.add_subparsers (description="NanoSnake implements the following subcommands", dest="subcommands")
+    subparsers = parser.add_subparsers (description="%(prog)s implements the following subcommands", dest="subcommands")
     subparsers.required = True
 
     # DNA_methylation subparser
-    subparser_dm = subparsers.add_parser("DNA_methylation", description="Workflow to evaluate DNA methylation in Nanopore data using Nanopolish")
-    subparser_dm.set_defaults(func=DNA_methylation)
-    subparser_dm_IO = subparser_dm.add_argument_group("input/output options")
-    subparser_dm_IO.add_argument("--reference", "-r", default=None, type=str, help="Path to a Fasta reference file to be used for read mapping (required to run the worflow)")
-    subparser_dm_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required to run the worflow)")
+    subparser_dmeth = subparsers.add_parser("DNA_methylation", description="Workflow to evaluate DNA methylation in Nanopore data using Nanopolish")
+    subparser_dmeth.set_defaults(func=DNA_methylation)
+    subparser_dmeth_IO = subparser_dmeth.add_argument_group("input/output options")
+    subparser_dmeth_IO.add_argument("--reference", "-r", default=None, type=str, help="Path to a Fasta reference file to be used for read mapping (required to run the worflow)")
+    subparser_dmeth_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required to run the worflow)")
+
+    # DNA map subparser
+    subparser_dmap = subparsers.add_parser("DNA_map", description="Workflow aligning DNA on a genome + QC")
+    subparser_dmap.set_defaults(func=DNA_map)
+    subparser_dmap_IO = subparser_dmap.add_argument_group("input/output options")
+    subparser_dmap_IO.add_argument("--reference", "-r", default=None, type=str, help="Path to a Fasta reference file to be used for read mapping (required to run the worflow)")
+    subparser_dmap_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required to run the worflow)")
 
     # RNA_counts subparser
-    subparser_rc = subparsers.add_parser("RNA_counts", description="Workflow aligning RNA on the transcriptome an generating estimated counts")
-    subparser_rc.set_defaults(func=RNA_counts)
+    subparser_rcount = subparsers.add_parser("RNA_counts", description="Workflow aligning RNA on the transcriptome an generating estimated counts")
+    subparser_rcount.set_defaults(func=RNA_counts)
 
     # Add common group parsers
-    for sp in [subparser_dm, subparser_rc]:
+    for sp in [subparser_dmeth, subparser_dmap, subparser_rcount]:
         sp_IO = add_argument_group (sp, "input/output options")
         sp_IO.add_argument("--snakemake_config", "-c", default=None, type=str, help="Snakemake configuration YAML file (default: %(default)s)")
         sp_IO.add_argument("--multiqc_config", "-m", default=None, type=str, help="MultiQC configuration YAML file (default: %(default)s)")
@@ -134,7 +141,6 @@ def main(args=None):
         sp_snakemake.add_argument("--shadow_prefix", type=str, default=None, help="prefix for shadow directories. The job-specific shadow directories will be created in $SHADOW_PREFIX/shadow/")
         sp_snakemake.add_argument("--create_envs_only", action="store_true", default=False, help="if specified, only builds the conda environments specified for each job, then exits.")
         sp_snakemake.add_argument("--list_conda_envs", action="store_true", default=False, help="list conda environments and their location on disk.")
-        sp_snakemake.add_argument("--wrapper_prefix", type=str, default=None, help="prefix for wrapper script URLs")
         sp_snakemake.add_argument("--kubernetes", type=str, default=None, help="submit jobs to kubernetes, using the given namespace.")
         sp_snakemake.add_argument("--kubernetes_envvars", type=str, nargs='+', default=[], help="environment variables that shall be passed to kubernetes jobs.")
         sp_snakemake.add_argument("--container_image", type=str, default=None, help="Docker image to use, e.g., for kubernetes.")
@@ -176,13 +182,15 @@ def DNA_methylation (args):
     if not access_file(args.reference):
         raise NanoSnakeError (f"The reference file {args.reference} is not readeable")
 
+    ########################################################################################## Check sample sheet
+    ########################################################################################## Check config files
+
     # Store additionnal options to pass to snakemake
     logger.info ("Build config dict for snakemake")
     config = {
         "reference": args.reference,
         "sample_sheet": sample_sheet_fn,
-        "multiqc_config":multiqc_config_fn,
-        "wrappers_dir":WRAPPER_DIR}
+        "multiqc_config":multiqc_config_fn}
     logger.debug (config)
 
     # Filter other args option compatible with snakemake API
@@ -196,11 +204,50 @@ def DNA_methylation (args):
         configfile=snakemake_config_fn,
         config=config,
         use_conda=True,
+        wrapper_prefix="file:{}/".format(WRAPPER_DIR),
         **kwargs)
 
 def RNA_counts (args):
     """"""
     pass
+
+def DNA_map (args):
+    """"""
+    # Get config files
+    snakemake_config_fn = get_config_fn (workflow="DNA_map", fn=args.snakemake_config, name="snakemake_config.yaml", workdir=args.workdir)
+    sample_sheet_fn =  get_config_fn (workflow="DNA_map", fn=args.sample_sheet, name="sample_sheet.tsv", workdir=args.workdir)
+    multiqc_config_fn = get_config_fn (workflow="DNA_map", fn=args.multiqc_config, name="multiqc_config.yaml", workdir=args.workdir)
+
+    # Verify that the reference was given by the user and is readeable
+    if not args.reference:
+        raise NanoSnakeError (f"--reference is required to run the workflow")
+    if not access_file(args.reference):
+        raise NanoSnakeError (f"The reference file {args.reference} is not readeable")
+
+    ########################################################################################## Check sample sheet
+    ########################################################################################## Check config files
+
+    # Store additionnal options to pass to snakemake
+    logger.info ("Build config dict for snakemake")
+    config = {
+        "reference": args.reference,
+        "sample_sheet": sample_sheet_fn,
+        "multiqc_config":multiqc_config_fn}
+    logger.debug (config)
+
+    # Filter other args option compatible with snakemake API
+    kwargs = filter_valid_snakemake_options (args)
+    logger.debug (kwargs)
+
+    # Run Snakemake through the API
+    logger.warning ("RUNING SNAKEMAKE PIPELINE")
+    snakemake (
+        snakefile= os.path.join (WORKFLOW_DIR, "DNA_map", "snakefile.py"),
+        configfile=snakemake_config_fn,
+        config=config,
+        use_conda=True,
+        wrapper_prefix="file:{}/".format(WRAPPER_DIR),
+        **kwargs)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~HELPER FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 

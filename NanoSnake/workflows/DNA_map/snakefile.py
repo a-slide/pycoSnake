@@ -27,21 +27,11 @@ minimap2_align_dir = config["minimap2_align"]["outdir"]
 bamqc_dir = config["bamqc"]["outdir"]
 samtools_filter_dir = config["samtools_filter"]["outdir"]
 genomecov_dir = config["genomecov"]["outdir"]
-nanopolish_dir = config["nanopolish_call_methylation"]["outdir"]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Getters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def get_fastq (wildcards):
     return glob (sample_df.loc[wildcards.sample, "fastq"])
-
-def get_fast5_dir (wildcards):
-    return glob (sample_df.loc[wildcards.sample, "fast5_dir"])
-
-def get_seq_summary (wildcards):
-    try:
-        return glob (sample_df.loc[wildcards.sample, "seq_summary"])
-    except Exception:
-        return None
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Top Rules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -58,14 +48,6 @@ rule all:
         expand(path.join("results", bamqc_dir,"{sample}_samtools_idxstats.txt"), sample=sample_list),
         expand(path.join("results", samtools_filter_dir, "{sample}.bam"), sample=sample_list),
         expand(path.join("results", genomecov_dir,"{sample}.bedgraph"), sample=sample_list),
-        expand(path.join("results", merge_fastq_dir,"{sample}.fastq.index"), sample=sample_list),
-        expand(path.join("results", merge_fastq_dir,"{sample}.fastq.index.fai"), sample=sample_list),
-        expand(path.join("results", merge_fastq_dir,"{sample}.fastq.index.gzi"), sample=sample_list),
-        expand(path.join("results", merge_fastq_dir,"{sample}.fastq.index.readdb"), sample=sample_list),
-        expand(path.join("results", nanopolish_dir,"{sample}_call_methylation.tsv"), sample=sample_list),
-        expand(path.join("results", nanopolish_dir,"{sample}_freq_meth_calculate.bed"), sample=sample_list),
-        expand(path.join("results", nanopolish_dir,"{sample}_freq_meth_calculate.tsv"), sample=sample_list),
-        expand(path.join("results", nanopolish_dir,"{sample}_freq_meth_calculate.log"), sample=sample_list),
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Rules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -161,52 +143,3 @@ rule genomecov:
         opt=config["genomecov"]["opt"],
     wrapper:
         "genomecov"
-
-rule nanopolish_index:
-    input:
-        fastq = rules.merge_fastq.output,
-        fast5_dir = get_fast5_dir,
-        seq_summary = get_seq_summary,
-    output:
-        index = path.join("results", merge_fastq_dir,"{sample}.fastq.index"),
-        fai = path.join("results", merge_fastq_dir,"{sample}.fastq.index.fai"),
-        gzi = path.join("results", merge_fastq_dir,"{sample}.fastq.index.gzi"),
-        readdb = path.join("results", merge_fastq_dir,"{sample}.fastq.index.readdb"),
-    log:
-        path.join("logs", merge_fastq_dir,"{sample}_nanopolish_index.log")
-    wrapper:
-        "nanopolish_index"
-
-rule nanopolish_call_methylation:
-    input:
-        fastq = rules.merge_fastq.output,
-        bam = rules.samtools_filter.output,
-        ref = config["reference"],
-    output:
-        call = path.join("results", nanopolish_dir,"{sample}_call_methylation.tsv"),
-        bed = path.join("results", nanopolish_dir,"{sample}_freq_meth_calculate.bed"),
-        tsv = path.join("results", nanopolish_dir,"{sample}_freq_meth_calculate.tsv"),
-        log = path.join("results", nanopolish_dir,"{sample}_freq_meth_calculate.log"),
-    log:
-        path.join("logs", nanopolish_dir,"{sample}.log")
-    params:
-        opt_nanopolish=config["nanopolish_call_methylation"]["opt_nanopolish"],
-        opt_nanopolishcomp=config["nanopolish_call_methylation"]["opt_nanopolishcomp"],
-    threads:
-        config["nanopolish_call_methylation"]["threads"]
-    wrapper:
-        "nanopolish_call_methylation"
-
-# rule multiqc:
-#     input:
-#         rules.minimap2_align.output
-#     output:
-#         path.join("results", samtools_filter_dir,"{sample}.bam")
-#     log:
-#         path.join("logs", samtools_filter_dir,"{sample}.log")
-#     params:
-#         opt=config["samtools_filter"]["opt"],
-#     threads:
-#         config["samtools_filter"]["threads"]
-#     wrapper:
-#         "multiqc"

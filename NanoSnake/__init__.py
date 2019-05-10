@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Define self package variable
-__version__ = '0.0.0.a1'
+__version__ = '0.0.0.a2'
 __description__="""NanoSnake contains a collection of snakemake workflows for analysing nanopore sequencing data"""
 
 # Collect info in a dictionnary for setup.py
@@ -23,7 +23,7 @@ setup_dict = {
     "install_requires": ['pandas>=0.24.1', 'snakemake>=5.4.2', 'tqdm>=4.23'],
     "packages": [__name__],
     "package_dir": {__name__: __name__},
-    "package_data": {__name__: ['envs/*', 'rules/*', 'scripts/*', 'snakefiles/*', 'templates/*']},
+    "package_data": {__name__: ['workflows/*', 'wrappers/*']},
     "entry_points": {'console_scripts': ['NanoSnake=NanoSnake.__main__:main']
     }
 }
