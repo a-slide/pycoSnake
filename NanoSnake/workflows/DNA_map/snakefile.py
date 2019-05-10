@@ -162,6 +162,5 @@ rule genomecov:
         config["genomecov"]["threads"]
     resources:
         mem_mb = config["genomecov"]["memory"]
-        rusage
     wrapper:
         "genomecov"
