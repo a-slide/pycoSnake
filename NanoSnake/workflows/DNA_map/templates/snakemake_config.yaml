@@ -1,55 +1,33 @@
-# Fastq options
+# snakemake general cluster config file
+
+
 merge_fastq:
     opt: ""
     outdir: "01_merge_fastq"
-    threads: 1
-    #rusage: "\"select[mem>1000] rusage[mem=1000] span[hosts=1]\""
-    memory: 1000
 
-# FastQC options
 fastqc:
     opt: ""
+    threads: 2
     outdir: "02_fastQC"
-    threads: 6
-    memory: 1000
 
-# Genome indexing
 minimap2_index:
     opt: ""
     outdir: "03_minimap2_index"
-    threads: 1
-    #resources: "\"select[mem>15000] rusage[mem=15000] span[hosts=1]\""
-    memory: 15000
-    rusage: "\"select[mem>1000] rusage[mem=1000] span[hosts=1]\""
 
-# Alignment
 minimap2_align:
     opt: "-x map-ont"
+    threads: 4
     outdir: "04_minimap2_align"
-    threads: 6
-    #resources: "\"select[mem>15000] rusage[mem=15000] span[hosts=1]\""
-    memory: 15000
 
-# QC with qualimap + samtools stats flagstat and idxstat
 bamqc:
     opt: ""
     outdir: "05_bamqc"
-    threads: 1
-    #resources: "\"select[mem>2000] rusage[mem=2000] span[hosts=1]\""
-    memory: 2000
 
-# Bam filtering with samtools view + sort and index
 samtools_filter:
     opt: "-q 10 -F 3844"
+    threads: 4
     outdir: "06_samtools_filter"
-    threads: 6
-    #resources: "\"select[mem>15000] rusage[mem=15000] span[hosts=1]\""
-    memory: 15000
 
-# Bam filtering with samtools view + sort and index
 genomecov:
     opt: "-bg"
     outdir: "07_genomecov"
-    threads: 1
-    #resources: "\"select[mem>5000] rusage[mem=5000] span[hosts=1]\""
-    memory: 5000

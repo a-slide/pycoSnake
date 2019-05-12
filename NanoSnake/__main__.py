@@ -158,6 +158,8 @@ def main(args=None):
         logger.setLevel (logging.DEBUG)
     elif args.quiet:
         logger.setLevel (logging.WARNING)
+    else:
+        logger.setLevel (logging.INFO)
 
     # Generate template if required
     if args.generate_template:

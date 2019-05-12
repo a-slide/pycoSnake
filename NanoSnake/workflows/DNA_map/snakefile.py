@@ -58,10 +58,6 @@ rule merge_fastq:
         path.join("results", merge_fastq_dir,"{sample}.fastq")
     log:
         path.join("logs", merge_fastq_dir,"{sample}.log")
-    threads:
-        config["merge_fastq"]["threads"]
-    resources:
-        mem_mb = config["merge_fastq"]["memory"]
     wrapper:
         "concat_files"
 
@@ -77,8 +73,6 @@ rule fastqc:
         opt=config["fastqc"]["opt"]
     threads:
         config["fastqc"]["threads"]
-    resources:
-        mem_mb = config["fastqc"]["memory"]
     wrapper:
         "fastqc"
 
@@ -91,11 +85,6 @@ rule minimap2_index:
         path.join("logs", minimap2_index_dir,"ref.log")
     params:
         opt=config["minimap2_index"]["opt"]
-    threads:
-        config["minimap2_index"]["threads"]
-    resources:
-        M = config["minimap2_index"]["memory"],
-        R = config["minimap2_index"]["rusage"]
     wrapper:
         "minimap2_index"
 
@@ -111,8 +100,6 @@ rule minimap2_align:
         opt=config["minimap2_align"]["opt"],
     threads:
         config["minimap2_align"]["threads"]
-    resources:
-        mem_mb = config["minimap2_align"]["memory"]
     wrapper:
         "minimap2_align"
 
@@ -126,10 +113,6 @@ rule bamqc:
         idxstats=path.join("results", bamqc_dir,"{sample}_samtools_idxstats.txt"),
     log:
         path.join("logs", bamqc_dir,"{sample}.log")
-    threads:
-        config["bamqc"]["threads"]
-    resources:
-        mem_mb = config["bamqc"]["memory"]
     wrapper:
         "bamqc"
 
@@ -144,8 +127,6 @@ rule samtools_filter:
         opt=config["samtools_filter"]["opt"],
     threads:
         config["samtools_filter"]["threads"]
-    resources:
-        mem_mb = config["samtools_filter"]["memory"]
     wrapper:
         "samtools_filter"
 
@@ -158,9 +139,5 @@ rule genomecov:
         path.join("logs", genomecov_dir,"{sample}.log")
     params:
         opt=config["genomecov"]["opt"],
-    threads:
-        config["genomecov"]["threads"]
-    resources:
-        mem_mb = config["genomecov"]["memory"]
     wrapper:
         "genomecov"

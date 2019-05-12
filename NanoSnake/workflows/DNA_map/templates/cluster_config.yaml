@@ -1,0 +1,30 @@
+# Config file for lsf cluster
+# --cluster_config lsf_cluster_config.yaml --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -R "rusage[mem={cluster.mem}]" -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
+
+__default__:
+    queue": "research-rh74"
+    threads : 1
+    mem : 1000
+    name : "nanosnake.{rule}.{wildcards.sample}"
+    output : "logs/cluster_{rule}.{wildcards.sample}.o"
+    error : "logs/cluster_{rule}.{wildcards.sample}.e"
+
+fastqc:
+    threads: 10
+
+minimap2_index:
+    mem : 20000
+    name : "nanosnake.{rule}"
+    output : "logs/cluster_{rule}.o"
+    error : "logs/cluster_{rule}.e"
+
+minimap2_align:
+    threads : 20
+    mem : 10000
+
+samtools_filter:
+    threads : 20
+    mem : 10000
+s
+genomecov:
+    mem : 5000
