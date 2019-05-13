@@ -4,7 +4,7 @@
 __default__:
     threads : 2
     mem : 5000
-    resources: "\"rusage[mem=5000]\""
+    resources: "\"select[mem>5000] rusage[mem=5000] span[hosts=1]\""
     queue: "research-rh74"
     name : "nanosnake.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
@@ -20,7 +20,7 @@ fastqc:
 minimap2_index:
     opt: ""
     mem : 20000
-    resources: "\"rusage[mem=20000]\""
+    resources: "\"select[mem>20000] rusage[mem=20000] span[hosts=1]\""
     name : "nanosnake.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
@@ -29,20 +29,20 @@ minimap2_align:
     opt: "-x map-ont"
     threads : 20
     mem : 40000
-    resources: "\"rusage[mem=40000:tmp=100000]\""
+    resources: "\"select[mem>40000] rusage[mem=40000] span[hosts=1]\""
 
 bamqc:
     opt: ""
     mem: 10000
-    resources: "\"rusage[mem=10000]\""
+    resources: "\"select[mem>10000] rusage[mem=10000] span[hosts=1]\""
 
 samtools_filter:
     opt: "-q 10 -F 3844"
     threads : 20
     mem : 20000
-    resources: "\"rusage[mem=20000:tmp=100000]\""
+    resources: "\"select[mem>20000] rusage[mem=20000] span[hosts=1]\""
 
 genomecov:
     opt: "-bg"
     mem: 10000
-    resources: "\"rusage[mem=10000]\""
+    resources: "\"select[mem>10000] rusage[mem=10000] span[hosts=1]\""
