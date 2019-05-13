@@ -1,9 +1,10 @@
 # Config file for lsf cluster
-# --cluster_config cluster_config.yaml --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -R 'rusage[mem={cluster.mem}]' -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
+# --cluster_config cluster_config.yaml --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -R {cluster.resources} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
 
 __default__:
     threads : 2
     mem : 5000
+    resources: "\"rusage[mem=5000]\""
     queue: "research-rh74"
     name : "nanosnake.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
@@ -15,11 +16,11 @@ merge_fastq:
 fastqc:
     opt: ""
     threads: 10
-    mem: 5000
 
 minimap2_index:
     opt: ""
     mem : 20000
+    resources: "\"rusage[mem=20000]\""
     name : "nanosnake.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
@@ -28,16 +29,20 @@ minimap2_align:
     opt: "-x map-ont"
     threads : 20
     mem : 40000
+    resources: "\"rusage[mem=40000:tmp=100000]\""
 
 bamqc:
     opt: ""
     mem: 10000
+    resources: "\"rusage[mem=10000]\""
 
 samtools_filter:
     opt: "-q 10 -F 3844"
     threads : 20
     mem : 20000
+    resource: "\"rusage[mem=20000:tmp=100000]\""
 
 genomecov:
     opt: "-bg"
     mem: 10000
+    resource: "\"rusage[mem=10000]\""
