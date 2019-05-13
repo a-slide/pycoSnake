@@ -1,33 +1,36 @@
 # snakemake general cluster config file
 
-
 merge_fastq:
     opt: ""
-    outdir: "01_merge_fastq"
+    threads: 1
+    mem: 1000
 
 fastqc:
     opt: ""
     threads: 2
-    outdir: "02_fastQC"
+    mem: 1000
 
 minimap2_index:
     opt: ""
-    outdir: "03_minimap2_index"
+    threads: 1
+    mem: 1000
 
 minimap2_align:
     opt: "-x map-ont"
     threads: 4
-    outdir: "04_minimap2_align"
+    mem: 1000
 
 bamqc:
     opt: ""
-    outdir: "05_bamqc"
+    threads: 1
+    mem: 1000
 
 samtools_filter:
     opt: "-q 10 -F 3844"
     threads: 4
-    outdir: "06_samtools_filter"
+    mem: 1000
 
 genomecov:
     opt: "-bg"
-    outdir: "07_genomecov"
+    threads: 1
+    mem: 1000
