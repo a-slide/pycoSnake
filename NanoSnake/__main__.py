@@ -67,7 +67,7 @@ def main(args=None):
         sp_IO.add_argument("--multiqc_config", "-m", default=None, type=str, help="MultiQC configuration YAML file (default: %(default)s)")
         sp_IO.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
         sp_template = add_argument_group (sp, "Template options")
-        sp_template.add_argument("--generate_template", type=str, narg="*", default=[], choice=["all", "sample_sheet", "config", "multiqc", "cluster"], help="Generate template files (configs + sample_sheet) in workdir and exit (default: %(default)s)")
+        sp_template.add_argument("--generate_template", type=str, nargs="+", default=[], choices=["all", "sample_sheet", "config", "multiqc", "cluster"], help="Generate template files (configs + sample_sheet) in workdir and exit (default: %(default)s)")
         sp_template.add_argument("--overwrite_template", action="store_true", default=False, help="Overwrite existing template files if they already exist (default: %(default)s).")
         sp_verbosity = sp.add_mutually_exclusive_group()
         sp_verbosity.add_argument("--verbose", "-v", action="store_true", default=False, help="Show additional debug output (default: %(default)s)")
