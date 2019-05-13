@@ -67,7 +67,7 @@ def main(args=None):
         sp_IO.add_argument("--multiqc_config", "-m", default=None, type=str, help="MultiQC configuration YAML file (default: %(default)s)")
         sp_IO.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
         sp_template = add_argument_group (sp, "Template options")
-        sp_template.add_argument("--generate_template", action="store_true", default=False, help="Generate template files (configs + sample_sheet) in workdir and exit (default: %(default)s)")
+        sp_template.add_argument("--generate_template", type=str, narg="*", default=[], choice=["all", "sample_sheet", "config", "multiqc", "cluster"], help="Generate template files (configs + sample_sheet) in workdir and exit (default: %(default)s)")
         sp_template.add_argument("--overwrite_template", action="store_true", default=False, help="Overwrite existing template files if they already exist (default: %(default)s).")
         sp_verbosity = sp.add_mutually_exclusive_group()
         sp_verbosity.add_argument("--verbose", "-v", action="store_true", default=False, help="Show additional debug output (default: %(default)s)")
@@ -166,8 +166,9 @@ def main(args=None):
     # Generate template if required
     if args.generate_template:
         logger.warning (f"Generate template files in working directory")
-        generate_template (workflow=args.subcommands, outdir=args.workdir, overwrite=args.overwrite_template)
+        generate_template (templates=args.generate_template, workflow=args.subcommands, outdir=args.workdir, overwrite=args.overwrite_template)
 
+    # Else run workflow
     else:
         args.func(args)
 
@@ -219,9 +220,8 @@ def RNA_counts (args):
 def DNA_map (args):
     """"""
     # Get config files
-    snakemake_config_fn = get_config_fn (workflow="DNA_map", fn=args.snakemake_config, name="snakemake_config.yaml", workdir=args.workdir)
-    sample_sheet_fn =  get_config_fn (workflow="DNA_map", fn=args.sample_sheet, name="sample_sheet.tsv", workdir=args.workdir)
-    multiqc_config_fn = get_config_fn (workflow="DNA_map", fn=args.multiqc_config, name="multiqc_config.yaml", workdir=args.workdir)
+    config_fn = get_config_fn (workflow="DNA_map", fn=args.snakemake_config, name="config.yaml", workdir=args.workdir)
+    sample_sheet_fn = get_config_fn (workflow="DNA_map", fn=args.sample_sheet, name="sample_sheet.tsv", workdir=args.workdir)
     snakefile = os.path.join (WORKFLOW_DIR, "DNA_map", "snakefile.py")
 
     # Verify that the reference was given by the user and is readeable
@@ -230,15 +230,11 @@ def DNA_map (args):
     if not access_file(args.reference):
         raise NanoSnakeError (f"The reference file {args.reference} is not readeable")
 
-    ########################################################################################## Check sample sheet
-    ########################################################################################## Check config files
-
     # Store additionnal options to pass to snakemake
     logger.info ("Build config dict for snakemake")
     config = {
         "reference": args.reference,
         "sample_sheet": sample_sheet_fn,
-        "multiqc_config":multiqc_config_fn,
         "cluster_config":args.cluster_config}
     logger.debug (config)
 
@@ -250,7 +246,7 @@ def DNA_map (args):
     logger.warning ("RUNING SNAKEMAKE PIPELINE")
     snakemake (
         snakefile=snakefile,
-        configfile=snakemake_config_fn,
+        configfile=config_fn,
         config=config,
         use_conda=True,
         wrapper_prefix="file:{}/".format(WRAPPER_DIR),
@@ -274,17 +270,32 @@ def filter_valid_snakemake_options (args):
             valid_kwargs[k] = v
     return valid_kwargs
 
-def generate_template (workflow, outdir="./", overwrite=False):
+def generate_template (templates, workflow, outdir="./", overwrite=False):
     """"""
-    # Copy file one by one and verify if they already exist
-    for src_fn in os.scandir(os.path.join (WORKFLOW_DIR, workflow, "templates")):
-        dest_fn = os.path.join(outdir, os.path.basename(src_fn))
 
-        if os.path.isfile(dest_fn) and not overwrite:
-            logger.warning (f"\tTemplate file {dest_fn} already exists in working directory")
-            logger.warning (f"\tPlease use --overwrite_template if you want to replace the existing file")
-        else:
-            logger.debug (f"\tCreate template file {dest_fn} ")
+    templates_to_fname = {
+        "sample_sheet":"sample_sheet.tsv" ,
+        "config":"config.yaml",
+        "multiqc":"multiqc_config.yaml" ,
+        "cluster":"cluster_config.yaml"}
+
+    for template, fname in templates_to_fname.items():
+        if template in templates or "all" in templates:
+
+            # Create src path and test readability
+            src_fn = os.path.join (WORKFLOW_DIR, workflow, "templates", fname)
+            if not access_file:
+                logger.warning (f"\tTemplate file {src_fn} doesnt exist for workflow {workflow}")
+                continue
+
+            # Create destination file name and test if it exists
+            dest_fn = os.path.join(outdir, fname)
+            if os.path.isfile(dest_fn) and not overwrite:
+                logger.warning (f"\tTemplate file {dest_fn} already exists in working directory. Use --overwrite_template to replace the existing file")
+                continue
+
+            # Write scr in dest
+            logger.warning (f"\tCreate template file {dest_fn}")
             shutil.copy2 (src_fn, dest_fn)
 
 def get_config_fn (workflow, fn, name, workdir):
