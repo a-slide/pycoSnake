@@ -40,9 +40,9 @@ samtools_filter:
     opt: "-q 10 -F 3844"
     threads : 20
     mem : 20000
-    resource: "\"rusage[mem=20000:tmp=100000]\""
+    resources: "\"rusage[mem=20000:tmp=100000]\""
 
 genomecov:
     opt: "-bg"
     mem: 10000
-    resource: "\"rusage[mem=10000]\""
+    resources: "\"rusage[mem=10000]\""
