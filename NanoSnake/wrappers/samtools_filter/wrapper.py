@@ -5,13 +5,22 @@ __license__ = "MIT"
 
 # Imports
 from snakemake.shell import shell
+import tempfile
 
 # Get optional args if unavailable
 opt = snakemake.params.get("opt", "")
 
-# Split threads in 2 for view ans sort
-threads = 1 if snakemake.threads <= 1 else snakemake.threads//2
+# Threads sharing
+threads = snakemake.threads if snakemake.threads >= 2 else 2
+view_threads = threads//4
+sort_threads = threads-view_threads
 
-# Run shell command
-shell("samtools view -bh {opt} -@ {threads} {snakemake.input[0]} | samtools sort -O bam > {snakemake.output[0]}  2> {snakemake.log}")
+# Run shell commands
+shell("echo '#### SAMTOOLS VIEW & SORT LOG ####' > {snakemake.log}")
+
+# Open temp directory for samtools sort temporary files
+with tempfile.TemporaryDirectory() as temp_dir:
+    shell("samtools view -bh {opt} -@ {view_threads} {snakemake.input[0]} 2>> {snakemake.log}| \
+        samtools sort -@ {sort_threads} -T {temp_dir} -O bam > {snakemake.output[0]}  2>> {snakemake.log}")
+
 shell("samtools index {snakemake.output[0]}")
