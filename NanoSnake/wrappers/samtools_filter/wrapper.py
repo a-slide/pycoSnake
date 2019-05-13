@@ -13,7 +13,7 @@ opt = snakemake.params.get("opt", "")
 
 # Threads sharing
 threads = snakemake.threads if snakemake.threads >= 2 else 2
-view_threads = threads//4
+view_threads = threads//2
 sort_threads = threads-view_threads
 
 # Run shell commands
