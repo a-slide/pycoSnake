@@ -44,5 +44,5 @@ samtools_filter:
 
 genomecov:
     opt: "-bg"
-    mem: 10000
-    resources: "\"select[mem>10000] rusage[mem=10000] span[hosts=1]\""
+    mem: 20000
+    resources: "\"select[mem>20000] rusage[mem=20000] span[hosts=1]\""
