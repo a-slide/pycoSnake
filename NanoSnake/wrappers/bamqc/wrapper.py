@@ -21,5 +21,4 @@ shell("echo '#### SAMTOOLS IDXSTATS LOG ####' >> {snakemake.log}")
 shell("samtools idxstats {snakemake.input[0]} > {snakemake.output.idxstats} 2>> {snakemake.log}")
 
 shell("echo '#### QUALIMAP BAMQC LOG ####' >> {snakemake.log}")
-shell("unset DISPLAY") # Else cause problem in cluster env
-shell("qualimap bamqc --java-mem-size={snakemake.resources.mem_mb}M -bam {snakemake.input[0]} -outdir {qualimap_dirbase} >> {snakemake.log}")
+shell("unset DISPLAY && qualimap bamqc --java-mem-size={snakemake.resources.mem_mb}M -bam {snakemake.input[0]} -outdir {qualimap_dirbase} >> {snakemake.log}")
