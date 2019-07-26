@@ -4,13 +4,12 @@
 set -e
 
 echo "Set up conda package manager"
-wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh --quiet
 bash miniconda.sh -b -p $HOME/miniconda
 export PATH="$HOME/miniconda/bin:$PATH"
 hash -r
 conda config --set always_yes yes --set changeps1 no --set anaconda_upload no
 conda update -q conda
-conda info -a
 
 echo "Install packages needed for package build and upload"
 conda install -q python=3.6 conda-build anaconda-client

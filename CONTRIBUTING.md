@@ -7,10 +7,9 @@ First of all, thanks for considering contributing to `NanoSnake`! 👍 It's peop
 [repo]: https://github.com/a-slide/NanoSnake
 [issues]: https://github.com/a-slide/NanoSnake/issues
 [new_issue]: https://github.com/a-slide/NanoSnake/issues/new
-[citation]: https://zenodo.org/record/2540931
+[citation]: https://zenodo.org/badge/latestdoi/173960745
 [email]: aleg@ebi.ac.uk
 [code_of_conduct]: https://github.com/a-slide/NanoSnake/blob/master/CODE_OF_CONDUCT.md
-[demo_notebook]: https://a-slide.github.io/NanoSnake/NanoSnake_usage.html
 
 ## Code of conduct
 
@@ -24,7 +23,7 @@ There are several ways you can contribute to this project. If you want to know m
 
 Think `NanoSnake` is useful? Let others discover it, by telling them in person, via Twitter or a blog post.
 
-Using `NanoSnake` for a paper you are writing? Please cite it.
+Using `NanoSnake` for a paper you are writing? Please cite it using this [DOI][citation]
 
 ### Ask a question ⁉️
 
