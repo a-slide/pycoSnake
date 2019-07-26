@@ -1,0 +1,47 @@
+# snakemake general config file
+
+merge_fastq:
+    opt: ""
+    threads: 1
+    mem: 1000
+
+fastqc:
+    opt: ""
+    threads: 2
+    mem: 1000
+
+minimap2_index:
+    opt: ""
+    threads: 1
+    mem: 1000
+
+minimap2_align:
+    opt: "-x map-ont"
+    threads: 4
+    mem: 1000
+
+bamqc:
+    opt: ""
+    threads: 1
+    mem: 1000
+
+samtools_filter:
+    opt: "-q 10 -F 3844"
+    threads: 4
+    mem: 1000
+
+genomecov:
+    opt: "-bg"
+    threads: 1
+    mem: 1000
+
+nanopolish_index:
+    opt: ""
+    threads: 1
+    mem: 1000
+
+nanopolish_call_methylation:
+    opt_nanopolish: "--methylation cpg"
+    opt_nanopolishcomp: "--min_llr 2 --min_depth 20 --min_meth_freq 0.1 --split_group --motif cpg"
+    threads: 4
+    mem: 1000
