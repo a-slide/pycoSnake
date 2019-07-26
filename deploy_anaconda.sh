@@ -10,7 +10,6 @@ export PATH="$HOME/miniconda/bin:$PATH"
 hash -r
 conda config --set always_yes yes --set changeps1 no --set anaconda_upload no
 conda update -q conda
-conda info -a
 
 echo "Install packages needed for package build and upload"
 conda install -q python=3.6 conda-build anaconda-client
