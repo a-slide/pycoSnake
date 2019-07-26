@@ -1,11 +1,15 @@
 # Snakemake workflow: NanoSnake
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.4.2-brightgreen.svg)](https://snakemake.bitbucket.io)
-[![Build Status](https://travis-ci.org/a-slide/NanoSnake.svg?branch=master)](https://travis-ci.com/a-slide/NanoSnake#)
+[![Anaconda version](https://anaconda.org/aleg/nanosnake/badges/version.svg)](https://anaconda.org/aleg/nanosnake)
+[![Anaconda last release](https://anaconda.org/aleg/nanosnake/badges/latest_release_relative_date.svg)](https://anaconda.org/aleg/nanosnake)
+[![Anaconda platforms](https://anaconda.org/aleg/nanosnake/badges/platforms.svg)](https://anaconda.org/aleg/nanosnake)
+[![Anaconda Downloads](https://anaconda.org/aleg/nanosnake/badges/downloads.svg)](https://anaconda.org/aleg/nanosnake)
+[![Anaconda Licence](https://anaconda.org/aleg/nanosnake/badges/license.svg)](https://anaconda.org/aleg/nanosnake)
 
 ---
 
-**UNSTABLE PACKAGE UNDER DEVELOPMENT**
+**UNSTABLE PACKAGE UNDER ACTIVE DEVELOPMENT**
 
 ---
 
@@ -17,7 +21,7 @@
 
 ### Install conda package manager
 
-Conda is the only dependency that you need to install manually.
+Conda is the only dependency that you need to install the package.
 
 All the other packages and external program needed for this pipeline will then be automatically handled by conda itself.
 
@@ -25,44 +29,28 @@ Install conda following the official documentation for you system
 
 https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
-### Deploy conda env and install NanoSnake
+### Install the package in a conda environment
 
-If you want to install the package in develop mode (installed and editable at the same time), clone the repository locally:
-
-```
-git clone git@github.com:a-slide/NanoSnake.git
-
-cd NanoSnake
-```
-
-Create a virtual environment to deploy the package
 
 ```
-conda env create -f environment.yml
-```
+conda create -n nanosnake -c aleg -c bioconda -c conda-forge python=3.6 nanosnake
 
-Activate the conda environment and install NanoSnake with pip
-
-```
-conda activate NanoSnake
-pip install -e ./
+conda activate nanosnake
 ```
 
 To update the package, from the package directory
 
 ```
-git pull
-conda env update -f conda_env.yml
-conda activate NanoSnake
-pip install -e ./ -U
+conda activate nanosnake
+
+conda update nanosnake
 ```
 
 ## Usage
 
-At the moment there are 3 workflows available in NanoSnake:
+At the moment there are 2 workflows available in NanoSnake:
 * DNA_map
 * DNA_methylation
-* RNA_counts
 
 ## Configure workflow
 
@@ -71,12 +59,14 @@ Generate the sample sheet and config template files required for the workflow yo
 ```
 conda activate NanoSnake
 
-NanoSnake {WORKFLOW NAME} --generate_template --overwrite_template
+NanoSnake {WORKFLOW NAME} --generate_template all --overwrite_template
 ```
 
-The `samples.tsv` file needs to be filled with the required informations detailed in the file header.
+The `samples.tsv` file needs to be filled with the required informations detailed in the file header and passed to NanoSnake (`--sample_sheet`).
 
-The `config.yaml` can be modified and passed to NanoSnake upon execution, but it is recommended to stick to the default parameters.
+The `config.yaml` can be modified and passed to NanoSnake (`--config`). It is generally recommended to stick to the default parameters.
+
+The `cluster_config.yaml` can be modified and passed to NanoSnake (`--cluster_config`). Use the file instead of config.yaml if you are executing the pipeline in a cluster environment. By default the file is for an LSF cluster, but it can be modified for other HPC platfoms.  
 
 
 ### Step 4: Execute workflow
@@ -86,5 +76,5 @@ Call NanoSnake and choose your workflow
 ```
 conda activate NanoSnake
 
-NanoSnake {PIPELINE NAME} {OPTIONS}
+NanoSnake {WORKFLOW NAME} {OPTIONS}
 ```

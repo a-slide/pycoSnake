@@ -102,3 +102,5 @@ ENV/
 
 # data
 tests/
+dev/
+conda_build/

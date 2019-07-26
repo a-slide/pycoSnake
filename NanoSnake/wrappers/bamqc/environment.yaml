@@ -6,4 +6,4 @@ channels:
 dependencies:
   - python=3.6
   - qualimap=2.2.2
-  - fastqc=0.11.8
+  - samtools==1.9
