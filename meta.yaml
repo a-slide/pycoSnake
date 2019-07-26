@@ -1,4 +1,4 @@
-{% set version = "0.0.0.4" %}
+{% set version = "0.0.0.5" %}
 {% set name = "NanoSnake" %}
 
 package:
@@ -10,7 +10,7 @@ source:
 
 build:
   number: 0
-  script: "pip install {{ name }}-{{ version }}.tar.gz --no-deps --ignore-installed -vv "
+  script: "pip install {{ name }}-{{ version }}.tar.gz --no-deps --ignore-installed -v "
   entry_points:
     - NanoSnake=NanoSnake.__main__:main
   noarch: "python"

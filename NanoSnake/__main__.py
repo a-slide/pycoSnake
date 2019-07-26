@@ -266,7 +266,7 @@ def generate_template (templates, workflow, outdir="./", overwrite=False):
             # Create src path and test readability
             src_fn = os.path.join (WORKFLOW_DIR, workflow, "templates", fname)
             if not access_file(src_fn):
-                #logger.warning (f"\tTemplate file {src_fn} doesnt exist for workflow {workflow}")
+                logger.warning (f"\tTemplate file {src_fn} doesnt exist for workflow {workflow}")
                 continue
 
             # Create destination file name and test if it exists
