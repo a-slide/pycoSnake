@@ -31,15 +31,19 @@ https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
 ### Install the package in a conda environment
 
-If you want to install the package in develop mode (installed and editable at the same time), clone the repository locally:
 
 ```
-```
+conda create -n nanosnake -c aleg -c bioconda -c conda-forge python=3.6 nanosnake
 
+conda activate nanosnake
+```
 
 To update the package, from the package directory
 
 ```
+conda activate nanosnake
+
+conda update nanosnake
 ```
 
 ## Usage
@@ -55,12 +59,14 @@ Generate the sample sheet and config template files required for the workflow yo
 ```
 conda activate NanoSnake
 
-NanoSnake {WORKFLOW NAME} --generate_template --overwrite_template
+NanoSnake {WORKFLOW NAME} --generate_template all --overwrite_template
 ```
 
-The `samples.tsv` file needs to be filled with the required informations detailed in the file header.
+The `samples.tsv` file needs to be filled with the required informations detailed in the file header and passed to NanoSnake (`--sample_sheet`).
 
-The `config.yaml` can be modified and passed to NanoSnake upon execution, but it is recommended to stick to the default parameters.
+The `config.yaml` can be modified and passed to NanoSnake (`--config`). It is generally recommended to stick to the default parameters.
+
+The `cluster_config.yaml` can be modified and passed to NanoSnake (`--cluster_config`). Use the file instead of config.yaml if you are executing the pipeline in a cluster environment. By default the file is for an LSF cluster, but it can be modified for other HPC platfoms.  
 
 
 ### Step 4: Execute workflow
@@ -70,5 +76,5 @@ Call NanoSnake and choose your workflow
 ```
 conda activate NanoSnake
 
-NanoSnake {PIPELINE NAME} {OPTIONS}
+NanoSnake {WORKFLOW NAME} {OPTIONS}
 ```
