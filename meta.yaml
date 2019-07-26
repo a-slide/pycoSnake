@@ -1,0 +1,37 @@
+{% set version = "0.0.0.4" %}
+{% set name = "NanoSnake" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  path: dist/{{ name }}-{{ version }}.tar.gz
+
+build:
+  number: 0
+  script: "pip install {{ name }}-{{ version }}.tar.gz --no-deps --ignore-installed -vv "
+  entry_points:
+    - NanoSnake=NanoSnake.__main__:main
+  noarch: "python"
+
+requirements:
+  build:
+    - python>=3.6
+    - pip>=19.2.1
+    - ripgrep=11.0.1
+  run:
+    - python>=3.6
+    - snakemake>=5.5.4
+    - pandas>=0.24.1
+
+test:
+  commands:
+    - NanoSnake --help
+    - NanoSnake DNA_methylation --help
+    - NanoSnake DNA_map --help
+
+about:
+  home: "https://github.com/a-slide/NanoSnake"
+  license: "MIT"
+  summary: "NanoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
