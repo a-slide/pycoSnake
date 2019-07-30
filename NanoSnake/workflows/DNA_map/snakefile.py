@@ -22,13 +22,13 @@ sample_list = list(sample_df.index)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Getters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def get_fastq (wildcards):
-    return glob (sample_df.loc[wildcards.sample, "fastq"])
+    return sample_df.loc[wildcards.sample, "fastq"]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Top Rules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 rule all:
     input:
-        expand(path.join("results","merge_fastq","{sample}.fastq"), sample=sample_list),
+        expand(path.join("results","merge_filter_fastq","{sample}.fastq"), sample=sample_list),
         expand(path.join("results","fastqc","{sample}_fastqc.html"), sample=sample_list),
         expand(path.join("results","fastqc","{sample}_fastqc.zip"), sample=sample_list),
         expand(path.join("results","minimap2_index","ref.mmi")),
@@ -42,17 +42,17 @@ rule all:
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Rules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-rule merge_fastq:
+rule merge_filter_fastq:
     input: get_fastq
-    output: path.join("results","merge_fastq","{sample}.fastq")
-    log: path.join("logs","merge_fastq","{sample}.log")
-    threads: config["merge_fastq"].get("threads", 1)
-    params: opt=config["merge_fastq"].get("opt", "")
-    resources: mem_mb=config["merge_fastq"].get("mem", 1000)
-    wrapper: "concat_files"
+    output: path.join("results","merge_filter_fastq","{sample}.fastq")
+    log: path.join("logs","merge_filter_fastq","{sample}.log")
+    threads: config["merge_filter_fastq"].get("threads", 1)
+    params: opt=config["merge_filter_fastq"].get("opt", "")
+    resources: mem_mb=config["merge_filter_fastq"].get("mem", 1000)
+    wrapper: "merge_filter_fastq"
 
 rule fastqc:
-    input: rules.merge_fastq.output
+    input: rules.merge_filter_fastq.output
     output:
         html=path.join("results","fastqc","{sample}_fastqc.html"),
         zip=path.join("results","fastqc","{sample}_fastqc.zip")
@@ -74,7 +74,7 @@ rule minimap2_index:
 rule minimap2_align:
     input:
         index=rules.minimap2_index.output,
-        fastq=rules.merge_fastq.output
+        fastq=rules.merge_filter_fastq.output
     output: path.join("results","minimap2_align","{sample}.bam")
     log: path.join("logs","minimap2_align","{sample}.log")
     threads: config["minimap2_align"].get("threads", 4)

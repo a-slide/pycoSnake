@@ -1,8 +1,8 @@
 # sample_id: Name of the sample (without blank space)
-# fastq: Path to the sample fastq file. Can also be a list regular expression
-# fast5_dir: Path to the directory containing the sample raw fast5 files
+# fastq: Path to the directory containing the sample fastq files. Can also be a single file path
+# fast5: Path to the directory containing the sample raw fast5 files
 # seq_summary: Path to a sequencing_summary.txt
 
-sample_id	fastq	fast5_dir	seq_summary
-sample_1	data/basecall/s1/*.fastq	data/raw_fast5/s1/	data/basecall/s1/sequencing_summary.txt
-sample_2	data/basecall/s2/*.fastq	data/raw_fast5/s2/	data/basecall/s2/sequencing_summary.txt
+sample_id	fastq	fast5	seq_summary
+sample_1	data/basecall/s1/	data/raw_fast5/s1/	data/basecall/s1/sequencing_summary.txt
+sample_2	data/basecall/s2/	data/raw_fast5/s2/	data/basecall/s2/sequencing_summary.txt

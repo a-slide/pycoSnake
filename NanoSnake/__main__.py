@@ -171,6 +171,7 @@ def main(args=None):
 
     # Else run workflow
     else:
+
         args.func(args)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SUBPARSERS FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -180,7 +181,7 @@ def DNA_methylation (args):
     # Get and check config files
     snakefile = os.path.join (WORKFLOW_DIR, "DNA_methylation", "snakefile.py")
     configfile = get_config_fn (config=args.config, cluster_config=args.cluster_config)
-    sample_sheet = get_sample_sheet (sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq", "fast5_dir", "seq_summary"])
+    sample_sheet = get_sample_sheet (sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq", "fast5", "seq_summary"])
     reference = get_reference (args.reference)
 
     # Store additionnal options to pass to snakemake
