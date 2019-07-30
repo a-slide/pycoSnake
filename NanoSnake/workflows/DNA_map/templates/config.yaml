@@ -1,7 +1,7 @@
-# snakemake general cluster config file
+# snakemake general config file
 
-merge_fastq:
-    opt: ""
+merge_filter_fastq:
+    opt: "--min_len 100 --remove_duplicates"
     threads: 1
     mem: 1000
 
