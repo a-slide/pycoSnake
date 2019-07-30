@@ -36,7 +36,7 @@ https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
 
 ```
-conda create -n nanosnake -c aleg -c bioconda -c conda-forge python=3.6 nanosnake
+conda create -n nanosnake -c aleg -c anaconda -c bioconda -c conda-forge python=3.6 nanosnake
 
 conda activate nanosnake
 ```
@@ -80,4 +80,39 @@ Call NanoSnake and choose your workflow
 conda activate NanoSnake
 
 NanoSnake {WORKFLOW NAME} {OPTIONS}
+```
+
+#### Example for the DNA_methylation workflow
+
+Usage on a local machine
+
+```
+conda activate NanoSnake
+
+NanoSnake DNA_methylation \
+    --reference ref.fa \
+    --sample_sheet sample_sheet.tsv \
+    --config config.yaml \
+    --cores 10
+```
+
+Usage in an LSF cluster environment
+
+```
+conda activate NanoSnake
+
+NanoSnake DNA_methylation \
+    --reference ref.fa \
+    --sample_sheet sample_sheet.tsv \
+    --cluster_config cluster_config.yaml \
+    --cores 100 \
+    --nodes 5 \
+    --cluster "bsub \
+        -q {cluster.queue} \
+        -n {cluster.threads} \
+        -M {cluster.mem} \
+        -R \"select[mem>{cluster.mem}] rusage[mem={cluster.mem}] span[hosts=1]\" \
+        -J {cluster.name} \
+        -oo {cluster.output} \
+        -eo {cluster.error}" \
 ```
