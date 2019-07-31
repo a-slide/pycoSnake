@@ -10,6 +10,11 @@ fastqc:
     threads: 2
     mem: 1000
 
+pycoqc:
+    opt: "--filter_calibration"
+    threads: 2
+    mem: 1000
+
 minimap2_index:
     opt: ""
     threads: 1

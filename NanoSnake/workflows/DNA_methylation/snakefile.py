@@ -28,18 +28,15 @@ def get_fast5 (wildcards):
     return sample_df.loc[wildcards.sample, "fast5"]
 
 def get_seq_summary (wildcards):
-    try:
-        return sample_df.loc[wildcards.sample, "seq_summary"]
-    except:
-        return None
+    return sample_df.loc[wildcards.sample, "seq_summary"]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Top Rules~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 rule all:
     input:
         expand(path.join("results","merge_filter_fastq","{sample}.fastq"), sample=sample_list),
-        expand(path.join("results","fastqc","{sample}_fastqc.html"), sample=sample_list),
-        expand(path.join("results","fastqc","{sample}_fastqc.zip"), sample=sample_list),
+        expand(path.join("results","pycoqc","{sample}_pycoqc.html"), sample=sample_list),
+        expand(path.join("results","pycoqc","{sample}_pycoqc.json"), sample=sample_list),
         expand(path.join("results","minimap2_index","ref.mmi")),
         expand(path.join("results","minimap2_align", "{sample}.bam"), sample=sample_list),
         expand(path.join("results","bamqc","{sample}","qualimapReport.html"), sample=sample_list),
@@ -67,16 +64,17 @@ rule merge_filter_fastq:
     resources: mem_mb=config["merge_filter_fastq"].get("mem", 1000)
     wrapper: "merge_filter_fastq"
 
-rule fastqc:
-    input: rules.merge_filter_fastq.output
+rule pycoqc:
+    input:
+        seq_summary = get_seq_summary
     output:
-        html=path.join("results","fastqc","{sample}_fastqc.html"),
-        zip=path.join("results","fastqc","{sample}_fastqc.zip")
-    log: path.join("logs", "fastqc","{sample}_fastqc.log")
-    threads: config["fastqc"].get("threads", 2)
-    params: opt=config["fastqc"].get("opt", "")
-    resources: mem_mb=config["fastqc"].get("mem", 1000)
-    wrapper: "fastqc"
+        html=path.join("results","pycoqc","{sample}_pycoqc.html"),
+        json=path.join("results","pycoqc","{sample}_pycoqc.json")
+    log: path.join("logs", "pycoqc","{sample}_pycoqc.log")
+    threads: config["pycoqc"].get("threads", 2)
+    params: opt=config["pycoqc"].get("opt", "")
+    resources: mem_mb=config["pycoqc"].get("mem", 1000)
+    wrapper: "pycoqc"
 
 rule minimap2_index:
     input: config["reference"]
