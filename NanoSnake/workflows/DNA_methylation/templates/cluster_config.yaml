@@ -11,10 +11,10 @@ merge_filter_fastq:
     threads : 2
     mem : 5000
 
-fastqc:
-    opt: ""
-    threads: 10
-    mem : 5000
+pycoqc:
+    opt: "--filter_calibration"
+    threads: 2
+    mem: 10000
 
 minimap2_index:
     opt: ""

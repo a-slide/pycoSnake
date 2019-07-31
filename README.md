@@ -46,7 +46,7 @@ To update the package, from the package directory
 ```
 conda activate nanosnake
 
-conda update nanosnake
+conda update nanosnake -c aleg
 ```
 
 ## Usage
@@ -107,12 +107,5 @@ NanoSnake DNA_methylation \
     --cluster_config cluster_config.yaml \
     --cores 100 \
     --nodes 5 \
-    --cluster "bsub \
-        -q {cluster.queue} \
-        -n {cluster.threads} \
-        -M {cluster.mem} \
-        -R \"select[mem>{cluster.mem}] rusage[mem={cluster.mem}] span[hosts=1]\" \
-        -J {cluster.name} \
-        -oo {cluster.output} \
-        -eo {cluster.error}" \
+    --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -R \"select[mem>{cluster.mem}] rusage[mem={cluster.mem}] span[hosts=1]\" -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
 ```
