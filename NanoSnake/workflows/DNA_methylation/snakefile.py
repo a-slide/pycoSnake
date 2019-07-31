@@ -66,7 +66,7 @@ rule merge_filter_fastq:
 
 rule pycoqc:
     input:
-        summary = get_seq_summary
+        seq_summary = get_seq_summary
     output:
         html=path.join("results","pycoqc","{sample}_pycoqc.html"),
         json=path.join("results","pycoqc","{sample}_pycoqc.json")
