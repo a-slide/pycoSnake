@@ -63,6 +63,10 @@ Generate the sample sheet and config template files required for the workflow yo
 conda activate NanoSnake
 
 NanoSnake {WORKFLOW NAME} --generate_template all --overwrite_template
+
+or
+
+NanoSnake {WORKFLOW NAME} -g all -o
 ```
 
 The `samples.tsv` file needs to be filled with the required informations detailed in the file header and passed to NanoSnake (`--sample_sheet`).
@@ -89,23 +93,15 @@ Usage on a local machine
 ```
 conda activate NanoSnake
 
-NanoSnake DNA_methylation \
-    --reference ref.fa \
-    --sample_sheet sample_sheet.tsv \
-    --config config.yaml \
-    --cores 10
+NanoSnake DNA_methylation -r ref.fa  -s sample_sheet.tsv -c config.yaml --cores 10
 ```
 
 Usage in an LSF cluster environment
 
+Use the cluster_config file instead of the normal config
+
 ```
 conda activate NanoSnake
 
-NanoSnake DNA_methylation \
-    --reference ref.fa \
-    --sample_sheet sample_sheet.tsv \
-    --cluster_config cluster_config.yaml \
-    --cores 100 \
-    --nodes 5 \
-    --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -R \"select[mem>{cluster.mem}] rusage[mem={cluster.mem}] span[hosts=1]\" -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
+NanoSnake DNA_methylation  -r ref.fa  -s sample_sheet.tsv -c cluster_config.yaml --cores 100 --nodes 5 --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -R \"select[mem>{cluster.mem}] rusage[mem={cluster.mem}] span[hosts=1]\" -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
 ```

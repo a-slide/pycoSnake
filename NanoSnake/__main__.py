@@ -65,12 +65,11 @@ def main(args=None):
     # Add common group parsers
     for sp in [subparser_dmeth, subparser_dmap, subparser_rcount]:
         sp_IO = add_argument_group (sp, "input/output options")
-        sp_IO.add_argument("--config", "-c", default=None, type=str, help="Snakemake configuration YAML file (required if cluster_config not given)")
-        sp_IO.add_argument("--cluster_config", type=str, default=None, help="configuration YAML file for cluster options (required if snakemake_config not given)")
+        sp_IO.add_argument("--config", "-c", default=None, type=str, help="Snakemake configuration YAML file. Provide a cluster_config file instead if using cluster support (required)")
         sp_IO.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
         sp_template = add_argument_group (sp, "Template options")
-        sp_template.add_argument("--generate_template", type=str, nargs="+", default=[], choices=["all", "sample_sheet", "config", "multiqc_config", "cluster_config"], help="Generate template files (configs + sample_sheet) in workdir and exit (default: %(default)s)")
-        sp_template.add_argument("--overwrite_template", action="store_true", default=False, help="Overwrite existing template files if they already exist (default: %(default)s).")
+        sp_template.add_argument("--generate_template", "-g", type=str, nargs="+", default=[], choices=["all", "sample_sheet", "config", "multiqc_config", "cluster_config"], help="Generate template files (configs + sample_sheet) in workdir and exit (default: %(default)s)")
+        sp_template.add_argument("--overwrite_template", "-o", action="store_true", default=False, help="Overwrite existing template files if they already exist (default: %(default)s).")
         sp_verbosity = sp.add_mutually_exclusive_group()
         sp_verbosity.add_argument("--verbose", "-v", action="store_true", default=False, help="Show additional debug output (default: %(default)s)")
         sp_verbosity.add_argument("--quiet", "-q", action="store_true", default=False, help="Reduce overall output (default: %(default)s)")
@@ -160,27 +159,31 @@ def main(args=None):
     else:
         logger.setLevel (logging.INFO)
 
-    # Cluster stuff so that we only have one option for core
-    if args.cluster and args.cores:
-        args.local_cores = args.cores
-
     # Generate template if required
     if args.generate_template:
         logger.warning (f"Generate template files in working directory")
         generate_template (templates=args.generate_template, workflow=args.subcommands, outdir=args.workdir, overwrite=args.overwrite_template)
+        sys.exit()
 
-    # Else run workflow
+    # Cluster stuff to simplify options
+    if args.cluster:
+        logger.warning (f"STARTING WORKFLOW IN CLUSTER MODE")
+        args.local_cores = args.cores
+        args.cluster_config = args.config
     else:
+        logger.warning (f"STARTING WORKFLOW IN LOCAL MODE")
 
-        args.func(args)
+    # Run workflow
+    args.func(args)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SUBPARSERS FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def DNA_methylation (args):
     """"""
     # Get and check config files
+    logger.warning ("CHECKING CONFIGURATION FILES")
     snakefile = os.path.join (WORKFLOW_DIR, "DNA_methylation", "snakefile.py")
-    configfile = get_config_fn (config=args.config, cluster_config=args.cluster_config)
+    configfile = get_config_fn (config=args.config)
     sample_sheet = get_sample_sheet (sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq", "fast5", "seq_summary"])
     reference = get_reference (args.reference)
 
@@ -207,7 +210,7 @@ def DNA_map (args):
     """"""
     # Get and check config files
     snakefile = os.path.join (WORKFLOW_DIR, "DNA_map", "snakefile.py")
-    configfile = get_config_fn (config=args.config, cluster_config=args.cluster_config)
+    configfile = get_config_fn (config=args.config)
     sample_sheet = get_sample_sheet (sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq"])
     reference = get_reference (args.reference)
 
@@ -280,17 +283,8 @@ def generate_template (templates, workflow, outdir="./", overwrite=False):
             logger.warning (f"\tCreate template file {dest_fn}")
             shutil.copy2 (src_fn, dest_fn)
 
-def get_config_fn (config, cluster_config):
+def get_config_fn (config):
     """"""
-    if cluster_config:
-        config = cluster_config
-        logger.warning ("\tUsing provided cluster configuration file")
-    elif config:
-        config = config
-        logger.warning ("\tUsing provided configuration file")
-    else:
-        raise NanoSnakeError ("A config file (--config) or cluster config file (--cluster_config) is required to run the workflow")
-
     # Try loading the config file
     try:
         with open(config) as fp:
