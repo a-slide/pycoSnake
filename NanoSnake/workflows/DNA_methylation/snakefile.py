@@ -127,25 +127,11 @@ rule genomecov:
     resources: mem_mb=config["genomecov"].get("mem", 1000)
     wrapper: "genomecov"
 
-rule nanopolish_index:
+rule nanopolish_call_methylation:
     input:
         fastq = rules.merge_filter_fastq.output,
         fast5 = get_fast5,
         seq_summary = get_seq_summary,
-    output:
-        index = path.join("results", "merge_filter_fastq","{sample}.fastq.index"),
-        fai = path.join("results", "merge_filter_fastq","{sample}.fastq.index.fai"),
-        gzi = path.join("results", "merge_filter_fastq","{sample}.fastq.index.gzi"),
-        readdb = path.join("results", "merge_filter_fastq","{sample}.fastq.index.readdb"),
-    log: path.join("logs","nanopolish_index","{sample}.log")
-    threads: config["nanopolish_index"].get("threads", 2)
-    params: opt=config["nanopolish_index"].get("opt", "")
-    resources: mem_mb=config["nanopolish_index"].get("mem", 1000)
-    wrapper: "nanopolish_index"
-
-rule nanopolish_call_methylation:
-    input:
-        fastq = rules.merge_filter_fastq.output,
         bam = rules.samtools_filter.output,
         ref = config["reference"],
     output:

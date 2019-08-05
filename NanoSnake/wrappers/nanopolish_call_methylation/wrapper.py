@@ -16,6 +16,9 @@ outdir = os.path.dirname(snakemake.output.bed)
 outprefix = os.path.basename(snakemake.output.bed).replace("_freq_meth_calculate.bed", "")
 
 # Run shell commands
+shell("echo '#### NANOPOLISH INDEX LOG ####' > {snakemake.log}")
+shell("nanopolish index -d {snakemake.input.fast5} {snakemake.input.fastq} -s {snakemake.input.seq_summary} -v 2>> {snakemake.log}")
+
 shell("echo '#### NANOPOLISH CALL-METHYLATION LOG ####' > {snakemake.log}")
 shell("nanopolish call-methylation -t {snakemake.threads} {opt_nanopolish} -r {snakemake.input.fastq} -b {snakemake.input.bam} -g {snakemake.input.ref} > {snakemake.output.call} 2>> {snakemake.log}")
 
