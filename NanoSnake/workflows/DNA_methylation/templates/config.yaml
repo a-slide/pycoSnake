@@ -42,6 +42,6 @@ genomecov:
 
 nanopolish_call_methylation:
     opt_nanopolish: "--methylation cpg"
-    opt_nanopolishcomp: "--min_llr 2 --min_depth 20 --min_meth_freq 0.1"
+    opt_nanopolishcomp: "--min_depth 20"
     threads: 4
     mem: 1000
