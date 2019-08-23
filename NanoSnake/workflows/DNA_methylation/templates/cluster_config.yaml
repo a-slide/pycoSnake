@@ -1,20 +1,20 @@
 # Config file for lsf cluster
 
+# DEFAULT OPTIONS
+
 __default__:
     queue: "research-rh74"
     name : "nanosnake.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
+# MAIN PIPELINE CONFIG
+# These rules are the backbone of the pipeline
+
 merge_filter_fastq:
     opt: "--min_len 100 --remove_duplicates"
-    threads : 2
-    mem : 5000
-
-pycoqc:
-    opt: "--filter_calibration"
     threads: 2
-    mem: 10000
+    mem: 5000
 
 minimap2_index:
     opt: ""
@@ -29,23 +29,35 @@ minimap2_align:
     threads : 20
     mem : 40000
 
-bamqc:
-    opt: ""
-    threads : 2
-    mem: 50000
-
 samtools_filter:
     opt: "-q 10 -F 3844"
     threads : 20
     mem : 20000
+
+nanopolish_call_methylation:
+    opt_nanopolish: "--methylation cpg"
+    opt_nanopolishcomp: "--min_depth 20"
+    threads: 20
+    mem: 20000
+
+# OPTIONAL PIPELINE CONFIG
+# Removing a rule block will cause the rule not to be triggered
+
+pycoqc:
+    opt: "--filter_calibration"
+    threads: 2
+    mem: 10000
+
+samtools_qc:
+    threads: 1
+    mem: 10000
 
 genomecov:
     opt: "-bg"
     threads : 2
     mem: 20000
 
-nanopolish_call_methylation:
-    opt_nanopolish: "--methylation cpg"
-    opt_nanopolishcomp: "--min_depth 20"
-    threads: 20
+igvtools_count:
+    opt: "-w 10 --strands 'read'"
+    threads: 1
     mem: 20000
