@@ -1,18 +1,9 @@
-# snakemake general config file
+# MAIN PIPELINE CONFIG
+# These rules are the backbone of the pipeline
 
 merge_filter_fastq:
     opt: "--min_len 100 --remove_duplicates"
     threads: 1
-    mem: 1000
-
-fastqc:
-    opt: ""
-    threads: 2
-    mem: 1000
-
-pycoqc:
-    opt: "--filter_calibration"
-    threads: 2
     mem: 1000
 
 minimap2_index:
@@ -25,14 +16,27 @@ minimap2_align:
     threads: 4
     mem: 1000
 
-bamqc:
-    opt: ""
-    threads: 1
-    mem: 1000
-
 samtools_filter:
     opt: "-q 10 -F 3844"
     threads: 4
+    mem: 1000
+
+nanopolish_call_methylation:
+    opt_nanopolish: "--methylation cpg"
+    opt_nanopolishcomp: "--min_depth 20"
+    threads: 4
+    mem: 1000
+
+# OPTIONAL PIPELINE CONFIG
+# Removing a rule block will cause the rule not to be triggered
+
+pycoqc:
+    opt: "--filter_calibration"
+    threads: 2
+    mem: 1000
+
+samtools_qc:
+    threads: 1
     mem: 1000
 
 genomecov:
@@ -40,8 +44,7 @@ genomecov:
     threads: 1
     mem: 1000
 
-nanopolish_call_methylation:
-    opt_nanopolish: "--methylation cpg"
-    opt_nanopolishcomp: "--min_depth 20"
-    threads: 4
+igvtools_count:
+    opt: "-w 10 --strands 'read'"
+    threads: 1
     mem: 1000

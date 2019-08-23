@@ -5,7 +5,6 @@ channels:
   - conda-forge
 dependencies:
   - python=3.6
-  - nanopolish=0.11.1
-  - pip=19.1
-  - pip:
-    - NanopolishComp==0.6.8
+  - samtools==1.9
+  - openjdk=11.0.1
+  - igvtools
