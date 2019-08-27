@@ -11,7 +11,7 @@ from snakemake.shell import shell
 opt_nanopolish = snakemake.params.get("opt_nanopolish", "")
 opt_nanopolishcomp = snakemake.params.get("opt_nanopolishcomp", "")
 
-sample_id = os.path.split(snakemake.input.fastq)[1].rpartition(".")[0]
+sample_id = os.path.split(snakemake.input.fastq[0])[1].rpartition(".")[0]
 
 # Run shell commands
 shell("echo '#### NANOPOLISH INDEX LOG ####' > {snakemake.log}")
