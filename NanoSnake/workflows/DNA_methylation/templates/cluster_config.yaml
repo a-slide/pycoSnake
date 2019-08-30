@@ -58,6 +58,6 @@ genomecov:
     mem: 20000
 
 igvtools_count:
-    opt: "-w 10 --strands 'read'"
+    opt: "-w 10"
     threads: 1
     mem: 20000
