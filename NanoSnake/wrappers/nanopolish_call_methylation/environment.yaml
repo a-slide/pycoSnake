@@ -8,4 +8,4 @@ dependencies:
   - nanopolish=0.11.1
   - pip=19.1
   - pip:
-    - NanopolishComp==0.6.9
+    - NanopolishComp==0.6.10
