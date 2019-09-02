@@ -22,9 +22,13 @@ samtools_filter:
     mem: 1000
 
 nanopolish_call_methylation:
-    opt_nanopolish: "--methylation cpg"
-    opt_nanopolishcomp: "--min_depth 20"
+    opt: "--methylation cpg"
     threads: 4
+    mem: 1000
+
+nanopolishcomp_freq_meth_calculate:
+    opt: "--min_depth 20"
+    threads: 1
     mem: 1000
 
 # OPTIONAL PIPELINE CONFIG

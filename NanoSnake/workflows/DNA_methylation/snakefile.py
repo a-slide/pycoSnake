@@ -38,9 +38,9 @@ rule all:
         expand(path.join("results","minimap2_index","ref.mmi")),
         expand(path.join("results","minimap2_align", "{sample}.bam"), sample=sample_list),
         expand(path.join("results","samtools_filter", "{sample}.bam"), sample=sample_list),
-        expand(path.join("results", "nanopolish_call_methylation","{sample}_call_methylation.tsv"), sample=sample_list),
-        expand(path.join("results", "nanopolish_call_methylation","{sample}_freq_meth_calculate.bed"), sample=sample_list),
-        expand(path.join("results", "nanopolish_call_methylation","{sample}_freq_meth_calculate.tsv"), sample=sample_list),
+        expand(path.join("results", "nanopolish_call_methylation","{sample}.tsv"), sample=sample_list),
+        expand(path.join("results", "nanopolishcomp_freq_meth_calculate","{sample}.bed"), sample=sample_list),
+        expand(path.join("results", "nanopolishcomp_freq_meth_calculate","{sample}.tsv"), sample=sample_list),
         expand(path.join("results","pycoqc","{sample}_pycoqc.html"), sample=sample_list) if "pycoqc" in config else [],
         expand(path.join("results","pycoqc","{sample}_pycoqc.json"), sample=sample_list) if "pycoqc" in config else [],
         expand(path.join("results","samtools_qc","{sample}_samtools_stats.txt"), sample=sample_list) if "samtools_qc" in config else [],
@@ -96,17 +96,25 @@ rule nanopolish_call_methylation:
         seq_summary = get_seq_summary,
         bam = rules.samtools_filter.output,
         ref = config["reference"],
-    output:
-        call = path.join("results", "nanopolish_call_methylation","{sample}_call_methylation.tsv"),
-        bed = path.join("results", "nanopolish_call_methylation","{sample}_freq_meth_calculate.bed"),
-        tsv = path.join("results", "nanopolish_call_methylation","{sample}_freq_meth_calculate.tsv"),
+    output: path.join("results", "nanopolish_call_methylation","{sample}.tsv")
     log: path.join("logs","nanopolish_call_methylation","{sample}.log")
     threads: config["nanopolish_call_methylation"].get("threads", 2)
-    params:
-        opt_nanopolish=config["nanopolish_call_methylation"].get("opt_nanopolish", ""),
-        opt_nanopolishcomp=config["nanopolish_call_methylation"].get("opt_nanopolishcomp", ""),
+    params: opt=config["nanopolish_call_methylation"].get("opt", ""),
     resources: mem_mb=config["nanopolish_call_methylation"].get("mem", 1000)
     wrapper: "nanopolish_call_methylation"
+
+rule nanopolishcomp_freq_meth_calculate:
+    input:
+        call = rules.nanopolish_call_methylation.output,
+        ref = config["reference"],
+    output:
+        bed = path.join("results", "nanopolishcomp_freq_meth_calculate","{sample}.bed"),
+        tsv = path.join("results", "nanopolishcomp_freq_meth_calculate","{sample}.tsv"),
+    log: path.join("logs","nanopolishcomp_freq_meth_calculate","{sample}.log")
+    threads: config["nanopolishcomp_freq_meth_calculate"].get("threads", 1)
+    params: opt=config["nanopolishcomp_freq_meth_calculate"].get("opt", ""),
+    resources: mem_mb=config["nanopolishcomp_freq_meth_calculate"].get("mem", 1000)
+    wrapper: "nanopolishcomp_freq_meth_calculate"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~OPTIONAL RULES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -122,7 +130,7 @@ if "pycoqc" in config:
         params: opt=config["pycoqc"].get("opt", "")
         resources: mem_mb=config["pycoqc"].get("mem", 1000)
         wrapper: "pycoqc"
-        
+
 if "samtools_qc" in config:
     rule samtools_qc:
         input: rules.minimap2_align.output,
