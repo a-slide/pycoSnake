@@ -8,26 +8,14 @@ import os
 from snakemake.shell import shell
 
 # Get optional args if unavailable
-opt_nanopolish = snakemake.params.get("opt_nanopolish", "")
-opt_nanopolishcomp = snakemake.params.get("opt_nanopolishcomp", "")
+opt = snakemake.params.get("opt", "")
 
 # Run shell commands
 shell("touch {snakemake.log}")
-
-sample_id = os.path.split(snakemake.input.fastq[0])[1].rpartition(".")[0]
-
-# Create ref genome index if needed
-index = snakemake.input.ref+".fai"
-if not os.access(index, os.R_OK):
-    shell("echo '#### SAMTOOLS INDEX LOG####' >> {snakemake.log}")
-    shell("samtools faidx {snakemake.input.ref} 2>> {snakemake.log}")
 
 # Run shell commands
 shell("echo '#### NANOPOLISH INDEX LOG ####' >> {snakemake.log}")
 shell("nanopolish index -d {snakemake.input.fast5} {snakemake.input.fastq} -s {snakemake.input.seq_summary} -v 2>> {snakemake.log}")
 
 shell("echo '#### NANOPOLISH CALL-METHYLATION LOG ####' > {snakemake.log}")
-shell("nanopolish call-methylation -t {snakemake.threads} {opt_nanopolish} -r {snakemake.input.fastq} -b {snakemake.input.bam} -g {snakemake.input.ref} > {snakemake.output.call} 2>> {snakemake.log}")
-
-shell("echo '#### NANOPOLISHCOMP FREQ_METH_CALCULATE LOG ####' >> {snakemake.log}")
-shell("NanopolishComp Freq_meth_calculate --verbose {opt_nanopolishcomp} -i {snakemake.output.call} -f {index} -b {snakemake.output.bed} -t {snakemake.output.tsv} -s {sample_id} 2>> {snakemake.log}")
+shell("nanopolish call-methylation -t {snakemake.threads} {opt} -r {snakemake.input.fastq} -b {snakemake.input.bam} -g {snakemake.input.ref} > {snakemake.output} 2>> {snakemake.log}")

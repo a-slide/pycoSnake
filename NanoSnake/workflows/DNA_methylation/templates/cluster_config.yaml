@@ -40,6 +40,16 @@ nanopolish_call_methylation:
     threads: 20
     mem: 20000
 
+nanopolish_call_methylation:
+    opt: "--methylation cpg"
+    threads: 20
+    mem: 10000
+
+nanopolishcomp_freq_meth_calculate:
+    opt: "--min_depth 20"
+    threads: 2
+    mem: 50000
+
 # OPTIONAL PIPELINE CONFIG
 # Removing a rule block will cause the rule not to be triggered
 
