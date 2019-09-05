@@ -38,6 +38,7 @@ rule all:
         expand(path.join("results","minimap2_index","ref.mmi")),
         expand(path.join("results","minimap2_align", "{sample}.bam"), sample=sample_list),
         expand(path.join("results","samtools_filter", "{sample}.bam"), sample=sample_list),
+        expand(path.join("results","merge_filter_fastq","{sample}.fastq.index"), sample=sample_list),
         expand(path.join("results", "nanopolish_call_methylation","{sample}.tsv"), sample=sample_list),
         expand(path.join("results", "nanopolishcomp_freq_meth_calculate","{sample}.bed"), sample=sample_list),
         expand(path.join("results", "nanopolishcomp_freq_meth_calculate","{sample}.tsv"), sample=sample_list),
@@ -89,11 +90,22 @@ rule samtools_filter:
     resources: mem_mb=config["samtools_filter"].get("mem", 1000)
     wrapper: "samtools_filter"
 
-rule nanopolish_call_methylation:
+rule nanopolish_index:
     input:
         fastq = rules.merge_filter_fastq.output,
         fast5 = get_fast5,
         seq_summary = get_seq_summary,
+    output: path.join("results","merge_filter_fastq","{sample}.fastq.index")
+    log: path.join("logs","nanopolish_index","{sample}.log")
+    threads: config["nanopolish_index"].get("threads", 2)
+    params: opt=config["nanopolish_index"].get("opt", ""),
+    resources: mem_mb=config["nanopolish_index"].get("mem", 1000)
+    wrapper: "nanopolish_index"
+
+rule nanopolish_call_methylation:
+    input:
+        fastq = rules.merge_filter_fastq.output,
+        fastq_index = rules.nanopolish_index.output,
         bam = rules.samtools_filter.output,
         ref = config["reference"],
     output: path.join("results", "nanopolish_call_methylation","{sample}.tsv")
