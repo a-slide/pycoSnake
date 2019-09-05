@@ -11,4 +11,4 @@ from snakemake.shell import shell
 opt = snakemake.params.get("opt", "")
 
 # Run shell commands
-shell("nanopolish call-methylation -t {snakemake.threads} {opt} -r {snakemake.input.fastq} -b {snakemake.input.bam} -g {snakemake.input.ref} > {snakemake.output} 2> {snakemake.log}")
+shell("nanopolish index -d {snakemake.input.fast5} {snakemake.input.fastq} -s {snakemake.input.seq_summary} -v 2> {snakemake.log}")

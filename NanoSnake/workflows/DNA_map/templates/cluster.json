@@ -1,0 +1,26 @@
+__default__:
+    n         : 1
+    memory    : 1000
+    queue     : "research-rh7",
+    resources : "\"select[mem>1000] rusage[mem=1000] span[hosts=1]\""
+    name      : "JOBNAME.{rule}.{wildcards}"
+    output    : "logs/cluster_{rule}.{wildcards}.o"
+    error     : "logs/cluster_{rule}.{wildcards}.e"
+
+fastqc:
+    n         : 6
+
+minimap2_index:
+    n         : 2
+    memory    : 15000
+    resources : "\"select[mem>15000] rusage[mem=15000] span[hosts=1]\""
+
+minimap2_align:
+    n         : 16
+    memory    : 15000
+    resources : "\"select[mem>16000] rusage[mem=16000] span[hosts=1]\""
+
+samtools_filter:
+    n         : 8
+    memory    : 10000
+    resources : "\"select[mem>10000] rusage[mem=10000] span[hosts=1]\""

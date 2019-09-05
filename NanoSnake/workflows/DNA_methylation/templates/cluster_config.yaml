@@ -34,11 +34,10 @@ samtools_filter:
     threads : 20
     mem : 20000
 
-nanopolish_call_methylation:
-    opt_nanopolish: "--methylation cpg"
-    opt_nanopolishcomp: "--min_depth 20"
-    threads: 20
-    mem: 20000
+nanopolish_index:
+    opt: ""
+    threads: 2
+    mem: 10000
 
 nanopolish_call_methylation:
     opt: "--methylation cpg"
