@@ -1,4 +1,4 @@
-{% set version = "0.0.0.20" %}
+{% set version = "0.0.0.21" %}
 {% set name = "NanoSnake" %}
 
 package:
@@ -28,8 +28,8 @@ requirements:
 test:
   commands:
     - NanoSnake --help
-    - NanoSnake DNA_methylation --help
-    - NanoSnake DNA_map --help
+    - NanoSnake RNA --help
+    - NanoSnake DNA --help
 
 about:
   home: "https://github.com/a-slide/NanoSnake"
