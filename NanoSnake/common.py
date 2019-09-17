@@ -5,7 +5,6 @@
 import os
 from collections import *
 
-
 #~~~~~~~~~~~~~~CUSTOM EXCEPTION CLASS~~~~~~~~~~~~~~#
 class NanoSnakeError (Exception):
     """ Basic exception class for nanocompore module """

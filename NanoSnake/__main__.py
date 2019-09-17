@@ -44,26 +44,19 @@ def main(args=None):
     subparsers = parser.add_subparsers (description="%(prog)s implements the following subcommands", dest="subcommands")
     subparsers.required = True
 
-    # DNA_methylation subparser
-    subparser_dmeth = subparsers.add_parser("DNA_methylation", description="Workflow to evaluate DNA methylation in Nanopore data using Nanopolish")
-    subparser_dmeth.set_defaults(func=DNA_methylation)
-    subparser_dmeth_IO = subparser_dmeth.add_argument_group("input/output options")
-    subparser_dmeth_IO.add_argument("--reference", "-r", default=None, type=str, help="Path to a Fasta reference file to be used for read mapping (required)")
-    subparser_dmeth_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
+    # DNA subparser
+    subparser_dna = subparsers.add_parser("DNA", description="Workflow for DNA Analysis of Nanopore data")
+    subparser_dna.set_defaults(func=DNA)
+    subparser_dna_IO = subparser_dna.add_argument_group("input/output options")
+    subparser_dna_IO.add_argument("--reference", "-r", default=None, type=str, help="Path to a Fasta reference file to be used for read mapping (required)")
+    subparser_dna_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
-    # DNA map subparser
-    subparser_dmap = subparsers.add_parser("DNA_map", description="Workflow aligning DNA on a genome + QC")
-    subparser_dmap.set_defaults(func=DNA_map)
-    subparser_dmap_IO = subparser_dmap.add_argument_group("input/output options")
-    subparser_dmap_IO.add_argument("--reference", "-r", default=None, type=str, help="Path to a Fasta reference file to be used for read mapping (required)")
-    subparser_dmap_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
-
-    # RNA_counts subparser
-    subparser_rcount = subparsers.add_parser("RNA_counts", description="Workflow aligning RNA on the transcriptome an generating estimated counts")
-    subparser_rcount.set_defaults(func=RNA_counts)
+    # RNA subparser
+    subparser_rna = subparsers.add_parser("RNA", description="Workflow for RNA Analysis of Nanopore data")
+    subparser_rna.set_defaults(func=RNA)
 
     # Add common group parsers
-    for sp in [subparser_dmeth, subparser_dmap, subparser_rcount]:
+    for sp in [subparser_dna, subparser_rna]:
         sp_IO = add_argument_group (sp, "input/output options")
         sp_IO.add_argument("--config", "-c", default=None, type=str, help="Snakemake configuration YAML file. Provide a cluster_config file instead if using cluster support (required)")
         sp_IO.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
@@ -151,13 +144,11 @@ def main(args=None):
     # Parse args and call subfunction
     args = parser.parse_args()
 
-    # Define overall verbose level
+    # Change overall verbose level if verbose or quiet
     if args.verbose:
-        logger.setLevel (logging.DEBUG)
+        logger.setLevel(logging.DEBUG)
     elif args.quiet:
-        logger.setLevel (logging.WARNING)
-    else:
-        logger.setLevel (logging.INFO)
+        logger.setLevel(logging.WARNING)
 
     # Generate template if required
     if args.generate_template:
@@ -167,23 +158,25 @@ def main(args=None):
 
     # Cluster stuff to simplify options
     if args.cluster:
-        logger.warning (f"STARTING WORKFLOW IN CLUSTER MODE")
+        logger.warning (f"INITIALISING WORKFLOW IN CLUSTER MODE")
         args.local_cores = args.cores
         args.cluster_config = args.config
     else:
-        logger.warning (f"STARTING WORKFLOW IN LOCAL MODE")
+        logger.warning (f"INITIALISING WORKFLOW IN LOCAL MODE")
 
     # Run workflow
     args.func(args)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~SUBPARSERS FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-def DNA_methylation (args):
+def DNA (args):
     """"""
     # Get and check config files
     logger.warning ("CHECKING CONFIGURATION FILES")
-    snakefile = os.path.join (WORKFLOW_DIR, "DNA_methylation", "snakefile.py")
+    snakefile = os.path.join (WORKFLOW_DIR, "DNA", "snakefile.py")
     configfile = get_config_fn (config=args.config)
+
+    ###### To be changed depending on optional steps ###### To be changed depending on optional steps ###### To be changed depending on optional steps
     sample_sheet = get_sample_sheet (sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq", "fast5", "seq_summary"])
     reference = get_reference (args.reference)
 
@@ -206,34 +199,7 @@ def DNA_methylation (args):
         wrapper_prefix=f"file:{WRAPPER_DIR}/",
         **kwargs)
 
-def DNA_map (args):
-    """"""
-    # Get and check config files
-    snakefile = os.path.join (WORKFLOW_DIR, "DNA_map", "snakefile.py")
-    configfile = get_config_fn (config=args.config)
-    sample_sheet = get_sample_sheet (sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq"])
-    reference = get_reference (args.reference)
-
-    # Store additionnal options to pass to snakemake
-    logger.info ("Build config dict for snakemake")
-    extra_config = {"reference": reference,"sample_sheet": sample_sheet}
-    logger.debug (extra_config)
-
-    # Filter other args option compatible with snakemake API
-    kwargs = filter_valid_snakemake_options (args)
-    logger.debug (kwargs)
-
-    # Run Snakemake through the API
-    logger.warning ("RUNING SNAKEMAKE PIPELINE")
-    snakemake (
-        snakefile=snakefile,
-        configfile=configfile,
-        config=extra_config,
-        use_conda=True,
-        wrapper_prefix=f"file:{WRAPPER_DIR}/",
-        **kwargs)
-
-def RNA_counts (args):
+def RNA (args):
     """"""
     pass
 
@@ -257,7 +223,6 @@ def filter_valid_snakemake_options (args):
 
 def generate_template (templates, workflow, outdir="./", overwrite=False):
     """"""
-
     templates_to_fname = {
         "sample_sheet":"sample_sheet.tsv" ,
         "config":"config.yaml",

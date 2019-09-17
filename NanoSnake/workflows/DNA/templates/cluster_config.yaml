@@ -1,16 +1,18 @@
 # Config file for lsf cluster
+# Optional rules can be commented to be skipped
+# Example command line for LSF:
+# bsub NanoSnake DNA -r ref.fa -s sample_sheet.tsv -c cluster_config.yaml --cores 1000 --nodes 10 \
+# --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} \
+# -R \"select[mem>{cluster.mem}] rusage[mem={cluster.mem}] span[hosts=1]\" -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
 
 # DEFAULT OPTIONS
-
 __default__:
     queue: "research-rh74"
     name : "nanosnake.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
-# MAIN PIPELINE CONFIG
-# These rules are the backbone of the pipeline
-
+# REQUIRED CORE RULES
 merge_filter_fastq:
     opt: "--min_len 100 --remove_duplicates"
     threads: 2
@@ -26,7 +28,7 @@ minimap2_index:
 
 minimap2_align:
     opt: "-x map-ont"
-    threads : 20
+    threads : 40
     mem : 40000
 
 samtools_filter:
@@ -34,6 +36,7 @@ samtools_filter:
     threads : 20
     mem : 20000
 
+# OPTIONAL DNA METHYLATION RULES
 nanopolish_index:
     opt: ""
     threads: 2
@@ -41,17 +44,15 @@ nanopolish_index:
 
 nanopolish_call_methylation:
     opt: "--methylation cpg"
-    threads: 20
+    threads: 40
     mem: 10000
 
 nanopolishcomp_freq_meth_calculate:
-    opt: "--min_depth 20"
+    opt: "--min_depth 10"
     threads: 2
     mem: 50000
 
-# OPTIONAL PIPELINE CONFIG
-# Removing a rule block will cause the rule not to be triggered
-
+# OPTIONAL QC RULES
 pycoqc:
     opt: "--filter_calibration"
     threads: 2
@@ -61,6 +62,7 @@ samtools_qc:
     threads: 1
     mem: 10000
 
+# OPTIONAL COVERAGE RULES
 genomecov:
     opt: "-bg"
     threads : 2

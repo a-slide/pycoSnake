@@ -1,6 +1,0 @@
-# sample_id: Name of the sample (without blank space)
-# fastq: Path to the sample fastq file. Can also be a list regular expression
-
-sample_id	fastq
-sample_1	data/basecall/s1/
-sample_2	data/basecall/s2/
