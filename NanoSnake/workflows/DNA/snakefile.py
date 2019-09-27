@@ -138,7 +138,8 @@ if "nanopolishcomp_freq_meth_calculate" in config:
 if "pycoqc" in config:
     rule pycoqc:
         input:
-            seq_summary = get_seq_summary
+            seq_summary = get_seq_summary,
+            bam = rules.minimap2_align.output
         output:
             html=path.join("results","pycoqc","{sample}_pycoqc.html"),
             json=path.join("results","pycoqc","{sample}_pycoqc.json")

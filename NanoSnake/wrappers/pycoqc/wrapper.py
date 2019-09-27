@@ -11,4 +11,4 @@ from snakemake.shell import shell
 opt = snakemake.params.get("opt", "")
 
 # Run shell command
-shell ("pycoQC {opt} --verbose -f {snakemake.input.seq_summary} -o {snakemake.output.html} -j {snakemake.output.json} &> {snakemake.log}")
+shell ("pycoQC {opt} --verbose -f {snakemake.input.seq_summary} -a {snakemake.input.bam} -o {snakemake.output.html} -j {snakemake.output.json} &> {snakemake.log}")
