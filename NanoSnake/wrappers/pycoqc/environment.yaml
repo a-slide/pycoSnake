@@ -6,4 +6,4 @@ channels:
 
 dependencies:
   - python=3.6
-  - pycoqc=2.5.0.7
+  - pycoqc=2.5.0.8
