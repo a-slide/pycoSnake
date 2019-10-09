@@ -6,4 +6,4 @@ dependencies:
   - python=3.6
   - pip=19.1
   - pip:
-    - NanopolishComp==0.6.11
+    - pycoMeth=0.0.3

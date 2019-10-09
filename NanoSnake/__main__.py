@@ -174,6 +174,11 @@ def DNA (args):
     # Get and check config files
     logger.warning ("CHECKING CONFIGURATION FILES")
     snakefile = os.path.join (WORKFLOW_DIR, "DNA", "snakefile.py")
+
+    # Do not go further if unlocking is required
+    if args.unlock:
+        snakemake (snakefile=snakefile, **kwargs)
+
     configfile = get_config_fn (config=args.config)
 
     ###### To be changed depending on optional steps ###### To be changed depending on optional steps ###### To be changed depending on optional steps

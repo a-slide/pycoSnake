@@ -40,8 +40,8 @@ rule all:
         expand(path.join("results","samtools_filter", "{sample}.bam"), sample=sample_list),
         expand(path.join("results","merge_filter_fastq","{sample}.fastq.index"), sample=sample_list) if "nanopolish_index" in config else [],
         expand(path.join("results", "nanopolish_call_methylation","{sample}.tsv"), sample=sample_list) if "nanopolish_call_methylation" in config else [],
-        expand(path.join("results", "nanopolishcomp_freq_meth_calculate","{sample}.bed"), sample=sample_list) if "nanopolishcomp_freq_meth_calculate" in config else [],
-        expand(path.join("results", "nanopolishcomp_freq_meth_calculate","{sample}.tsv"), sample=sample_list) if "nanopolishcomp_freq_meth_calculate" in config else [],
+        expand(path.join("results", "pycometh_aggregate","{sample}.bed"), sample=sample_list) if "pycometh_aggregate" in config else [],
+        expand(path.join("results", "pycometh_aggregate","{sample}.tsv"), sample=sample_list) if "pycometh_aggregate" in config else [],
         expand(path.join("results","pycoqc","{sample}_pycoqc.html"), sample=sample_list) if "pycoqc" in config else [],
         expand(path.join("results","pycoqc","{sample}_pycoqc.json"), sample=sample_list) if "pycoqc" in config else [],
         expand(path.join("results","samtools_qc","{sample}_samtools_stats.txt"), sample=sample_list) if "samtools_qc" in config else [],
@@ -119,19 +119,19 @@ if "nanopolish_call_methylation" in config:
         resources: mem_mb=config["nanopolish_call_methylation"].get("mem", 1000)
         wrapper: "nanopolish_call_methylation"
 
-if "nanopolishcomp_freq_meth_calculate" in config:
-    rule nanopolishcomp_freq_meth_calculate:
+if "pycometh_aggregate" in config:
+    rule pycometh_aggregate:
         input:
             call = rules.nanopolish_call_methylation.output,
             ref = config["reference"],
         output:
-            bed = path.join("results", "nanopolishcomp_freq_meth_calculate","{sample}.bed"),
-            tsv = path.join("results", "nanopolishcomp_freq_meth_calculate","{sample}.tsv"),
-        log: path.join("logs","nanopolishcomp_freq_meth_calculate","{sample}.log")
-        threads: config["nanopolishcomp_freq_meth_calculate"].get("threads", 1)
-        params: opt=config["nanopolishcomp_freq_meth_calculate"].get("opt", ""),
-        resources: mem_mb=config["nanopolishcomp_freq_meth_calculate"].get("mem", 1000)
-        wrapper: "nanopolishcomp_freq_meth_calculate"
+            bed = path.join("results", "pycometh_aggregate","{sample}.bed"),
+            tsv = path.join("results", "pycometh_aggregate","{sample}.tsv"),
+        log: path.join("logs","pycometh_aggregate","{sample}.log")
+        threads: config["pycometh_aggregate"].get("threads", 1)
+        params: opt=config["pycometh_aggregate"].get("opt", ""),
+        resources: mem_mb=config["pycometh_aggregate"].get("mem", 1000)
+        wrapper: "pycometh_aggregate"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~QC RULES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 

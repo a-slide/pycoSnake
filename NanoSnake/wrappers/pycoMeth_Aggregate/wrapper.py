@@ -21,5 +21,5 @@ if not os.access(index, os.R_OK):
     shell("echo '#### SAMTOOLS INDEX LOG####' >> {snakemake.log}")
     shell("samtools faidx {snakemake.input.ref} 2>> {snakemake.log}")
 
-shell("echo '#### NANOPOLISHCOMP FREQ_METH_CALCULATE LOG ####' >> {snakemake.log}")
-shell("NanopolishComp Freq_meth_calculate --verbose {opt} -i {snakemake.input.call} -f {index} -b {snakemake.output.bed} -t {snakemake.output.tsv} -s {sample_id} 2>> {snakemake.log}")
+shell("echo '#### PYCOMETH AGGREGATE LOG ####' >> {snakemake.log}")
+shell("pycoMeth Aggregate --verbose {opt} -i {snakemake.input.call} -f {index} -b {snakemake.output.bed} -t {snakemake.output.tsv} -s {sample_id} 2>> {snakemake.log}")

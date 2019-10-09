@@ -47,7 +47,7 @@ nanopolish_call_methylation:
     threads: 40
     mem: 10000
 
-nanopolishcomp_freq_meth_calculate:
+pycometh_aggregate:
     opt: "--min_depth 10"
     threads: 2
     mem: 50000
