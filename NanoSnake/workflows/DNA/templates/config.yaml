@@ -2,7 +2,7 @@
 
 # REQUIRED CORE RULES
 merge_filter_fastq:
-    opt: "--min_len 100 --remove_duplicates"
+    opt: "--min_len 100 --remove_duplicates --min_qual 5"
     threads: 1
     mem: 1000
 
@@ -12,7 +12,7 @@ minimap2_index:
     mem: 1000
 
 minimap2_align:
-    opt: "-x map-ont"
+    opt: "-x map-ont --MD -L"
     threads: 4
     mem: 1000
 
@@ -32,8 +32,14 @@ nanopolish_call_methylation:
     threads: 4
     mem: 1000
 
-nanopolishcomp_freq_meth_calculate:
-    opt: "--min_depth 20"
+pycometh_aggregate:
+    opt: "--min_depth 10"
+    threads: 1
+    mem: 1000
+
+# OPTIONAL STRUCTURAL VARIANT RULES
+sniffles:
+    opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
     threads: 1
     mem: 1000
 
