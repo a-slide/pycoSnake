@@ -2,7 +2,7 @@
 
 # REQUIRED CORE RULES
 merge_filter_fastq:
-    opt: "--min_len 100 --remove_duplicates"
+    opt: "--min_len 100 --remove_duplicates --min_qual 5"
     threads: 1
     mem: 1000
 
@@ -12,7 +12,7 @@ minimap2_index:
     mem: 1000
 
 minimap2_align:
-    opt: "-x map-ont"
+    opt: "-x map-ont --MD -L"
     threads: 4
     mem: 1000
 

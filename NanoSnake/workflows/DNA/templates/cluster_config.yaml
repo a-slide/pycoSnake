@@ -14,7 +14,7 @@ __default__:
 
 # REQUIRED CORE RULES
 merge_filter_fastq:
-    opt: "--min_len 100 --remove_duplicates"
+    opt: "--min_len 100 --remove_duplicates --min_qual 5"
     threads: 2
     mem: 5000
 
@@ -27,7 +27,7 @@ minimap2_index:
     error : "logs/{rule}/bsub_stderr.log"
 
 minimap2_align:
-    opt: "-x map-ont"
+    opt: "-x map-ont --MD -L"
     threads : 40
     mem : 40000
 
