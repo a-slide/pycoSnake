@@ -52,6 +52,12 @@ pycometh_aggregate:
     threads: 2
     mem: 50000
 
+# OPTIONAL STRUCTURAL VARIANT RULES
+sniffles:
+    opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
+    threads: 5
+    mem: 10000
+
 # OPTIONAL QC RULES
 pycoqc:
     opt: "--filter_calibration"

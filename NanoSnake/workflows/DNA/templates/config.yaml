@@ -33,7 +33,13 @@ nanopolish_call_methylation:
     mem: 1000
 
 pycometh_aggregate:
-    opt: "--min_depth 20"
+    opt: "--min_depth 10"
+    threads: 1
+    mem: 1000
+
+# OPTIONAL STRUCTURAL VARIANT RULES
+sniffles:
+    opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
     threads: 1
     mem: 1000
 

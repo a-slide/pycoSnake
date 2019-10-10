@@ -42,6 +42,7 @@ rule all:
         expand(path.join("results", "nanopolish_call_methylation","{sample}.tsv"), sample=sample_list) if "nanopolish_call_methylation" in config else [],
         expand(path.join("results", "pycometh_aggregate","{sample}.bed"), sample=sample_list) if "pycometh_aggregate" in config else [],
         expand(path.join("results", "pycometh_aggregate","{sample}.tsv"), sample=sample_list) if "pycometh_aggregate" in config else [],
+        expand(path.join("results", "sniffles","{sample}.vcf"), sample=sample_list) if "sniffles" in config else [],
         expand(path.join("results","pycoqc","{sample}_pycoqc.html"), sample=sample_list) if "pycoqc" in config else [],
         expand(path.join("results","pycoqc","{sample}_pycoqc.json"), sample=sample_list) if "pycoqc" in config else [],
         expand(path.join("results","samtools_qc","{sample}_samtools_stats.txt"), sample=sample_list) if "samtools_qc" in config else [],
@@ -132,6 +133,18 @@ if "pycometh_aggregate" in config:
         params: opt=config["pycometh_aggregate"].get("opt", ""),
         resources: mem_mb=config["pycometh_aggregate"].get("mem", 1000)
         wrapper: "pycometh_aggregate"
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~QC RULES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
+if "sniffles" in config:
+    rule sniffles:
+        input: rules.minimap2_align.output
+        output: path.join("results", "sniffles","{sample}.vcf")
+        log: path.join("logs","sniffles","{sample}.log")
+        threads: config["sniffles"].get("threads", 1)
+        params: opt=config["sniffles"].get("opt", ""),
+        resources: mem_mb=config["sniffles"].get("mem", 1000)
+        wrapper: "sniffles"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~QC RULES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
