@@ -13,8 +13,8 @@ __default__:
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 # REQUIRED CORE RULES
-merge_filter_fastq:
-    opt: "--min_len 100 --remove_duplicates --min_qual 5"
+pbt_fastq_filter:
+    opt: "--remove_duplicates --min_len 100 --min_qual 7"
     threads: 2
     mem: 5000
 
@@ -31,10 +31,10 @@ minimap2_align:
     threads : 40
     mem : 40000
 
-samtools_filter:
-    opt: "-q 10 -F 3844"
-    threads : 20
-    mem : 20000
+pbt_alignment_filter:
+    opt: "--min_align_len 100 --min_freq_identity 0.7 --skip_unmapped --skip_secondary --skip_supplementary"
+    threads : 2
+    mem : 5000
 
 # OPTIONAL DNA METHYLATION RULES
 nanopolish_index:
@@ -60,9 +60,9 @@ sniffles:
 
 # OPTIONAL QC RULES
 pycoqc:
-    opt: "--filter_calibration"
+    opt: "--filter_calibration --filter_duplicated --min_pass_len 100 --min_pass_qual 7"
     threads: 2
-    mem: 10000
+    mem: 20000
 
 samtools_qc:
     threads: 1

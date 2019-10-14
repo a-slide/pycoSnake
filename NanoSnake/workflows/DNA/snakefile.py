@@ -34,11 +34,11 @@ def get_seq_summary (wildcards):
 
 rule all:
     input:
-        expand(path.join("results","merge_filter_fastq","{sample}.fastq"), sample=sample_list),
+        expand(path.join("results","pbt_fastq_filter","{sample}.fastq"), sample=sample_list),
         expand(path.join("results","minimap2_index","ref.mmi")),
         expand(path.join("results","minimap2_align", "{sample}.bam"), sample=sample_list),
-        expand(path.join("results","samtools_filter", "{sample}.bam"), sample=sample_list),
-        expand(path.join("results","merge_filter_fastq","{sample}.fastq.index"), sample=sample_list) if "nanopolish_index" in config else [],
+        expand(path.join("results","pbt_alignment_filter", "{sample}.bam"), sample=sample_list),
+        expand(path.join("results","pbt_fastq_filter","{sample}.fastq.index"), sample=sample_list) if "nanopolish_index" in config else [],
         expand(path.join("results", "nanopolish_call_methylation","{sample}.tsv"), sample=sample_list) if "nanopolish_call_methylation" in config else [],
         expand(path.join("results", "pycometh_aggregate","{sample}.bed"), sample=sample_list) if "pycometh_aggregate" in config else [],
         expand(path.join("results", "pycometh_aggregate","{sample}.tsv"), sample=sample_list) if "pycometh_aggregate" in config else [],
@@ -53,14 +53,14 @@ rule all:
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CORE RULES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
-rule merge_filter_fastq:
+rule pbt_fastq_filter:
     input: get_fastq
-    output: path.join("results","merge_filter_fastq","{sample}.fastq")
-    log: path.join("logs","merge_filter_fastq","{sample}.log")
-    threads: config["merge_filter_fastq"].get("threads", 1)
-    params: opt=config["merge_filter_fastq"].get("opt", "")
-    resources: mem_mb=config["merge_filter_fastq"].get("mem", 1000)
-    wrapper: "merge_filter_fastq"
+    output: path.join("results","pbt_fastq_filter","{sample}.fastq")
+    log: path.join("logs","pbt_fastq_filter","{sample}.log")
+    threads: config["pbt_fastq_filter"].get("threads", 1)
+    params: opt=config["pbt_fastq_filter"].get("opt", "")
+    resources: mem_mb=config["pbt_fastq_filter"].get("mem", 1000)
+    wrapper: "pbt_fastq_filter"
 
 rule minimap2_index:
     input: config["reference"]
@@ -74,7 +74,7 @@ rule minimap2_index:
 rule minimap2_align:
     input:
         index=rules.minimap2_index.output,
-        fastq=rules.merge_filter_fastq.output
+        fastq=rules.pbt_fastq_filter.output
     output: path.join("results","minimap2_align","{sample}.bam")
     log: path.join("logs","minimap2_align","{sample}.log")
     threads: config["minimap2_align"].get("threads", 4)
@@ -82,24 +82,24 @@ rule minimap2_align:
     resources: mem_mb=config["minimap2_align"].get("mem", 1000)
     wrapper: "minimap2_align"
 
-rule samtools_filter:
+rule pbt_alignment_filter:
     input: rules.minimap2_align.output
-    output: path.join("results","samtools_filter","{sample}.bam")
-    log: path.join("logs","samtools_filter","{sample}.log")
-    threads: config["samtools_filter"].get("threads", 2)
-    params: opt=config["samtools_filter"].get("opt", "")
-    resources: mem_mb=config["samtools_filter"].get("mem", 1000)
-    wrapper: "samtools_filter"
+    output: path.join("results","pbt_alignment_filter","{sample}.bam")
+    log: path.join("logs","pbt_alignment_filter","{sample}.log")
+    threads: config["pbt_alignment_filter"].get("threads", 1)
+    params: opt=config["pbt_alignment_filter"].get("opt", "")
+    resources: mem_mb=config["pbt_alignment_filter"].get("mem", 1000)
+    wrapper: "pbt_alignment_filter"
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DNA METHYLATION RULES~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 if "nanopolish_index" in config:
     rule nanopolish_index:
         input:
-            fastq = rules.merge_filter_fastq.output,
+            fastq = rules.pbt_fastq_filter.output,
             fast5 = get_fast5,
             seq_summary = get_seq_summary,
-        output: path.join("results","merge_filter_fastq","{sample}.fastq.index")
+        output: path.join("results","pbt_fastq_filter","{sample}.fastq.index")
         log: path.join("logs","nanopolish_index","{sample}.log")
         threads: config["nanopolish_index"].get("threads", 2)
         params: opt=config["nanopolish_index"].get("opt", ""),
@@ -109,9 +109,9 @@ if "nanopolish_index" in config:
 if "nanopolish_call_methylation" in config:
     rule nanopolish_call_methylation:
         input:
-            fastq = rules.merge_filter_fastq.output,
+            fastq = rules.pbt_fastq_filter.output,
             fastq_index = rules.nanopolish_index.output,
-            bam = rules.samtools_filter.output,
+            bam = rules.pbt_alignment_filter.output,
             ref = config["reference"],
         output: path.join("results", "nanopolish_call_methylation","{sample}.tsv")
         log: path.join("logs","nanopolish_call_methylation","{sample}.log")
@@ -179,7 +179,7 @@ if "samtools_qc" in config:
 
 if "genomecov" in config:
     rule genomecov:
-        input: rules.samtools_filter.output
+        input: rules.pbt_alignment_filter.output
         output: path.join("results","genomecov","{sample}.bedgraph")
         log: path.join("logs","genomecov","{sample}.log")
         threads: config["genomecov"].get("threads", 1)
@@ -190,7 +190,7 @@ if "genomecov" in config:
 if "igvtools_count" in config:
     rule igvtools_count:
         input:
-            bam = rules.samtools_filter.output,
+            bam = rules.pbt_alignment_filter.output,
             ref = config["reference"],
         output: path.join("results","igvtools_count","{sample}.tdf")
         log: path.join("logs","igvtools_count","{sample}.log")

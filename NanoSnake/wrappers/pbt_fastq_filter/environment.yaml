@@ -1,9 +1,9 @@
 channels:
   - defaults
+  - aleg
   - bioconda
   - conda-forge
-  - aleg
 
 dependencies:
   - python=3.6
-  - pycoqc=2.5.0.14
+  - pyBioTools=0.2.0.1

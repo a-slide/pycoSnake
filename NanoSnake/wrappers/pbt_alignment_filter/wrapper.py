@@ -5,9 +5,11 @@ __license__ = "MIT"
 
 # Imports
 from snakemake.shell import shell
+import tempfile
+import os
 
 # Get optional args if unavailable
 opt = snakemake.params.get("opt", "")
 
 # Run shell command
-shell("pyBioTools Fastq filter_reads -s {snakemake.input[0]} -d {snakemake.output[0]} {opt} --verbose &> {snakemake.log}")
+shell("pyBioTools Alignment Filter -i {snakemake.input[0]} -o {snakemake.output[0]} {opt} --verbose &> {snakemake.log}")
