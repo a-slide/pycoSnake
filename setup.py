@@ -5,7 +5,7 @@ from setuptools import setup
 
 # Define package info
 name= "NanoSnake"
-version = '0.0.1.0'
+version = '0.0.1.1'
 description = "NanoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
 with open("README.md", "r") as fh:
     long_description = fh.read()
