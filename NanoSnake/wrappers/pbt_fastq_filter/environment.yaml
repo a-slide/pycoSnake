@@ -6,4 +6,4 @@ channels:
 
 dependencies:
   - python=3.6
-  - pyBioTools=0.2.0.1
+  - pyBioTools=0.2.0.2
