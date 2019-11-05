@@ -171,17 +171,11 @@ def main(args=None):
 
 def DNA (args):
     """"""
+
     # Get and check config files
     logger.warning ("CHECKING CONFIGURATION FILES")
     snakefile = os.path.join (WORKFLOW_DIR, "DNA", "snakefile.py")
-
-    # Do not go further if unlocking is required
-    if args.unlock:
-        snakemake (snakefile=snakefile, **kwargs)
-
     configfile = get_config_fn (config=args.config)
-
-    ###### To be changed depending on optional steps ###### To be changed depending on optional steps ###### To be changed depending on optional steps
     sample_sheet = get_sample_sheet (sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq", "fast5", "seq_summary"])
     reference = get_reference (args.reference)
 
