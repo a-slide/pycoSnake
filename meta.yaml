@@ -1,4 +1,4 @@
-{% set version = '0.0.1.3' %}
+{% set version = '0.0.1.4' %}
 {% set name = "NanoSnake" %}
 
 package:
