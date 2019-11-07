@@ -12,10 +12,6 @@
 
 ---
 
-**UNSTABLE PACKAGE UNDER ACTIVE DEVELOPMENT**
-
----
-
 ## Authors
 
 * Adrien Leger (@a-slide)
@@ -51,9 +47,16 @@ conda update nanosnake -c aleg
 
 ## Usage
 
-At the moment there are 2 workflows available in NanoSnake:
-* DNA_map
-* DNA_methylation
+At the moment there is only 1 workflow available in NanoSnake:
+
+* DNA : Analyse Basecalled Nanopore sequencing data.
+    * Fastq merging and filtering
+    * Alignment with minimap2
+    * Alignment cleaning
+    * Generate coverage plots IGV and bedgraph (optional)
+    * Run Nanopore QC with pycoQC (optional)
+    * Run methylation analysing with Nanoplolish + pycoMeth (optional)
+    * Run SV analysis with Sniffles + pycoSV (optional)
 
 ## Configure workflow
 
@@ -75,7 +78,6 @@ The `config.yaml` can be modified and passed to NanoSnake (`--config`). It is ge
 
 The `cluster_config.yaml` can be modified and passed to NanoSnake (`--cluster_config`). Use the file instead of config.yaml if you are executing the pipeline in a cluster environment. By default the file is for an LSF cluster, but it can be modified for other HPC platfoms.  
 
-
 ### Step 4: Execute workflow
 
 Call NanoSnake and choose your workflow
@@ -86,9 +88,9 @@ conda activate NanoSnake
 NanoSnake {WORKFLOW NAME} {OPTIONS}
 ```
 
-#### Example for the DNA_methylation workflow
+#### Example for the DNA workflow
 
-Usage on a local machine
+**Usage on a local machine**
 
 ```
 conda activate NanoSnake
@@ -96,12 +98,18 @@ conda activate NanoSnake
 NanoSnake DNA_methylation -r ref.fa  -s sample_sheet.tsv -c config.yaml --cores 10
 ```
 
-Usage in an LSF cluster environment
+**Usage in an LSF cluster environment**
 
 Use the cluster_config file instead of the normal config
 
 ```
 conda activate NanoSnake
 
-NanoSnake DNA_methylation  -r ref.fa  -s sample_sheet.tsv -c cluster_config.yaml --cores 100 --nodes 5 --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -R \"select[mem>{cluster.mem}] rusage[mem={cluster.mem}] span[hosts=1]\" -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
+NanoSnake DNA_methylation  \
+    -r ref.fa \
+    -s sample_sheet.tsv \
+    -c cluster_config.yaml \
+    --cores 100 \
+    --nodes 5 \
+    --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
 ```
