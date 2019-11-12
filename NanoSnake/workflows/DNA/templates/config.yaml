@@ -1,65 +1,51 @@
-# Optional rules can be commented to be skipped
+# All the rules accept the following parameters: opt, threads, mem
 
-# REQUIRED CORE RULES
+# Configuration file version (do not change)
+config_version: 2
+
+# MAIN RULES
 pbt_fastq_filter:
     opt: "--remove_duplicates --min_len 100 --min_qual 7"
-    threads: 1
-    mem: 1000
 
 minimap2_index:
     opt: ""
-    threads: 1
-    mem: 1000
 
 minimap2_align:
-    opt: "-x map-ont --MD -L"
+    opt: "-x map-ont -L"
     threads: 4
-    mem: 1000
 
 pbt_alignment_filter:
     opt: "--min_align_len 100 --min_freq_identity 0.7 --skip_unmapped --skip_secondary --skip_supplementary"
-    threads: 1
-    mem: 1000
 
-# OPTIONAL DNA METHYLATION RULES
+# OPTIONAL DNA METHYLATION RULES, can be commented to be skipped
 nanopolish_index:
     opt: ""
-    threads: 1
-    mem: 1000
 
 nanopolish_call_methylation:
     opt: "--methylation cpg"
     threads: 4
-    mem: 1000
 
 pycometh_aggregate:
     opt: "--min_depth 10"
-    threads: 1
-    mem: 1000
 
-# OPTIONAL STRUCTURAL VARIANT RULES
+# OPTIONAL STRUCTURAL VARIANT RULES, can be commented to be skipped
+ngmlr:
+    opt: "-x ont"
+    threads: 4
+
 sniffles:
     opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
-    threads: 1
-    mem: 1000
 
-# OPTIONAL QC RULES
+# OPTIONAL QC RULES, can be commented to be skipped
 pycoqc:
     opt: "--filter_calibration --filter_duplicated --min_pass_len 100 --min_pass_qual 7"
-    threads: 2
-    mem: 1000
 
 samtools_qc:
-    threads: 1
-    mem: 1000
+    opt: ""
 
-# OPTIONAL COVERAGE RULES
+# OPTIONAL COVERAGE RULES, can be commented to be skipped
 genomecov:
     opt: "-bg"
-    threads: 1
-    mem: 1000
 
 igvtools_count:
     opt: "-w 10"
-    threads: 1
-    mem: 1000
