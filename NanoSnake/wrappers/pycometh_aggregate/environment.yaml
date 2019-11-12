@@ -6,4 +6,4 @@ dependencies:
   - python=3.6
   - pip=19.1
   - pip:
-    - pycoMeth==0.1.1
+    - pycoMeth==0.1.2
