@@ -1,9 +1,10 @@
 # Config file for lsf cluster
-# Optional rules can be commented to be skipped
 # Example command line for LSF:
 # bsub NanoSnake DNA -r ref.fa -s sample_sheet.tsv -c cluster_config.yaml --cores 1000 --nodes 10 \
-# --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} \
-# -R \"select[mem>{cluster.mem}] rusage[mem={cluster.mem}] span[hosts=1]\" -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
+# --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
+
+# Configuration file version (do not change)
+config_version: 2
 
 # DEFAULT OPTIONS
 __default__:
@@ -12,7 +13,7 @@ __default__:
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
-# REQUIRED CORE RULES
+# MAIN RULES
 pbt_fastq_filter:
     opt: "--remove_duplicates --min_len 100 --min_qual 7"
     threads: 2
@@ -27,7 +28,7 @@ minimap2_index:
     error : "logs/{rule}/bsub_stderr.log"
 
 minimap2_align:
-    opt: "-x map-ont --MD -L"
+    opt: "-x map-ont -L"
     threads : 40
     mem : 40000
 
@@ -36,7 +37,7 @@ pbt_alignment_filter:
     threads : 2
     mem : 5000
 
-# OPTIONAL DNA METHYLATION RULES
+# OPTIONAL DNA METHYLATION RULES, can be commented to be skippe
 nanopolish_index:
     opt: ""
     threads: 2
@@ -52,23 +53,26 @@ pycometh_aggregate:
     threads: 2
     mem: 50000
 
-# OPTIONAL STRUCTURAL VARIANT RULES
+# OPTIONAL STRUCTURAL VARIANT RULES, can be commented to be skipped
+ngmlr:
+    opt: "-x ont"
+    threads: 4
 sniffles:
     opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
     threads: 5
     mem: 10000
 
-# OPTIONAL QC RULES
+# OPTIONAL QC RULES, can be commented to be skipped
 pycoqc:
     opt: "--filter_calibration --filter_duplicated --min_pass_len 100 --min_pass_qual 7"
-    threads: 2
+    threads: 1
     mem: 20000
 
 samtools_qc:
     threads: 1
     mem: 10000
 
-# OPTIONAL COVERAGE RULES
+# OPTIONAL COVERAGE RULES, can be commented to be skipped
 genomecov:
     opt: "-bg"
     threads : 2

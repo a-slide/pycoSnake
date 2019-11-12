@@ -3,5 +3,4 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - python=3.6
   - bedtools=2.28.0

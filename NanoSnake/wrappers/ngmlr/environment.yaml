@@ -2,5 +2,7 @@ channels:
   - defaults
   - bioconda
   - conda-forge
+
 dependencies:
-  - nanopolish=0.11.1
+  - ngmlr==0.2.7
+  - samtools==1.9

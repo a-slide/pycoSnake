@@ -225,7 +225,6 @@ def generate_template (templates, workflow, outdir="./", overwrite=False):
     templates_to_fname = {
         "sample_sheet":"sample_sheet.tsv" ,
         "config":"config.yaml",
-        "multiqc_config":"multiqc_config.yaml",
         "cluster_config":"cluster_config.yaml"}
 
     for template, fname in templates_to_fname.items():

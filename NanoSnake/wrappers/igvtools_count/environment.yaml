@@ -3,7 +3,6 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - python=3.6
   - samtools==1.9
   - openjdk=11.0.1
   - igvtools
