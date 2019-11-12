@@ -15,6 +15,7 @@ class NanoSnakeWarning (Warning):
     pass
 
 #~~~~~~~~~~~~~~FUNCTIONS~~~~~~~~~~~~~~#
+
 def mkdir (fn, exist_ok=False):
     """ Create directory recursivelly. Raise IO error if path exist or if error at creation """
     try:
@@ -84,3 +85,21 @@ def jhelp (f:"python function or method"):
 
         # Display in Jupyter
         display (Markdown(s))
+
+#~~~~~~~~~~~~~~SNAKEMAKE HELPER FUNCTIONS~~~~~~~~~~~~~~#
+
+def all_in (collection, val_list):
+    """"""
+    for val in val_list:
+        if not val in collection:
+            return False
+    return True
+
+def get_threads (config, rule_name, default=1):
+    return config[rule_name].get("threads", default)
+
+def get_opt (config, rule_name, default=""):
+    return config[rule_name].get("opt", default)
+
+def get_mem (config, rule_name, default=1000):
+    return config[rule_name].get("mem", default)
