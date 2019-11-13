@@ -56,7 +56,9 @@ pycometh_aggregate:
 # OPTIONAL STRUCTURAL VARIANT RULES, can be commented to be skipped
 ngmlr:
     opt: "-x ont"
-    threads: 4
+    threads: 40
+    mem: 10000
+
 sniffles:
     opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
     threads: 5
