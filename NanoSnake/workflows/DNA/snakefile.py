@@ -166,7 +166,7 @@ if run_meth_calling:
         output: pj(res_dir[rule_name],"{sample}.tsv")
         log: pj(log_dir[rule_name],"{sample}.log")
         threads: get_threads(config, rule_name, 4)
-        params: opt=get_opt(config, rule_name),
+        params: opt=get_opt(config, rule_name)
         resources: mem_mb=get_mem(config, rule_name)
         wrapper: "nanopolish_call_methylation"
 
@@ -180,7 +180,7 @@ if run_meth_calling:
             tsv = pj(res_dir[rule_name],"{sample}.tsv"),
         log: pj(log_dir[rule_name],"{sample}.log")
         threads: get_threads(config, rule_name)
-        params: opt=get_opt(config, rule_name),
+        params: opt=get_opt(config, rule_name)
         resources: mem_mb=get_mem(config, rule_name)
         wrapper: "pycometh_aggregate"
 
@@ -196,7 +196,7 @@ if run_SV_calling:
         output: pj(res_dir[rule_name],"{sample}.bam")
         log: pj(log_dir[rule_name],"{sample}.log")
         threads: get_threads(config, rule_name, 4)
-        params: opt=get_opt(config, rule_name),
+        params: opt=get_opt(config, rule_name)
         resources: mem_mb=get_mem(config, rule_name)
         wrapper: "ngmlr"
 
@@ -206,7 +206,7 @@ if run_SV_calling:
         output: pj(res_dir[rule_name],"{sample}.vcf")
         log: pj(log_dir[rule_name],"{sample}.log")
         threads: get_threads(config, rule_name)
-        params: opt=get_opt(config, rule_name),
+        params: opt=get_opt(config, rule_name)
         resources: mem_mb=get_mem(config, rule_name)
         wrapper: "sniffles"
 
