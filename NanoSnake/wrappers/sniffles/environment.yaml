@@ -1,7 +1,0 @@
-channels:
-  - defaults
-  - bioconda
-  - conda-forge
-
-dependencies:
-  - sniffles==1.0.11

@@ -1,13 +1,17 @@
 # Config file for lsf cluster
-# Example command line for LSF:
-# bsub NanoSnake DNA -r ref.fa -s sample_sheet.tsv -c cluster_config.yaml --cores 1000 --nodes 10 \
-# --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
 
 # Configuration file version (do not change)
-config_version: 2
+config_version: 3
 
-# DEFAULT OPTIONS
+# cluster command for lsf
+cluster_cores: 1000
+cluster_nodes: 20
+cluster_cmd: "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
+
+# DEFAULT CLUSTER OPTIONS
 __default__:
+    threads: 2
+    mem: 5000
     queue: "research-rh74"
     name : "nanosnake.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
@@ -16,12 +20,9 @@ __default__:
 # MAIN RULES
 pbt_fastq_filter:
     opt: "--remove_duplicates --min_len 100 --min_qual 7"
-    threads: 2
-    mem: 5000
 
 minimap2_index:
     opt: ""
-    threads : 2
     mem : 20000
     name : "nanosnake.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
@@ -34,13 +35,10 @@ minimap2_align:
 
 pbt_alignment_filter:
     opt: "--min_align_len 100 --min_freq_identity 0.7 --skip_unmapped --skip_secondary --skip_supplementary"
-    threads : 2
-    mem : 5000
 
 # OPTIONAL DNA METHYLATION RULES, can be commented to be skippe
 nanopolish_index:
     opt: ""
-    threads: 2
     mem: 10000
 
 nanopolish_call_methylation:
@@ -48,37 +46,50 @@ nanopolish_call_methylation:
     threads: 40
     mem: 10000
 
-pycometh_aggregate:
+pycometh_cpg_aggregate:
     opt: "--min_depth 10"
-    threads: 2
     mem: 50000
+
+# pycometh_cpg_methcomp:
+#     opt: ""
+#
+# pycometh_interval_aggregate:
+#     opt: ""
+#
+# pycometh_interval_methcomp:
+#     opt: ""
 
 # OPTIONAL STRUCTURAL VARIANT RULES, can be commented to be skipped
 ngmlr:
     opt: "-x ont"
-    threads: 4
+    threads: 40
+    mem: 10000
+
 sniffles:
     opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
     threads: 5
     mem: 10000
 
+# pycosv_filter_variants:
+#     opt: ""
+#
+# pycosv_varcomp:
+#     opt: ""
+
 # OPTIONAL QC RULES, can be commented to be skipped
 pycoqc:
     opt: "--filter_calibration --filter_duplicated --min_pass_len 100 --min_pass_qual 7"
-    threads: 1
     mem: 20000
 
 samtools_qc:
-    threads: 1
+    opt: ""
     mem: 10000
 
 # OPTIONAL COVERAGE RULES, can be commented to be skipped
-genomecov:
+bedtools_genomecov:
     opt: "-bg"
-    threads : 2
     mem: 20000
 
 igvtools_count:
     opt: "-w 10"
-    threads: 1
     mem: 20000
