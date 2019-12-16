@@ -1,4 +1,4 @@
-{% set version = '0.0.2.1' %}
+{% set version = '0.0.2.2' %}
 {% set name = "NanoSnake" %}
 
 package:
@@ -22,9 +22,9 @@ requirements:
     - ripgrep=11.0.1
   run:
     - python>=3.6
-    - snakemake>=5.5.4
-    - pandas>=0.24.1
-    - loguru=0.4.0
+    - snakemake=5.5.4
+    - pandas=0.24.1
+    - loguru>=0.3.2
 
 test:
   commands:

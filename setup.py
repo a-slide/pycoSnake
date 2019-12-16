@@ -5,7 +5,7 @@ from setuptools import setup
 
 # Define package info
 name= "NanoSnake"
-version = '0.0.2.1'
+version = '0.0.2.2'
 description = "NanoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -30,7 +30,7 @@ setup(
     install_requires = [
         'pandas==0.24.1',
         'snakemake==5.5.4',
-        "loguru==0.4.0"],
+        "loguru>=0.3.2"],
     packages = [name],
     package_dir = {name: name},
     package_data = {name: [
