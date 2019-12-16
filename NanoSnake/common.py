@@ -3,15 +3,23 @@
 #~~~~~~~~~~~~~~IMPORTS~~~~~~~~~~~~~~#
 # Standard library imports
 import os
+import sys
 from collections import *
+import shutil
+import yaml
+import inspect
+
+# Third party lib
+import pandas as pd
+from loguru import logger as log
 
 #~~~~~~~~~~~~~~CUSTOM EXCEPTION CLASS~~~~~~~~~~~~~~#
 class NanoSnakeError (Exception):
-    """ Basic exception class for nanocompore module """
+    """ Basic exception class"""
     pass
 
 class NanoSnakeWarning (Warning):
-    """ Basic Warning class for nanocompore module """
+    """ Basic Warning class"""
     pass
 
 #~~~~~~~~~~~~~~FUNCTIONS~~~~~~~~~~~~~~#
@@ -26,6 +34,19 @@ def mkdir (fn, exist_ok=False):
 def access_file (fn, **kwargs):
     """ Check if the file is readable """
     return os.path.isfile (fn) and os.access (fn, os.R_OK)
+
+def get_logging_level(quiet=False, verbose=False):
+    """return logging level depending on verbosity args"""
+    if quiet:
+        return "WARNING"
+    if verbose:
+        return "DEBUG"
+    return "INFO"
+
+def set_log_level(quiet=False, verbose=False):
+    level = get_logging_level(quiet,verbose)
+    log.remove()
+    log.add (sys.stderr, level=level)
 
 def jhelp (f:"python function or method"):
     """
@@ -96,10 +117,121 @@ def all_in (collection, val_list):
     return True
 
 def get_threads (config, rule_name, default=1):
-    return config[rule_name].get("threads", default)
+    try:
+        return config[rule_name]["threads"]
+    except (KeyError, TypeError):
+        return default
 
 def get_opt (config, rule_name, default=""):
-    return config[rule_name].get("opt", default)
+    try:
+        return config[rule_name]["opt"]
+    except KeyError:
+        return default
 
 def get_mem (config, rule_name, default=1000):
-    return config[rule_name].get("mem", default)
+    try:
+        return config[rule_name]["mem"]
+    except KeyError:
+        return default
+
+def get_output (out, rule_name, val):
+    try:
+        return out[rule_name][val]
+    except KeyError:
+        return val
+
+#~~~~~~~~~~~~~~MAIN HELPER FUNCTIONS~~~~~~~~~~~~~~#
+
+def add_argument_group (parser, title):
+    """Add group only is it doesn't exist yet"""
+    for group in parser._action_groups:
+        if group.title == title:
+            return group
+    return parser.add_argument_group(title)
+
+def unlock_dir (workdir):
+    """"""
+    lockdir = os.path.join(workdir, ".snakemake", "locks")
+    try:
+        shutil.rmtree(lockdir)
+    except:
+        raise NanoSnakeError ("Cannot remove lock")
+
+def generate_template (workflow_dir, templates, workflow, workdir="./", overwrite=False, verbose=False, quiet=False):
+    """"""
+    set_log_level(quiet=quiet, verbose=verbose)
+
+    templates_to_fname = {
+        "sample_sheet":"sample_sheet.tsv" ,
+        "config":"config.yaml",
+        "cluster_config":"cluster_config.yaml"}
+
+    for template, fname in templates_to_fname.items():
+        if template in templates or "all" in templates:
+
+            # Create src path and test readability
+            src_fn = os.path.join (workflow_dir, workflow, "templates", fname)
+
+            # Create destination file name and test if it exists
+            dest_fn = os.path.join(workdir, fname)
+            if not os.path.isfile(dest_fn) or overwrite:
+                shutil.copy2 (src_fn, dest_fn)
+                log.info(f"{template} file created in working directory ")
+            else:
+                log.info(f"{template} file already exist in working directory. Use --overwrite_template to overwrite existing file")
+
+def get_yaml_val(yaml_fn, val_name, default):
+    """"""
+    try:
+        with open(config) as fp:
+            y = yaml.load(fp, Loader=yaml.FullLoader)
+            return y[val_name]
+    except:
+        return default
+
+def get_config_fn (config):
+    """"""
+    # Try loading the config file
+    try:
+        with open(config) as fp:
+            yaml.load(fp, Loader=yaml.FullLoader)
+    except:
+        raise NanoSnakeError ("The provided config file is not readeable or not a valid yaml file")
+
+    return os.path.abspath(config)
+
+def get_snakefile_fn (workflow_dir, workflow):
+    """"""
+    snakefile = os.path.join (workflow_dir, workflow, "snakefile.py")
+    if not access_file(snakefile):
+        raise NanoSnakeError ("The snakefile file is not readeable")
+    return os.path.abspath(snakefile)
+
+def get_sample_sheet (sample_sheet, required_fields=[]):
+    """"""
+    if not sample_sheet:
+        raise NanoSnakeError ("A sample_sheet file (--sample_sheet) is required to run the workflow")
+    try:
+        sample_df = pd.read_csv (sample_sheet, comment="#", skip_blank_lines=True, sep="\t")
+    except:
+        raise NanoSnakeError ("Cannot open provided sample sheet")
+    for f in required_fields:
+        if not f in sample_df.columns:
+            raise NanoSnakeError ("The provided sample sheet does not contain the required fieds: {}".format(" ".join(required_fields)))
+    return os.path.abspath(sample_sheet)
+
+def get_genome (genome):
+    """"""
+    if not genome:
+        raise NanoSnakeError ("A FASTA reference genome file (--genome) is required to run the workflow")
+    if not access_file(genome):
+        raise NanoSnakeError ("The FASTA reference genome file is not readeable")
+    return os.path.abspath(genome)
+
+def get_annotation (annotation):
+    """"""
+    if not annotation:
+        raise NanoSnakeError ("A GFF3/GTF annotation file (--annotation) is required to run the workflow")
+    if not access_file(annotation):
+        raise NanoSnakeError ("The GFF3/GTF annotation file is not readeable")
+    return os.path.abspath(annotation)

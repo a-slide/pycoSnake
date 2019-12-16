@@ -1,0 +1,62 @@
+# All the rules accept the following parameters: opt, threads, mem
+
+# Configuration file version (do not change)
+config_version: 1
+
+# MAIN RULES
+preprocess_genone:
+    opt: ""
+
+preprocess_annotation:
+    opt: ""
+
+fastp:
+    opt: "-l 25 -q 15"
+    threads: 2
+    mem: 1000
+
+star_index:
+    opt: "--genomeSAindexNbases 9"
+    threads: 2
+    mem: 1000
+
+star_align:
+    opt: "--outFilterType BySJout  --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.04 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000"
+    threads: 4
+    mem: 1000
+
+pbt_alignment_filter:
+    opt: "--min_align_len 50 --min_freq_identity 0.7 --skip_unmapped --skip_secondary --skip_supplementary"
+    threads: 1
+
+star_count_merge:
+    opt: ""
+
+# OPTIONAL RULES (comment to be skip)
+cufflinks:
+    opt: "--library-type fr-firststrand --upper-quartile-norm"
+    threads: 4
+    mem: 1000
+
+cufflinks_fpkm_merge:
+    opt: ""
+
+subread_featurecounts:
+    opt: "-p"
+    threads: 2
+    mem: 1000
+
+samtools_qc:
+    opt: ""
+    threads: 1
+    mem: 1000
+
+bedtools_genomecov:
+    opt: "-bg"
+    threads: 1
+    mem: 1000
+
+igvtools_count:
+    opt: "-w 10"
+    threads: 1
+    mem: 1000

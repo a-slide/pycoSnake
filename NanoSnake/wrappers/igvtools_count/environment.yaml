@@ -1,8 +1,0 @@
-channels:
-  - defaults
-  - bioconda
-  - conda-forge
-dependencies:
-  - samtools==1.9
-  - openjdk=11.0.1
-  - igvtools

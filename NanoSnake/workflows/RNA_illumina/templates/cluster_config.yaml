@@ -1,0 +1,87 @@
+# Config file for lsf cluster
+
+# Configuration file version (do not change)
+config_version: 1
+
+# cluster command for lsf
+cluster_cores: 1000
+cluster_nodes: 20
+cluster_cmd: "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
+
+# DEFAULT CLUSTER OPTIONS
+__default__:
+    threads: 2
+    mem: 5000
+    queue: "research-rh74"
+    name : "nanosnake.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
+
+# Configuration file version (do not change)
+config_version: 1
+
+# MAIN RULES
+preprocess_genone:
+    opt: ""
+    name : "nanosnake.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
+
+preprocess_annotation:
+    opt: ""
+    name : "nanosnake.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
+
+fastp:
+    opt: "-l 25 -q 15"
+    threads: 20
+    mem: 10000
+
+star_index:
+    opt: "--genomeSAindexNbases 9"
+    threads: 20
+    mem: 50000
+
+star_align:
+    opt: "--outFilterType BySJout  --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.04 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000"
+    threads: 20
+    mem: 20000
+
+pbt_alignment_filter:
+    opt: "--min_align_len 50 --min_freq_identity 0.7 --skip_unmapped --skip_secondary --skip_supplementary"
+
+star_count_merge:
+    opt: ""
+    name : "nanosnake.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
+
+# OPTIONAL RULES (comment to be skip)
+cufflinks:
+    opt: "--library-type fr-firststrand --upper-quartile-norm"
+    threads: 20
+    mem: 20000
+
+cufflinks_fpkm_merge:
+    opt: ""
+    name : "nanosnake.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
+
+subread_featurecounts:
+    opt: "-p"
+    threads: 20
+    mem: 20000
+
+samtools_qc:
+    opt: ""
+    mem: 10000
+
+bedtools_genomecov:
+    opt: "-bg"
+    mem: 20000
+
+igvtools_count:
+    opt: "-w 10"
+    mem: 20000

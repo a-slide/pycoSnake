@@ -1,8 +1,0 @@
-channels:
-  - defaults
-  - bioconda
-  - conda-forge
-
-dependencies:
-  - python=3.6
-  - qualimap=2.2.2

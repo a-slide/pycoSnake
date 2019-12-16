@@ -1,9 +1,0 @@
-channels:
-  - defaults
-  - bioconda
-  - conda-forge
-  - aleg
-
-dependencies:
-  - python=3.6
-  - pycoqc=2.5.0.17

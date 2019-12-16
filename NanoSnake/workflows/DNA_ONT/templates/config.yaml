@@ -1,9 +1,12 @@
 # All the rules accept the following parameters: opt, threads, mem
 
 # Configuration file version (do not change)
-config_version: 2
+config_version: 3
 
 # MAIN RULES
+preprocess_genone:
+    opt: ""
+
 pbt_fastq_filter:
     opt: "--remove_duplicates --min_len 100 --min_qual 7"
 
@@ -25,8 +28,17 @@ nanopolish_call_methylation:
     opt: "--methylation cpg"
     threads: 4
 
-pycometh_aggregate:
+pycometh_cpg_aggregate:
     opt: "--min_depth 10"
+
+# pycometh_cpg_methcomp:
+#     opt: ""
+#
+# pycometh_interval_aggregate:
+#     opt: ""
+#
+# pycometh_interval_methcomp:
+#     opt: ""
 
 # OPTIONAL STRUCTURAL VARIANT RULES, can be commented to be skipped
 ngmlr:
@@ -36,6 +48,12 @@ ngmlr:
 sniffles:
     opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
 
+# pycosv_filter_variants:
+#     opt: ""
+#
+# pycosv_varcomp:
+#     opt: ""
+
 # OPTIONAL QC RULES, can be commented to be skipped
 pycoqc:
     opt: "--filter_calibration --filter_duplicated --min_pass_len 100 --min_pass_qual 7"
@@ -44,7 +62,7 @@ samtools_qc:
     opt: ""
 
 # OPTIONAL COVERAGE RULES, can be commented to be skipped
-genomecov:
+bedtools_genomecov:
     opt: "-bg"
 
 igvtools_count:
