@@ -12,6 +12,10 @@
 
 ---
 
+NanoSnake is a collection of [Snakemake](https://github.com/snakemake/snakemake) pipelines neatly wrapped in a convenient python package interface. It is easy to install with conda and to simple to run on a local computer or in a cluster environment.
+
+---
+
 ## Authors
 
 * Adrien Leger (@a-slide)
@@ -49,7 +53,7 @@ conda update nanosnake -c aleg
 
 At the moment there is only 1 workflow available in NanoSnake:
 
-* DNA : Analyse Basecalled Nanopore sequencing data.
+* DNA_ONT : Analyse Basecalled Nanopore sequencing data.
     * Fastq merging and filtering
     * Alignment with minimap2
     * Alignment cleaning
@@ -57,6 +61,15 @@ At the moment there is only 1 workflow available in NanoSnake:
     * Run Nanopore QC with pycoQC (optional)
     * Run methylation analysing with Nanoplolish + pycoMeth (optional)
     * Run SV analysis with Sniffles + pycoSV (optional)
+
+* RNA_illumina : Analyse Illumina long RNA-seq sequencing data.
+    * Fastq filtering / control / pre-alignment quality control
+    * Alignment with STAR
+    * Summarize counts for all samples
+    * Alignment cleaning
+    * Generate coverage plots IGV and bedgraph (optional)
+    * Count reads per feature with featurecounts (optional)
+    * Calculation of FPKM with cufflinks and summarize FPKM for all samples (optional)
 
 ## Configure workflow
 
@@ -95,21 +108,17 @@ NanoSnake {WORKFLOW NAME} {OPTIONS}
 ```
 conda activate NanoSnake
 
-NanoSnake DNA_methylation -r ref.fa  -s sample_sheet.tsv -c config.yaml --cores 10
+NanoSnake DNA_ONT -r ref.fa  -s sample_sheet.tsv --config config.yaml --cores 10
 ```
 
 **Usage in an LSF cluster environment**
 
-Use the cluster_config file instead of the normal config
+Use the cluster_config option instead of the config file.
+The cluster_config provided with NanoSnake is configured to work on an LSF cluster environment
+It contains the "prototyp bsub command" to be used by Snakemake  `bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}` as well as the maximal number of cores and nodes to use.
 
 ```
 conda activate NanoSnake
 
-NanoSnake DNA_methylation  \
-    -r ref.fa \
-    -s sample_sheet.tsv \
-    -c cluster_config.yaml \
-    --cores 100 \
-    --nodes 5 \
-    --cluster "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
+NanoSnake DNA_ONT -r ref.fa -s sample_sheet.tsv --cluster_config cluster_config.yaml
 ```
