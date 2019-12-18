@@ -35,16 +35,12 @@ def access_file (fn, **kwargs):
     """ Check if the file is readable """
     return os.path.isfile (fn) and os.access (fn, os.R_OK)
 
-def get_logging_level(quiet=False, verbose=False):
-    """return logging level depending on verbosity args"""
+def set_log_level(quiet=False, verbose=False):
+    level = "INFO"
     if quiet:
         return "WARNING"
     if verbose:
         return "DEBUG"
-    return "INFO"
-
-def set_log_level(quiet=False, verbose=False):
-    level = get_logging_level(quiet,verbose)
     log.remove()
     log.add (sys.stderr, level=level)
 
@@ -224,14 +220,10 @@ def get_genome (genome):
     """"""
     if not genome:
         raise NanoSnakeError ("A FASTA reference genome file (--genome) is required to run the workflow")
-    if not access_file(genome):
-        raise NanoSnakeError ("The FASTA reference genome file is not readeable")
-    return os.path.abspath(genome)
+    return genome
 
 def get_annotation (annotation):
     """"""
     if not annotation:
         raise NanoSnakeError ("A GFF3/GTF annotation file (--annotation) is required to run the workflow")
-    if not access_file(annotation):
-        raise NanoSnakeError ("The GFF3/GTF annotation file is not readeable")
-    return os.path.abspath(annotation)
+    return annotation

@@ -27,7 +27,7 @@ WORKFLOW_DIR = pkg_resources.resource_filename (package_name, "workflows")
 
 def main(args=None):
     """ Main entry point for NanoSnake command line interface """
-    
+
     # Parser and subparsers for command
     parser = argparse.ArgumentParser (description=package_description)
     parser.add_argument("--version", action="version", version="{} v{}".format(package_name, package_version))
@@ -38,15 +38,15 @@ def main(args=None):
     subparser_dna_ont = subparsers.add_parser("DNA_ONT", description="Workflow for DNA Analysis of Nanopore data")
     subparser_dna_ont.set_defaults(func=DNA_ONT)
     subparser_dna_ont_IO = subparser_dna_ont.add_argument_group("input/output options")
-    subparser_dna_ont_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to a FASTA reference genome file to be used for read mapping (required)")
+    subparser_dna_ont_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to a FASTA reference genome file/URL to be used for read mapping (required)")
     subparser_dna_ont_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
     # RNA subparser
     subparser_rna_illumina = subparsers.add_parser("RNA_illumina", description="Workflow for RNA Analysis of Illumina data")
     subparser_rna_illumina.set_defaults(func=RNA_illumina)
     subparser_rna_illumina_IO = subparser_rna_illumina.add_argument_group("input/output options")
-    subparser_rna_illumina_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to a FASTA reference genome file to be used for read mapping (required)")
-    subparser_rna_illumina_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to a GFF3/GTF annotation files containing transcript annotations (required)")
+    subparser_rna_illumina_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to a FASTA reference genome file/URL to be used for read mapping (required)")
+    subparser_rna_illumina_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to a GFF3/GTF annotation file/URL containing transcript annotations (required)")
     subparser_rna_illumina_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
     # Add common group parsers
