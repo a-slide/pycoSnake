@@ -9,6 +9,10 @@ import pandas as pd
 
 # Local imports
 from NanoSnake.common import *
+from snakemake.remote.FTP import RemoteProvider as FTPRemoteProvider
+from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+FTP = FTPRemoteProvider()
+HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Minimum snakemake version
@@ -32,13 +36,25 @@ output_d=defaultdict(OrderedDict)
 log_d=OrderedDict()
 
 rule_name="preprocess_genone"
-input_d[rule_name]["ref"]=config["genome"]
+genome = config["genome"]
+if genome.startswith("ftp"):
+    input_d[rule_name]["ref"]=FTP.remote(genome)
+elif genome.startswith("http"):
+    input_d[rule_name]["ref"]=HTTP.remote(genome)
+else:
+    input_d[rule_name]["ref"]=genome
 output_d[rule_name]["ref"]=join("results","main","genone","ref.fa")
 output_d[rule_name]["index"]=join("results","main","genone","ref.fa.fai")
 log_d[rule_name]=join("logs",rule_name,"preprocess_genone.log")
 
 rule_name="preprocess_annotation"
-input_d[rule_name]["annotation"]=config["annotation"]
+annotation = config["annotation"]
+if annotation.startswith("ftp"):
+    input_d[rule_name]["annotation"]=FTP.remote(annotation)
+elif annotation.startswith("http"):
+    input_d[rule_name]["annotation"]=HTTP.remote(annotation)
+else:
+    input_d[rule_name]["annotation"]=annotation
 output_d[rule_name]["gff3"]=join("results","main","annotation","ref.gff3")
 output_d[rule_name]["gtf"]=join("results","main","annotation","ref.gtf")
 log_d[rule_name]=join("logs",rule_name,"preprocess_annotation.log")

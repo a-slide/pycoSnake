@@ -9,6 +9,10 @@ import pandas as pd
 
 # Local imports
 from NanoSnake.common import *
+from snakemake.remote.FTP import RemoteProvider as FTPRemoteProvider
+from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
+FTP = FTPRemoteProvider()
+HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Minimum snakemake version
@@ -35,7 +39,12 @@ log_d=OrderedDict()
 
 # Main rules
 rule_name="preprocess_genone"
-input_d[rule_name]["ref"]=config["genome"]
+if config["genome"].startswith("ftp"):
+    input_d[rule_name]["ref"]=FTP.remote(config["genome"])
+elif config["genome"].startswith("http"):
+    input_d[rule_name]["ref"]=HTTP.remote(config["genome"])
+else:
+    input_d[rule_name]["ref"]=config["genome"]
 output_d[rule_name]["ref"]=join("results","main","genone","ref.fa")
 output_d[rule_name]["index"]=join("results","main","genone","ref.fa.fai")
 log_d[rule_name]=join("logs",rule_name,"ref.log")

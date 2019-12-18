@@ -30,7 +30,8 @@ setup(
     install_requires = [
         'pandas==0.24.1',
         'snakemake==5.5.4',
-        "loguru>=0.3.2"],
+        "loguru>=0.3.2",
+        "ftputil==3.4"],
     packages = [name],
     package_dir = {name: name},
     package_data = {name: [
