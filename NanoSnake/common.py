@@ -179,7 +179,7 @@ def generate_template (workflow_dir, templates, workflow, workdir="./", overwrit
 def get_yaml_val(yaml_fn, val_name, default):
     """"""
     try:
-        with open(config) as fp:
+        with open(yaml_fn) as fp:
             y = yaml.load(fp, Loader=yaml.FullLoader)
             return y[val_name]
     except:
