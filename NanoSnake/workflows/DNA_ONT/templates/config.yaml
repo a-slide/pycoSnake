@@ -1,7 +1,7 @@
 # All the rules accept the following parameters: opt, threads, mem
 
 # Configuration file version (do not change)
-config_version: 3
+config_version: 4
 
 # MAIN RULES
 preprocess_genone:

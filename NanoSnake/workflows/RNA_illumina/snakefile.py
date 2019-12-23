@@ -16,7 +16,7 @@ HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Minimum snakemake version
-config_version=1
+config_version=2
 if not "config_version" in config or config["config_version"]!= config_version:
     raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with -t config")
 
@@ -26,7 +26,7 @@ sample_list=list(sample_df.index)
 
 def get_fastq1 (wildcards):
     return sample_df.loc[wildcards.sample, "fastq1"]
-def get_fastq1 (wildcards):
+def get_fastq2 (wildcards):
     return sample_df.loc[wildcards.sample, "fastq2"]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define IO for each rule~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -61,7 +61,7 @@ log_d[rule_name]=join("logs",rule_name,"preprocess_annotation.log")
 
 rule_name="fastp"
 input_d[rule_name]["fastq1"]=get_fastq1
-input_d[rule_name]["fastq2"]=get_fastq1
+input_d[rule_name]["fastq2"]=get_fastq2
 output_d[rule_name]["fastq1"]=join("results","main","fastp","{sample}_1.fastq.gz")
 output_d[rule_name]["fastq2"]=join("results","main","fastp","{sample}_2.fastq.gz")
 output_d[rule_name]["html"]=join("results","QC","fastp","{sample}_fastp.html")
@@ -76,8 +76,8 @@ log_d[rule_name]=join("logs",rule_name,"ref.log")
 
 rule_name="star_align"
 input_d[rule_name]["index"]=output_d["star_index"]["index"]
-input_d[rule_name]["fastq1"]=get_fastq1
-input_d[rule_name]["fastq2"]=get_fastq1
+input_d[rule_name]["fastq1"]=output_d["fastp"]["fastq1"]
+input_d[rule_name]["fastq2"]=output_d["fastp"]["fastq2"]
 output_d[rule_name]["sj"]=join("results","main","star_alignments","{sample}_SJ.tsv")
 output_d[rule_name]["bam"]=join("results","main","star_alignments","{sample}.bam")
 output_d[rule_name]["count"]=join("results","counts","star","{sample}_counts.tsv")
