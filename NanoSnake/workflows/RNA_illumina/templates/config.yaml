@@ -1,7 +1,7 @@
 # All the rules accept the following parameters: opt, threads, mem
 
 # Configuration file version (do not change)
-config_version: 1
+config_version: 2
 
 # MAIN RULES
 preprocess_genone:
@@ -11,12 +11,12 @@ preprocess_annotation:
     opt: ""
 
 fastp:
-    opt: "-l 25 -q 15"
+    opt: ""
     threads: 2
     mem: 1000
 
 star_index:
-    opt: "--genomeSAindexNbases 9"
+    opt: ""
     threads: 2
     mem: 1000
 

@@ -1,11 +1,11 @@
 # Config file for lsf cluster
 
 # Configuration file version (do not change)
-config_version: 1
+config_version: 2
 
 # cluster command for lsf
-cluster_cores: 1000
-cluster_nodes: 20
+cluster_cores: 10000
+cluster_nodes: 500
 cluster_cmd: "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
 
 # DEFAULT CLUSTER OPTIONS
@@ -13,33 +13,33 @@ __default__:
     threads: 2
     mem: 5000
     queue: "research-rh74"
-    name : "nanosnake.{rule}.{wildcards.sample}"
+    name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
-# Configuration file version (do not change)
-config_version: 1
-
 # MAIN RULES
 preprocess_genone:
-    opt: ""
-    name : "nanosnake.{rule}"
+    name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
+    opt: ""
 
 preprocess_annotation:
-    opt: ""
-    name : "nanosnake.{rule}"
+    name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
+    opt: ""
 
 fastp:
-    opt: "-l 25 -q 15"
+    opt: ""
     threads: 20
     mem: 10000
 
 star_index:
-    opt: "--genomeSAindexNbases 9"
+    name : "nanosnake_RNA_illumina.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
+    opt: ""
     threads: 20
     mem: 50000
 
@@ -53,7 +53,7 @@ pbt_alignment_filter:
 
 star_count_merge:
     opt: ""
-    name : "nanosnake.{rule}"
+    name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
 
@@ -65,7 +65,7 @@ cufflinks:
 
 cufflinks_fpkm_merge:
     opt: ""
-    name : "nanosnake.{rule}"
+    name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
 

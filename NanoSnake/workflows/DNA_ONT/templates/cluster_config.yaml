@@ -1,11 +1,11 @@
 # Config file for lsf cluster
 
 # Configuration file version (do not change)
-config_version: 3
+config_version: 4
 
 # cluster command for lsf
-cluster_cores: 1000
-cluster_nodes: 20
+cluster_cores: 10000
+cluster_nodes: 500
 cluster_cmd: "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}"
 
 # DEFAULT CLUSTER OPTIONS
@@ -13,18 +13,24 @@ __default__:
     threads: 2
     mem: 5000
     queue: "research-rh74"
-    name : "nanosnake.{rule}.{wildcards.sample}"
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 # MAIN RULES
+preprocess_genone:
+    opt: ""
+    name : "nanosnake_DNA_ONT.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
+
 pbt_fastq_filter:
     opt: "--remove_duplicates --min_len 100 --min_qual 7"
 
 minimap2_index:
     opt: ""
     mem : 20000
-    name : "nanosnake.{rule}"
+    name : "nanosnake_DNA_ONT.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
 
@@ -63,7 +69,7 @@ pycometh_cpg_aggregate:
 ngmlr:
     opt: "-x ont"
     threads: 40
-    mem: 10000
+    mem: 50000
 
 sniffles:
     opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
