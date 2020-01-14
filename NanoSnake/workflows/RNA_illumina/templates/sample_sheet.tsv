@@ -3,5 +3,5 @@
 # fastq2: Path to the directory containing the second in pair sample fastq file (optional)
 
 sample_id	fastq1	fastq2
-sample_2	data/fastq/s1_1.fastq.gz	data/s1_2.fastq.gz
-sample_1	data/fastq/s2_1.fastq.gz	data/s2_2.fastq.gz
+sample_2	data/fastq/s1_1.fastq.gz	data/fastq/s1_2.fastq.gz
+sample_1	data/fastq/s2_1.fastq.gz	data/fastq/s2_2.fastq.gz

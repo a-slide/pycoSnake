@@ -1,7 +1,7 @@
 # Config file for lsf cluster
 
 # Configuration file version (do not change)
-config_version: 4
+config_version: 5
 
 # cluster command for lsf
 cluster_cores: 10000
@@ -52,18 +52,26 @@ nanopolish_call_methylation:
     threads: 40
     mem: 10000
 
+pycometh_cgi_finder:
+    opt: ""
+    name : "nanosnake_DNA_ONT.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
+
 pycometh_cpg_aggregate:
     opt: "--min_depth 10"
     mem: 50000
 
-# pycometh_cpg_methcomp:
-#     opt: ""
-#
-# pycometh_interval_aggregate:
-#     opt: ""
-#
-# pycometh_interval_methcomp:
-#     opt: ""
+pycometh_interval_aggregate:
+    opt: "--min_cpg_per_interval 5"
+    mem: 10000
+
+pycometh_meth_comp:
+    opt: "--max_missing 1"
+    mem: 10000
+    name : "nanosnake_DNA_ONT.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
 
 # OPTIONAL STRUCTURAL VARIANT RULES, can be commented to be skipped
 ngmlr:

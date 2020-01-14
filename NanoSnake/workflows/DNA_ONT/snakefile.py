@@ -16,7 +16,7 @@ HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Minimum snakemake version
-config_version=4
+config_version=5
 if not "config_version" in config or config["config_version"]!= config_version:
     raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with -t config")
 
@@ -87,12 +87,33 @@ input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
 output_d[rule_name]["tsv"]=join("results","methylation","nanopolish_calls","{sample}.tsv")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
+rule_name="pycometh_cgi_finder"
+input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+output_d[rule_name]["tsv"]=join("results","methylation","pycometh_cgi_finder","CGI.tsv.gz")
+output_d[rule_name]["bed"]=join("results","methylation","pycometh_cgi_finder","CGI.bed")
+log_d[rule_name]=join("logs",rule_name,"ref.log")
+
 rule_name="pycometh_cpg_aggregate"
 input_d[rule_name]["tsv"]=output_d["nanopolish_call_methylation"]["tsv"]
 input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
-output_d[rule_name]["tsv"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.tsv")
+output_d[rule_name]["tsv"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.bed")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
+
+rule_name="pycometh_interval_aggregate"
+input_d[rule_name]["tsv"]=output_d["pycometh_cpg_aggregate"]["tsv"]
+input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+input_d[rule_name]["annot"]=output_d["pycometh_cgi_finder"]["bed"]
+output_d[rule_name]["tsv"]=join("results","methylation","pycometh_interval_aggregate","{sample}.tsv.gz")
+output_d[rule_name]["bed"]=join("results","methylation","pycometh_interval_aggregate","{sample}.bed")
+log_d[rule_name]=join("logs",rule_name,"{sample}.log")
+
+rule_name="pycometh_meth_comp"
+input_d[rule_name]["tsv"]=[join("results","methylation","pycometh_interval_aggregate",f"{sample}.tsv.gz") for sample in sample_list]
+input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+output_d[rule_name]["tsv"]=join("results","methylation","pycometh_meth_comp","meth_comp.tsv.gz")
+output_d[rule_name]["bed"]=join("results","methylation","pycometh_meth_comp","meth_comp.bed")
+log_d[rule_name]=join("logs",rule_name,"meth_comp.log")
 
 rule_name="ngmlr"
 input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
@@ -134,11 +155,13 @@ log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 # main rules
 run_rules = ["preprocess_genone", "pbt_fastq_filter", "minimap2_index", "minimap2_align", "pbt_alignment_filter"]
 # optional methylation analysis
-if all_in (config,["nanopolish_index", "nanopolish_call_methylation", "pycometh_cpg_aggregate"]):
-    run_rules.extend (["nanopolish_index", "nanopolish_call_methylation", "pycometh_cpg_aggregate"])
+methylation_rules = ["nanopolish_index", "nanopolish_call_methylation", "pycometh_cgi_finder", "pycometh_cpg_aggregate", "pycometh_interval_aggregate", "pycometh_meth_comp"]
+if all_in (config, methylation_rules):
+    run_rules.extend (methylation_rules)
 # optional SV analysis
-if all_in (config, ["ngmlr", "sniffles"]):
-    run_rules.extend (["ngmlr", "sniffles"])
+sv_rules = ["ngmlr", "sniffles"]
+if all_in (config, sv_rules):
+    run_rules.extend (sv_rules)
 # Other optional orphan rules
 for r in ["pycoqc", "samtools_qc", "bedtools_genomecov", "igvtools_count"]:
     if r in config:
@@ -224,6 +247,16 @@ rule nanopolish_call_methylation:
     resources: mem_mb=get_mem(config, rule_name)
     wrapper: "nanopolish_call_methylation"
 
+rule_name="pycometh_cgi_finder"
+rule pycometh_cgi_finder:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name),
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "pycometh_cgi_finder"
+
 rule_name="pycometh_cpg_aggregate"
 rule pycometh_cpg_aggregate:
     input: **input_d[rule_name]
@@ -233,6 +266,26 @@ rule pycometh_cpg_aggregate:
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
     wrapper: "pycometh_cpg_aggregate"
+
+rule_name="pycometh_interval_aggregate"
+rule pycometh_interval_aggregate:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name),
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "pycometh_interval_aggregate"
+
+rule_name="pycometh_meth_comp"
+rule pycometh_meth_comp:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name),
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "pycometh_meth_comp"
 
 rule_name="ngmlr"
 rule ngmlr:
