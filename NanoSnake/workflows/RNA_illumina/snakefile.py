@@ -122,7 +122,7 @@ log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 rule_name="subread_featurecounts_merge"
 input_d[rule_name]["counts"]=[join("results","counts","featurecounts",f"{sample}_counts.tsv") for sample in sample_list]
 output_d[rule_name]["counts"]=join("results","counts","featurecounts_merged","counts.tsv")
-output_d[rule_name]["tpm"]=join("results","counts","featurecounts_merged","tmp.tsv")
+output_d[rule_name]["tpm"]=join("results","counts","featurecounts_merged","tpm.tsv")
 log_d[rule_name]=join("logs",rule_name,"subread_featurecounts_merge.log")
 
 rule_name="samtools_qc"
