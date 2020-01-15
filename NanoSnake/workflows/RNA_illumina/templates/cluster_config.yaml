@@ -1,7 +1,7 @@
 # Config file for lsf cluster
 
 # Configuration file version (do not change)
-config_version: 2
+config_version: 3
 
 # cluster command for lsf
 cluster_cores: 10000
@@ -28,7 +28,7 @@ preprocess_annotation:
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
-    opt: ""
+    opt: "--keep-exon-attrs --keep-genes"
 
 fastp:
     opt: ""
@@ -53,25 +53,31 @@ pbt_alignment_filter:
 
 star_count_merge:
     opt: ""
-    name : "nanosnake_RNA_illumina.{rule}"
-    output : "logs/{rule}/bsub_stdout.log"
-    error : "logs/{rule}/bsub_stderr.log"
-
-# OPTIONAL RULES (comment to be skip)
-cufflinks:
-    opt: "--library-type fr-firststrand --upper-quartile-norm"
-    threads: 20
     mem: 20000
-
-cufflinks_fpkm_merge:
-    opt: ""
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
+
+# OPTIONAL RULES (comment to be skiped)
+# cufflinks:
+#     opt: "--library-type fr-firststrand --upper-quartile-norm"
+#     threads: 20
+#     mem: 20000
+
+# cufflinks_fpkm_merge:
+#     opt: ""
+#     mem: 20000
+#     name : "nanosnake_RNA_illumina.{rule}"
+#     output : "logs/{rule}/bsub_stdout.log"
+#     error : "logs/{rule}/bsub_stderr.log"
 
 subread_featurecounts:
     opt: "-p"
     threads: 20
+    mem: 20000
+
+subread_featurecounts_merge:
+    opt: ""
     mem: 20000
 
 samtools_qc:
