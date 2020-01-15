@@ -16,7 +16,7 @@ HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Minimum snakemake version
-config_version=2
+config_version=3
 if not "config_version" in config or config["config_version"]!= config_version:
     raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with -t config")
 
@@ -116,8 +116,14 @@ log_d[rule_name]=join("logs",rule_name,"cufflinks_fpkm_merge.log")
 rule_name="subread_featurecounts"
 input_d[rule_name]["bam"]=output_d["star_align"]["bam"]
 input_d[rule_name]["gtf"]=output_d["preprocess_annotation"]["gtf"]
-output_d[rule_name]["counts"]=join("results","counts","featurecounts","{sample}_isoforms_fpkm.tsv")
+output_d[rule_name]["counts"]=join("results","counts","featurecounts","{sample}_counts.tsv")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
+
+rule_name="subread_featurecounts_merge"
+input_d[rule_name]["counts"]=[join("results","counts","featurecounts",f"{sample}_counts.tsv") for sample in sample_list]
+output_d[rule_name]["counts"]=join("results","counts","featurecounts_merged","counts.tsv")
+output_d[rule_name]["tpm"]=join("results","counts","featurecounts_merged","tmp.tsv")
+log_d[rule_name]=join("logs",rule_name,"subread_featurecounts_merge.log")
 
 rule_name="samtools_qc"
 input_d[rule_name]["bam"]=output_d["star_align"]["bam"]
@@ -141,13 +147,22 @@ log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 # main rules
 run_rules=["preprocess_genone", "preprocess_annotation", "fastp", "star_index", "star_align", "pbt_alignment_filter", "star_count_merge"]
+
 # Optional cufflinks analysis
-if all_in(config, ["cufflinks", "cufflinks_fpkm_merge"]):
-    run_rules.extend(["cufflinks", "cufflinks_fpkm_merge"])
+opt_rules = ["cufflinks", "cufflinks_fpkm_merge"]
+if all_in(config, opt_rules):
+    run_rules.extend(opt_rules)
+
+# Optional subread_featurecounts analysis
+opt_rules = ["subread_featurecounts", "subread_featurecounts_merge"]
+if all_in(config, opt_rules):
+    run_rules.extend(opt_rules)
+
 # Other optional orphan rules
-for r in ["subread_featurecounts", "samtools_qc", "bedtools_genomecov", "igvtools_count"]:
+opt_rules = ["samtools_qc", "bedtools_genomecov", "igvtools_count"]
+for r in opt_rules:
     if r in config:
-        run_rules.append(r)
+        run_rules.extend(opt_rules)
 
 all_output=[]
 for rule_name, rule_d in output_d.items():
@@ -259,6 +274,16 @@ rule subread_featurecounts:
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
     wrapper: "subread_featurecounts"
+
+rule_name="subread_featurecounts_merge"
+rule subread_featurecounts_merge:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name)
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "subread_featurecounts_merge"
 
 rule_name="samtools_qc"
 rule samtools_qc:
