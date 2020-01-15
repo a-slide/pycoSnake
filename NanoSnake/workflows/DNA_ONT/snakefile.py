@@ -91,6 +91,7 @@ rule_name="pycometh_cgi_finder"
 input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
 output_d[rule_name]["tsv"]=join("results","methylation","pycometh_cgi_finder","CGI.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_cgi_finder","CGI.bed")
+output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_cgi_finder","CGI.bed.idx")
 log_d[rule_name]=join("logs",rule_name,"ref.log")
 
 rule_name="pycometh_cpg_aggregate"
@@ -98,6 +99,7 @@ input_d[rule_name]["tsv"]=output_d["nanopolish_call_methylation"]["tsv"]
 input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
 output_d[rule_name]["tsv"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.bed")
+output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.bed.idx")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="pycometh_interval_aggregate"
@@ -106,6 +108,7 @@ input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
 input_d[rule_name]["annot"]=output_d["pycometh_cgi_finder"]["bed"]
 output_d[rule_name]["tsv"]=join("results","methylation","pycometh_interval_aggregate","{sample}.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_interval_aggregate","{sample}.bed")
+output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_interval_aggregate","{sample}.bed.idx")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="pycometh_meth_comp"
@@ -113,6 +116,7 @@ input_d[rule_name]["tsv"]=[join("results","methylation","pycometh_interval_aggre
 input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
 output_d[rule_name]["tsv"]=join("results","methylation","pycometh_meth_comp","meth_comp.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_meth_comp","meth_comp.bed")
+output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_meth_comp","meth_comp.bed.idx")
 log_d[rule_name]=join("logs",rule_name,"meth_comp.log")
 
 rule_name="ngmlr"
