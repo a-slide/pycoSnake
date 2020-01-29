@@ -1,4 +1,4 @@
-{% set version = '0.0.3.0' %}
+{% set version = '0.0.3.1' %}
 {% set name = "NanoSnake" %}
 
 package:
@@ -32,7 +32,7 @@ test:
     - NanoSnake --help
     - NanoSnake RNA_illumina --help
     - NanoSnake DNA_ONT --help
-    - NanoSnake test --help
+    - NanoSnake tests --help
 
 about:
   home: "https://github.com/a-slide/NanoSnake"
