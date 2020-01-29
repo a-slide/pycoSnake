@@ -35,12 +35,16 @@ def access_file (fn, **kwargs):
     """ Check if the file is readable """
     return os.path.isfile (fn) and os.access (fn, os.R_OK)
 
-def set_log_level(quiet=False, verbose=False):
-    level = "INFO"
+def get_log_level(quiet=False, verbose=False):
+    """return logging level depending on verbosity args"""
     if quiet:
         return "WARNING"
     if verbose:
         return "DEBUG"
+    return "INFO"
+
+def set_log_level(quiet=False, verbose=False):
+    level = get_log_level(quiet,verbose)
     log.remove()
     log.add (sys.stderr, level=level)
 
@@ -200,7 +204,7 @@ def get_snakefile_fn (workflow_dir, workflow):
     """"""
     snakefile = os.path.join (workflow_dir, workflow, "snakefile.py")
     if not access_file(snakefile):
-        raise NanoSnakeError ("The snakefile file is not readeable")
+        raise NanoSnakeError ("The snakefile file is not readable")
     return os.path.abspath(snakefile)
 
 def get_sample_sheet (sample_sheet, required_fields=[]):
@@ -216,14 +220,8 @@ def get_sample_sheet (sample_sheet, required_fields=[]):
             raise NanoSnakeError ("The provided sample sheet does not contain the required fieds: {}".format(" ".join(required_fields)))
     return os.path.abspath(sample_sheet)
 
-def get_genome (genome):
+def required_option (name, var):
     """"""
-    if not genome:
-        raise NanoSnakeError ("A FASTA reference genome file (--genome) is required to run the workflow")
-    return genome
-
-def get_annotation (annotation):
-    """"""
-    if not annotation:
-        raise NanoSnakeError ("A GFF3/GTF annotation file (--annotation) is required to run the workflow")
-    return annotation
+    if not var:
+        raise NanoSnakeError (f"Option --{name} is required to run the workflow")
+    return var

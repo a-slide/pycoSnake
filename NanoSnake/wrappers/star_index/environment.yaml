@@ -1,0 +1,10 @@
+name: nanosnake_star_index
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - star=2.7.3a
+  - pyfaidx=0.5.7

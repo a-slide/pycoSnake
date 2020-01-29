@@ -16,9 +16,9 @@ HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Minimum snakemake version
-config_version=5
+config_version=6
 if not "config_version" in config or config["config_version"]!= config_version:
-    raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with -t config")
+    raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define samples sheet reference and getters~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 sample_df=pd.read_csv (config["sample_sheet"], comment="#", skip_blank_lines=True, sep="\t", index_col=0)
@@ -37,25 +37,24 @@ input_d=defaultdict(OrderedDict)
 output_d=defaultdict(OrderedDict)
 log_d=OrderedDict()
 
-# Main rules
-rule_name="preprocess_genone"
+rule_name="get_genome"
 if config["genome"].startswith("ftp"):
     input_d[rule_name]["ref"]=FTP.remote(config["genome"])
 elif config["genome"].startswith("http"):
     input_d[rule_name]["ref"]=HTTP.remote(config["genome"])
 else:
     input_d[rule_name]["ref"]=config["genome"]
-output_d[rule_name]["ref"]=join("results","main","genone","ref.fa")
-output_d[rule_name]["index"]=join("results","main","genone","ref.fa.fai")
+output_d[rule_name]["ref"]=join("results","input","genone","ref.fa")
+output_d[rule_name]["index"]=join("results","input","genone","ref.fa.fai")
 log_d[rule_name]=join("logs",rule_name,"ref.log")
 
 rule_name="pbt_fastq_filter"
 input_d[rule_name]["fastq"]=get_fastq
-output_d[rule_name]["fastq"]=join("results","main","merged_fastq","{sample}.fastq")
+output_d[rule_name]["fastq"]=join("results","input","merged_fastq","{sample}.fastq")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="minimap2_index"
-input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 output_d[rule_name]["index"]=join("results","main","minimap2_index","ref.mmi")
 log_d[rule_name]=join("logs",rule_name,"ref.log")
 
@@ -76,19 +75,19 @@ rule_name="nanopolish_index"
 input_d[rule_name]["fastq"]=output_d["pbt_fastq_filter"]["fastq"]
 input_d[rule_name]["fast5"]=get_fast5
 input_d[rule_name]["seqsum"]=get_seqsum
-output_d[rule_name]["index"]=join("results","main","merged_fastq","{sample}.fastq.index")
+output_d[rule_name]["index"]=join("results","input","merged_fastq","{sample}.fastq.index")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="nanopolish_call_methylation"
 input_d[rule_name]["fastq"]=output_d["pbt_fastq_filter"]["fastq"]
 input_d[rule_name]["fastq_index"]=output_d["nanopolish_index"]["index"]
 input_d[rule_name]["bam"]=output_d["pbt_alignment_filter"]["bam"]
-input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 output_d[rule_name]["tsv"]=join("results","methylation","nanopolish_calls","{sample}.tsv")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="pycometh_cgi_finder"
-input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 output_d[rule_name]["tsv"]=join("results","methylation","pycometh_cgi_finder","CGI.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_cgi_finder","CGI.bed")
 output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_cgi_finder","CGI.bed.idx")
@@ -96,7 +95,7 @@ log_d[rule_name]=join("logs",rule_name,"ref.log")
 
 rule_name="pycometh_cpg_aggregate"
 input_d[rule_name]["tsv"]=output_d["nanopolish_call_methylation"]["tsv"]
-input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 output_d[rule_name]["tsv"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.bed")
 output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.bed.idx")
@@ -104,7 +103,7 @@ log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="pycometh_interval_aggregate"
 input_d[rule_name]["tsv"]=output_d["pycometh_cpg_aggregate"]["tsv"]
-input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 input_d[rule_name]["annot"]=output_d["pycometh_cgi_finder"]["bed"]
 output_d[rule_name]["tsv"]=join("results","methylation","pycometh_interval_aggregate","{sample}.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_interval_aggregate","{sample}.bed")
@@ -113,14 +112,14 @@ log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="pycometh_meth_comp"
 input_d[rule_name]["tsv"]=[join("results","methylation","pycometh_interval_aggregate",f"{sample}.tsv.gz") for sample in sample_list]
-input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 output_d[rule_name]["tsv"]=join("results","methylation","pycometh_meth_comp","meth_comp.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_meth_comp","meth_comp.bed")
 output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_meth_comp","meth_comp.bed.idx")
 log_d[rule_name]=join("logs",rule_name,"meth_comp.log")
 
 rule_name="ngmlr"
-input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 input_d[rule_name]["fastq"]=output_d["pbt_fastq_filter"]["fastq"]
 output_d[rule_name]["bam"]=join("results","SV","ngmlr_alignments","{sample}.bam")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
@@ -151,23 +150,28 @@ log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="igvtools_count"
 input_d[rule_name]["bam"]=output_d["pbt_alignment_filter"]["bam"]
-input_d[rule_name]["ref"]=output_d["preprocess_genone"]["ref"]
+input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 output_d[rule_name]["tdf"]=join("results","coverage","igv_tdf","{sample}.tdf")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define all output depending on config file~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 # main rules
-run_rules = ["preprocess_genone", "pbt_fastq_filter", "minimap2_index", "minimap2_align", "pbt_alignment_filter"]
-# optional methylation analysis
-methylation_rules = ["nanopolish_index", "nanopolish_call_methylation", "pycometh_cgi_finder", "pycometh_cpg_aggregate", "pycometh_interval_aggregate", "pycometh_meth_comp"]
-if all_in (config, methylation_rules):
-    run_rules.extend (methylation_rules)
-# optional SV analysis
-sv_rules = ["ngmlr", "sniffles"]
-if all_in (config, sv_rules):
-    run_rules.extend (sv_rules)
+run_rules = ["get_genome", "pbt_fastq_filter", "minimap2_index", "minimap2_align", "pbt_alignment_filter"]
+
+# Optional methylation analysis
+opt_rules = ["nanopolish_index", "nanopolish_call_methylation", "pycometh_cgi_finder", "pycometh_cpg_aggregate", "pycometh_interval_aggregate", "pycometh_meth_comp"]
+if all_in (config, opt_rules):
+    run_rules.extend (opt_rules)
+
+# Optional SV analysis
+opt_rules = ["ngmlr", "sniffles"]
+if all_in (config, opt_rules):
+    run_rules.extend (opt_rules)
+
 # Other optional orphan rules
-for r in ["pycoqc", "samtools_qc", "bedtools_genomecov", "igvtools_count"]:
+opt_rules = ["pycoqc", "samtools_qc", "bedtools_genomecov", "igvtools_count"]
+for r in opt_rules:
     if r in config:
         run_rules.append(r)
 
@@ -178,18 +182,19 @@ for rule_name, rule_d in output_d.items():
             all_output.append(output)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RULES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+
 rule all:
     input: [expand(o, sample=sample_list) for o in all_output]
 
-rule_name="preprocess_genone"
-rule preprocess_genone:
+rule_name="get_genome"
+rule get_genome:
     input: **input_d[rule_name]
     output: **output_d[rule_name]
     log: log_d[rule_name]
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
-    wrapper: "preprocess_genone"
+    wrapper: "get_genome"
 
 rule_name="pbt_fastq_filter"
 rule pbt_fastq_filter:

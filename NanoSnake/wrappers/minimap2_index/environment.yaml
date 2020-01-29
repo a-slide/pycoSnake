@@ -1,0 +1,9 @@
+name: nanosnake_minimap2_index
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - minimap2==2.15

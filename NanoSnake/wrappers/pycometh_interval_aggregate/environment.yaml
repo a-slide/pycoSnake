@@ -1,0 +1,14 @@
+name: nanosnake_pycometh_interval_aggregate
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - openjdk=11.0.1
+  - igvtools=2.5.3
+  - python=3.6
+  - pip=19.1
+  - pip:
+    - pycoMeth==0.3.2

@@ -1,0 +1,9 @@
+name: nanosnake_get_gff3
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - gffread=0.11.6

@@ -1,4 +1,4 @@
-{% set version = '0.0.2.10' %}
+{% set version = '0.0.3.0' %}
 {% set name = "NanoSnake" %}
 
 package:
@@ -24,7 +24,7 @@ requirements:
     - python>=3.6
     - snakemake=5.5.4
     - pandas=0.24.1
-    - loguru>=0.3.2
+    - loguru=0.3.2
     - ftputil=3.4
 
 test:
@@ -32,6 +32,7 @@ test:
     - NanoSnake --help
     - NanoSnake RNA_illumina --help
     - NanoSnake DNA_ONT --help
+    - NanoSnake test --help
 
 about:
   home: "https://github.com/a-slide/NanoSnake"

@@ -1,0 +1,9 @@
+name: nanosnake_nanopolish_index
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - nanopolish=0.11.1

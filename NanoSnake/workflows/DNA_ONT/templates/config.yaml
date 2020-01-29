@@ -1,10 +1,10 @@
 # All the rules accept the following parameters: opt, threads, mem
 
 # Configuration file version (do not change)
-config_version: 5
+config_version: 6
 
 # MAIN RULES
-preprocess_genone:
+get_genome:
     opt: ""
 
 pbt_fastq_filter:
@@ -32,7 +32,7 @@ pycometh_cgi_finder:
     opt: ""
 
 pycometh_cpg_aggregate:
-    opt: "--min_depth 10"
+    opt: "--min_depth 5"
 
 pycometh_interval_aggregate:
     opt: "--min_cpg_per_interval 5"
@@ -46,7 +46,7 @@ ngmlr:
     threads: 4
 
 sniffles:
-    opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
+    opt: "--min_support 5 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
 
 # pycosv_filter_variants:
 #     opt: ""

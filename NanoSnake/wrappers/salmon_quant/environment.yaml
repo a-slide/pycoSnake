@@ -1,0 +1,9 @@
+name: nanosnake_salmon_quant
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - salmon=1.1.0

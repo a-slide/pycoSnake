@@ -1,0 +1,9 @@
+name: nanosnake_subread_featurecounts
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - subread=1.6.4
