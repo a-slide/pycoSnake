@@ -13,9 +13,9 @@ with open("README.md", "r") as fh:
 
 # Collect all package data to add
 package_data = []
-package_data.extend(glob("test_data/**", recursive=True))
-package_data.extend(glob("workflows/**", recursive=True))
-package_data.extend(glob("wrappers/**", recursive=True))
+package_data.extend([fn.partition("/")[-1] for fn in glob("NanoSnake/test_data/**", recursive=True)])
+package_data.extend([fn.partition("/")[-1] for fn in glob("NanoSnake/workflows/**", recursive=True)])
+package_data.extend([fn.partition("/")[-1] for fn in glob("NanoSnake/wrappers/**", recursive=True)])
 
 setup(
     name = name,
