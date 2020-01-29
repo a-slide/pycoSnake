@@ -8,6 +8,7 @@ import sys
 import argparse
 import pkg_resources
 from collections import *
+import glob
 
 # Third party library
 from snakemake import snakemake
@@ -20,8 +21,16 @@ from NanoSnake import __description__ as package_description
 from NanoSnake.common import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~GLOBAL DIRS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-WRAPPER_DIR = pkg_resources.resource_filename (package_name, "wrappers")
 WORKFLOW_DIR = pkg_resources.resource_filename (package_name, "workflows")
+DATA_DIR = pkg_resources.resource_filename (package_name, "test_data")
+WRAPPER_DIR = pkg_resources.resource_filename (package_name, "wrappers")
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~LIST EXISTING WRAPPERS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+WRAPPER_PREFIX = "file:{}/".format(WRAPPER_DIR)
+WRAPPERS = []
+for w in glob.glob(os.path.join(WRAPPER_DIR, "*")):
+    if os.path.isfile(os.path.join(w, "snakefile.py")):
+        WRAPPERS.append(os.path.split(w)[-1])
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CLI ENTRY POINT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
@@ -35,32 +44,45 @@ def main(args=None):
     subparsers.required = True
 
     # DNA subparser
+    subparser_tests = subparsers.add_parser("tests", description="Test all the wrappers")
+    subparser_tests.set_defaults(func=tests, type="test")
+    subparser_tests.add_argument("--wrappers", "-w", default=WRAPPERS, nargs='+', choices=WRAPPERS, type=str, help="List of wrappers to test (default: all)")
+    subparser_tests.add_argument("--keep_output", "-k", action="store_true", default=False, help="Keep temporary output files generated during tests (default: %(default)s)")
+    subparser_tests.add_argument("--clean_output", "-c", action="store_true", default=False, help="clean all temporary output files generated during tests (default: %(default)s)")
+    subparser_tests.add_argument("--cores", "-j", type=int, default=1, help="the number of provided cores (default: %(default)s)")
+    subparser_tests.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
+
+    # DNA subparser
     subparser_dna_ont = subparsers.add_parser("DNA_ONT", description="Workflow for DNA Analysis of Nanopore data")
-    subparser_dna_ont.set_defaults(func=DNA_ONT)
+    subparser_dna_ont.set_defaults(func=DNA_ONT, type="workflow")
     subparser_dna_ont_IO = subparser_dna_ont.add_argument_group("input/output options")
-    subparser_dna_ont_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to a FASTA reference genome file/URL to be used for read mapping (required)")
+    subparser_dna_ont_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (required)")
     subparser_dna_ont_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
     # RNA subparser
     subparser_rna_illumina = subparsers.add_parser("RNA_illumina", description="Workflow for RNA Analysis of Illumina data")
-    subparser_rna_illumina.set_defaults(func=RNA_illumina)
+    subparser_rna_illumina.set_defaults(func=RNA_illumina, type="workflow")
     subparser_rna_illumina_IO = subparser_rna_illumina.add_argument_group("input/output options")
-    subparser_rna_illumina_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to a FASTA reference genome file/URL to be used for read mapping (required)")
-    subparser_rna_illumina_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to a GFF3/GTF annotation file/URL containing transcript annotations (required)")
+    subparser_rna_illumina_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (required)")
+    subparser_rna_illumina_IO.add_argument("--transcriptome", "-t", default=None, type=str, help="Path to an ENSEMBL cDNA FASTA reference transcriptome file/URL to be used for read counting (required)")
+    subparser_rna_illumina_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (required)")
     subparser_rna_illumina_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
-    # Add common group parsers
+    # Add common options for all parsers
+    for sp in [subparser_dna_ont, subparser_rna_illumina, subparser_tests]:
+        sp_verbosity = sp.add_mutually_exclusive_group()
+        sp_verbosity.add_argument("--verbose", "-v", action="store_true", default=False, help="Show additional debug output (default: %(default)s)")
+        sp_verbosity.add_argument("--quiet", "-q", action="store_true", default=False, help="Reduce overall output (default: %(default)s)")
+
+    # Add common options for workflow parsers
     for sp in [subparser_dna_ont, subparser_rna_illumina]:
         sp_IO = add_argument_group (sp, "input/output options")
         sp_IO.add_argument("--config", "-c", default=None, type=str, help="Snakemake configuration YAML file (required in local mode)")
         sp_IO.add_argument("--cluster_config", default=None, type=str, help="Snakemake cluster configuration YAML file (required in cluster mode)")
         sp_IO.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
         sp_template = add_argument_group (sp, "Template options")
-        sp_template.add_argument("--generate_template", "-t", type=str, nargs="+", default=[], choices=["all", "sample_sheet", "config", "cluster_config"], help="Generate template files (configs + sample_sheet) in workdir and exit (default: %(default)s)")
-        sp_template.add_argument("--overwrite_template", "-o", action="store_true", default=False, help="Overwrite existing template files if they already exist (default: %(default)s).")
-        sp_verbosity = sp.add_mutually_exclusive_group()
-        sp_verbosity.add_argument("--verbose", "-v", action="store_true", default=False, help="Show additional debug output (default: %(default)s)")
-        sp_verbosity.add_argument("--quiet", "-q", action="store_true", default=False, help="Reduce overall output (default: %(default)s)")
+        sp_template.add_argument("--generate_template", "-e", type=str, nargs="+", default=[], choices=["all", "sample_sheet", "config", "cluster_config"], help="Generate template files (configs + sample_sheet) in workdir and exit (default: %(default)s)")
+        sp_template.add_argument("--overwrite_template", "-o", action="store_true", default=False, help="Overwrite existing template files if they already exist (default: %(default)s)")
         sp_snakemake = add_argument_group(sp, "Snakemake options")
         sp_snakemake.add_argument("--report", type=str, default=None, help="create an HTML report for a previous run at the given path (default: %(default)s)")
         sp_snakemake.add_argument("--listrules", action="store_true", default=False, help="list rules (default: %(default)s)")
@@ -115,7 +137,7 @@ def main(args=None):
         sp_snakemake.add_argument("--conda_prefix", type=str, default=None, help="the directory in which conda environments will be created (default: %(default)s)")
         sp_snakemake.add_argument("--create_envs_only", action="store_true", default=False, help="if specified, only builds the conda environments specified for each job, then exits. (default: %(default)s)")
         sp_snakemake.add_argument("--list_conda_envs", action="store_true", default=False, help="list conda environments and their location on disk. (default: %(default)s)")
-        sp_snakemake.add_argument("--wrapper_prefix",type=str, default="https://raw.githubusercontent.com/a-slide/NanoSnake_wrappers/master/NanoSnake_wrappers/wrappers/", help=" (prefix for wrapper script URLs. (default: %(default)s)")
+        sp_snakemake.add_argument("--wrapper_prefix",type=str, default=WRAPPER_PREFIX, help=" (prefix for wrapper script URLs. (default: %(default)s)")
 #        sp_snakemake.add_argument("--use_singularity", action="store_true", default=False, help="run jobs in singularity containers (if defined with singularity directive) (default: %(default)s)")
 #        sp_snakemake.add_argument("--singularity_args", type=str, default=None, help="additional arguments to pass to singularity (default: %(default)s)")
 #        sp_snakemake.add_argument("--singularity_prefix", type=str, default=None, help="the directory to which singularity images will be pulled (default: %(default)s)")
@@ -137,61 +159,60 @@ def main(args=None):
 #        sp_snakemake.add_argument("--cluster_status", type=str, default=None, help="status command for cluster execution. If None, Snakemake will rely on flag files. Otherwise, it expects the command to return “success”, “failure” or “running” when executing with a cluster jobid as single argument. (default: %(default)s)")
 #        sp_snakemake.add_argument("--export_cwl", type=str, default=None, help="Compile workflow to CWL and save to given file (default: %(default)s)")
 
-    # Parse args and call subfunction
+    # Parse args and and define logger verbose level
     args = parser.parse_args()
-
-    # Change overall verbose level if verbose or quiet
     set_log_level(quiet=args.quiet, verbose=args.verbose)
 
-    # Unlock locked dir and exit
-    if args.unlock:
-        log.warning (f"Unlocking working directory")
-        unlock_dir (workdir=args.workdir)
-        sys.exit()
+    if args.type == "workflow":
 
-    # Generate templates and exit
-    if args.generate_template:
-        log.warning (f"Generate template files in working directory")
-        generate_template (
-            workflow_dir=WORKFLOW_DIR,
-            templates=args.generate_template,
-            workflow=args.subcommands,
-            workdir=args.workdir,
-            overwrite=args.overwrite_template,
-            verbose=args.verbose,
-            quiet=args.quiet)
-        sys.exit()
+        # Unlock locked dir and exit
+        if args.unlock:
+            log.warning (f"Unlocking working directory")
+            unlock_dir (workdir=args.workdir)
+            sys.exit()
 
-    # Cluster stuff to simplify options
-    if args.cluster_config:
-        log.warning (f"INITIALISING WORKFLOW IN CLUSTER MODE")
-        args.local_cores = get_yaml_val(yaml_fn=args.cluster_config, val_name="cluster_cores", default=args.cores)
-        args.nodes = get_yaml_val(yaml_fn=args.cluster_config, val_name="cluster_nodes", default=args.nodes)
-        args.cluster = get_yaml_val(yaml_fn=args.cluster_config, val_name="cluster_cmd", default=args.cluster)
-        args.config = args.cluster_config
-        log.debug (f"Cores:{args.local_cores} / Nodes:{args.nodes} / Cluster_cmd:{args.cluster}")
-    elif args.config :
-        log.warning (f"INITIALISING WORKFLOW IN LOCAL MODE")
-    else:
-        raise NanoSnakeError("A configuration file `--config` or a cluster configuration file `--cluster_config` is required")
+        # Generate templates and exit
+        if args.generate_template:
+            log.warning (f"Generate template files in working directory")
+            generate_template (
+                workflow_dir=WORKFLOW_DIR,
+                templates=args.generate_template,
+                workflow=args.subcommands,
+                workdir=args.workdir,
+                overwrite=args.overwrite_template,
+                verbose=args.verbose,
+                quiet=args.quiet)
+            sys.exit()
+
+        # Cluster stuff to simplify options
+        if args.cluster_config:
+            log.warning (f"INITIALISING WORKFLOW IN CLUSTER MODE")
+            args.local_cores = get_yaml_val(yaml_fn=args.cluster_config, val_name="cluster_cores", default=args.cores)
+            args.nodes = get_yaml_val(yaml_fn=args.cluster_config, val_name="cluster_nodes", default=args.nodes)
+            args.cluster = get_yaml_val(yaml_fn=args.cluster_config, val_name="cluster_cmd", default=args.cluster)
+            args.config = args.cluster_config
+            log.debug (f"Cores:{args.local_cores} / Nodes:{args.nodes} / Cluster_cmd:{args.cluster}")
+        elif args.config :
+            log.warning (f"INITIALISING WORKFLOW IN LOCAL MODE")
+        else:
+            raise NanoSnakeError("A configuration file `--config` or a cluster configuration file `--cluster_config` is required")
 
     # Run workflow
     args.func(args)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DNA_ONT SUBPARSERS FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DNA_ONT SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def DNA_ONT (args):
     """"""
     # Get and check config files
     log.warning ("CHECKING CONFIGURATION FILES")
     snakefile = get_snakefile_fn(workflow_dir=WORKFLOW_DIR, workflow=args.subcommands)
     configfile = get_config_fn(config=args.config)
-    sample_sheet = get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq", "fast5", "seq_summary"])
-    genome = get_genome(args.genome)
 
     # Store additionnal options to pass to snakemake
     log.info ("Build config dict for snakemake")
-    config = {"genome":genome, "sample_sheet":sample_sheet}
+    config = {
+        "genome":required_option("genome", args.genome),
+        "sample_sheet":get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq", "fast5", "seq_summary"])}
     log.debug (config)
 
     # Filter other args option compatible with snakemake API
@@ -202,21 +223,21 @@ def DNA_ONT (args):
     log.warning ("RUNNING SNAKEMAKE PIPELINE")
     snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RNA_illumina SUBPARSERS FUNCTIONS~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RNA_illumina SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def RNA_illumina (args):
     """"""
     # Get and check config files
     log.warning ("CHECKING CONFIGURATION FILES")
     snakefile = get_snakefile_fn(workflow_dir=WORKFLOW_DIR, workflow=args.subcommands)
     configfile = get_config_fn(config=args.config)
-    sample_sheet = get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq1", "fastq2"])
-    genome = get_genome(args.genome)
-    annotation = get_annotation(args.annotation)
 
     # Store additionnal options to pass to snakemake
     log.info ("Build config dict for snakemake")
-    config = {"genome":genome, "annotation":annotation, "sample_sheet":sample_sheet}
+    config = {
+        "genome":required_option("genome", args.genome),
+        "transcriptome":required_option("transcriptome", args.transcriptome),
+        "annotation":required_option("annotation", args.annotation),
+        "sample_sheet":get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq1", "fastq2"])}
     log.debug (config)
 
     # Filter other args option compatible with snakemake API
@@ -227,9 +248,44 @@ def RNA_illumina (args):
     log.warning ("RUNNING SNAKEMAKE PIPELINE")
     snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Helper functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TEST SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+def tests (args):
+    """"""
+    # Cleanup data and leave
+    if args.clean_output:
+        log.info("Removing output data")
+        for wrapper_name in args.wrappers:
+            wrapper_workdir = os.path.join(args.workdir, wrapper_name)
+            shutil.rmtree(wrapper_workdir, ignore_errors=True)
+        sys.exit()
 
-# For some reason it has to be in the same file ...
+    # Test wrappers
+    for wrapper_name in args.wrappers:
+        log.warning("Testing Wrapper {}".format(wrapper_name))
+        try:
+            snakefile = get_snakefile_fn(workflow_dir=WRAPPER_DIR, workflow=wrapper_name)
+            wrapper_workdir = os.path.join(args.workdir, wrapper_name)
+            log.debug("Working in directory: {}".format(wrapper_workdir))
+
+            #Run Snakemake through the API
+            snakemake (
+                snakefile = snakefile,
+                workdir = wrapper_workdir,
+                config = {"data_dir":DATA_DIR},
+                wrapper_prefix = WRAPPER_PREFIX,
+                use_conda = True,
+                cores = args.cores,
+                verbose = args.verbose,
+                quiet = args.quiet)
+
+        finally:
+            log.debug("List of file generated: {}".format(os.listdir(wrapper_workdir)))
+            shutil.rmtree(os.path.join(wrapper_workdir, ".snakemake"), ignore_errors=True)
+            if not args.keep_output:
+                log.debug("Removing temporary directory")
+                shutil.rmtree(wrapper_workdir, ignore_errors=True)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Helper functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def filter_valid_snakemake_options (args):
     """Filter out options that are not in the snakemake API"""
     valid_options = list(inspect.signature(snakemake).parameters.keys())
