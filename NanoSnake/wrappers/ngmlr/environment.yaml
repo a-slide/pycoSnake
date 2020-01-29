@@ -1,0 +1,10 @@
+name: nanosnake_ngmlr
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - ngmlr==0.2.7
+  - samtools==1.9

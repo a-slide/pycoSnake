@@ -1,0 +1,12 @@
+name: nanosnake_get_genome
+
+channels:
+  - defaults
+  - aleg
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - python=3.6
+  - pyfaidx=0.5.8
+  - pyBioTools=0.2.0.5

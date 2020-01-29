@@ -1,0 +1,10 @@
+name: nanosnake_igvtools_count
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - openjdk=11.0.1
+  - igvtools=2.5.3

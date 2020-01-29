@@ -1,0 +1,9 @@
+name: nanosnake_bedtools_genomecov
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - bedtools=2.28.0

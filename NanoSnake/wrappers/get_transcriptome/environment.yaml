@@ -1,0 +1,13 @@
+name: nanosnake_get_transcriptome
+
+channels:
+  - defaults
+  - aleg
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - python=3.6
+  - pandas=0.25.3
+  - pyfaidx=0.5.8
+  - pyBioTools=0.2.0.5

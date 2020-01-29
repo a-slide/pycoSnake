@@ -1,0 +1,10 @@
+name: nanosnake_star_align
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - star=2.7.3a
+  - samtools==1.9
