@@ -1,7 +1,7 @@
 # Config file for lsf cluster
 
 # Configuration file version (do not change)
-config_version: 3
+config_version: 5
 
 # cluster command for lsf
 cluster_cores: 10000
@@ -17,24 +17,31 @@ __default__:
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
-# MAIN RULES
-preprocess_genone:
+# INPUT FILES RULES
+get_genome:
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
     opt: ""
 
-preprocess_annotation:
+get_transcriptome:
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
-    opt: "--keep-exon-attrs --keep-genes"
+    opt: ""
+
+get_annotation:
+    name : "nanosnake_RNA_illumina.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
+    opt: ""
 
 fastp:
     opt: ""
     threads: 20
     mem: 10000
 
+# GENOME ALIGNMENT RULES
 star_index:
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
@@ -94,3 +101,24 @@ bedtools_genomecov:
 igvtools_count:
     opt: "-w 10"
     mem: 20000
+
+# TRANSCRIPTOME PSEUDO-ALIGNMENT RULES
+salmon_index:
+    opt: ""
+    threads: 20
+    mem: 20000
+    name : "nanosnake_RNA_illumina.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
+
+salmon_quant:
+    opt: "--libType A --validateMappings"
+    threads: 20
+    mem: 20000
+
+salmon_count_merge:
+    opt: ""
+    mem: 20000
+    name : "nanosnake_RNA_illumina.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"

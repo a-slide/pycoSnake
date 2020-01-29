@@ -1,22 +1,26 @@
 # All the rules accept the following parameters: opt, threads, mem
 
 # Configuration file version (do not change)
-config_version: 3
+config_version: 5
 
-# MAIN RULES
-preprocess_genone:
+# INPUT FILES RULES
+get_genome:
     opt: ""
 
-preprocess_annotation:
-    opt: "--keep-exon-attrs --keep-genes"
+get_transcriptome:
+    opt: ""
+
+get_annotation:
+    opt: ""
 
 fastp:
     opt: ""
     threads: 2
 
+# GENOME ALIGNMENT RULES
 star_index:
     opt: ""
-    threads: 2
+    threads: 4
 
 star_align:
     opt: "--outFilterType BySJout  --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.04 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000"
@@ -29,7 +33,7 @@ pbt_alignment_filter:
 star_count_merge:
     opt: ""
 
-# OPTIONAL RULES (comment to be skip)
+# OPTIONAL ALIGNMENT RULES (comment to be skip)
 # cufflinks:
 #     opt: "--library-type fr-firststrand --upper-quartile-norm"
 #     threads: 4
@@ -52,3 +56,15 @@ bedtools_genomecov:
 
 igvtools_count:
     opt: "-w 10"
+
+# TRANSCRIPTOME PSEUDO-ALIGNMENT RULES
+salmon_index:
+    opt: ""
+    threads: 4
+
+salmon_quant:
+    opt: "--libType A --validateMappings"
+    threads: 4
+
+salmon_count_merge:
+    opt: ""
