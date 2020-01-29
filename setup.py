@@ -2,13 +2,20 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
+from glob import glob
 
 # Define package info
 name= "NanoSnake"
-version = '0.0.3.1'
+version = '0.0.3.3'
 description = "NanoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+# Collect all package data to add
+package_data = []
+package_data.extend([fn.partition("/")[-1] for fn in glob("NanoSnake/test_data/**", recursive=True)])
+package_data.extend([fn.partition("/")[-1] for fn in glob("NanoSnake/workflows/**", recursive=True)])
+package_data.extend([fn.partition("/")[-1] for fn in glob("NanoSnake/wrappers/**", recursive=True)])
 
 setup(
     name = name,
@@ -34,12 +41,6 @@ setup(
         "ftputil==3.4"],
     packages = [name],
     package_dir = {name: name},
-    package_data = {name: [
-        'workflows/*/snakefile.py',
-        'workflows/*/templates/*',
-        'wrappers/*',
-        'wrappers/*/*',
-        'test_data/*',
-        'test_data/*/*']},
+    package_data = {name: package_data},
     entry_points = {'console_scripts': ['NanoSnake=NanoSnake.__main__:main']}
 )

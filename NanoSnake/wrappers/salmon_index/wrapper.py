@@ -6,8 +6,6 @@ __version__ = "0.0.3"
 
 # Imports
 from snakemake.shell import shell
-from pyfaidx import Fasta
-from math import log2
 import os
 
 # Shortcuts
