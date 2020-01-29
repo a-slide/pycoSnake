@@ -1,7 +1,7 @@
 # Config file for lsf cluster
 
 # Configuration file version (do not change)
-config_version: 5
+config_version: 6
 
 # cluster command for lsf
 cluster_cores: 10000
@@ -18,7 +18,7 @@ __default__:
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 # MAIN RULES
-preprocess_genone:
+get_genome:
     opt: ""
     name : "nanosnake_DNA_ONT.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
@@ -59,7 +59,7 @@ pycometh_cgi_finder:
     error : "logs/{rule}/bsub_stderr.log"
 
 pycometh_cpg_aggregate:
-    opt: "--min_depth 10"
+    opt: "--min_depth 5"
     mem: 50000
 
 pycometh_interval_aggregate:
@@ -80,7 +80,7 @@ ngmlr:
     mem: 50000
 
 sniffles:
-    opt: "--min_support 10 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
+    opt: "--min_support 5 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
     threads: 5
     mem: 10000
 
