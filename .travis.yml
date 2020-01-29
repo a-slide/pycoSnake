@@ -12,6 +12,13 @@ deploy:
   # Deploy to Anaconda
   - provider: script
     skip_cleanup: true
-    script: bash ./deploy_anaconda.sh
+    script: bash ./deploy_anaconda.sh $ANACONDA_TOKEN
     on:
       branch: master
+
+  # Deploy to Anaconda
+  - provider: script
+    skip_cleanup: true
+    script: bash ./deploy_anaconda.sh $ANACONDA_DEV_TOKEN
+    on:
+      branch: dev
