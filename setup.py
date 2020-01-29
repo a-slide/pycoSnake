@@ -6,7 +6,7 @@ from glob import glob
 
 # Define package info
 name= "NanoSnake"
-version = '0.0.3.2'
+version = '0.0.3.3'
 description = "NanoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
 with open("README.md", "r") as fh:
     long_description = fh.read()
