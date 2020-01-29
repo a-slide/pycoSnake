@@ -13,9 +13,9 @@ with open("README.md", "r") as fh:
 
 # Collect all package data to add
 package_data = []
-package_data.extend(glob("./test_data/**", recursive=True))
-package_data.extend(glob("./workflows/**", recursive=True))
-package_data.extend(glob("./wrappers/**", recursive=True))
+package_data.extend(glob("test_data/**", recursive=True))
+package_data.extend(glob("workflows/**", recursive=True))
+package_data.extend(glob("wrappers/**", recursive=True))
 
 setup(
     name = name,
