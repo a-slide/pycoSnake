@@ -16,7 +16,7 @@ HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Minimum snakemake version
-config_version=6
+config_version=7
 if not "config_version" in config or config["config_version"]!= config_version:
     raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
 
@@ -31,6 +31,13 @@ def get_fast5 (wildcards):
 def get_seqsum (wildcards):
     return sample_df.loc[wildcards.sample, "seq_summary"]
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define number of chunks for nanopolish~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+try:
+    nchunk = int(config["pbt_alignment_split"]["n_chunks"])
+except:
+    nchunk = 2
+chunk_list = list(range(nchunk))
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define IO for each rule~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Build output files dictionnary
 input_d=defaultdict(OrderedDict)
@@ -38,12 +45,9 @@ output_d=defaultdict(OrderedDict)
 log_d=OrderedDict()
 
 rule_name="get_genome"
-if config["genome"].startswith("ftp"):
-    input_d[rule_name]["ref"]=FTP.remote(config["genome"])
-elif config["genome"].startswith("http"):
-    input_d[rule_name]["ref"]=HTTP.remote(config["genome"])
-else:
-    input_d[rule_name]["ref"]=config["genome"]
+if config["genome"].startswith("ftp"): input_d[rule_name]["ref"]=FTP.remote(config["genome"])
+elif config["genome"].startswith("http"): input_d[rule_name]["ref"]=HTTP.remote(config["genome"])
+else: input_d[rule_name]["ref"]=config["genome"]
 output_d[rule_name]["ref"]=join("results","input","genone","ref.fa")
 output_d[rule_name]["index"]=join("results","input","genone","ref.fa.fai")
 log_d[rule_name]=join("logs",rule_name,"ref.log")
@@ -78,13 +82,18 @@ input_d[rule_name]["seqsum"]=get_seqsum
 output_d[rule_name]["index"]=join("results","input","merged_fastq","{sample}.fastq.index")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
+rule_name="pbt_alignment_split"
+input_d[rule_name]["bam"]=output_d["pbt_alignment_filter"]["bam"]
+output_d[rule_name]["bam"]=expand(join("results","methylation","split_alignments","{{sample}}","{chunk}.bam"), chunk=chunk_list) # Expand chunks
+log_d[rule_name]=join("logs",rule_name,"{sample}.log")
+
 rule_name="nanopolish_call_methylation"
 input_d[rule_name]["fastq"]=output_d["pbt_fastq_filter"]["fastq"]
 input_d[rule_name]["fastq_index"]=output_d["nanopolish_index"]["index"]
-input_d[rule_name]["bam"]=output_d["pbt_alignment_filter"]["bam"]
+input_d[rule_name]["bam"]=join("results","methylation","split_alignments","{sample}","{chunk}.bam")
 input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
-output_d[rule_name]["tsv"]=join("results","methylation","nanopolish_calls","{sample}.tsv")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
+output_d[rule_name]["tsv"]=join("results","methylation","nanopolish_calls","{sample}","{chunk}.tsv")
+log_d[rule_name]=join("logs",rule_name,"{sample}","{chunk}.log")
 
 rule_name="pycometh_cgi_finder"
 input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
@@ -94,7 +103,7 @@ output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_cgi_find
 log_d[rule_name]=join("logs",rule_name,"ref.log")
 
 rule_name="pycometh_cpg_aggregate"
-input_d[rule_name]["tsv"]=output_d["nanopolish_call_methylation"]["tsv"]
+input_d[rule_name]["tsv"]=expand(join("results","methylation","nanopolish_calls","{{sample}}","{chunk}.tsv"), chunk=chunk_list) # Aggregate chunks
 input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 output_d[rule_name]["tsv"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.bed")
@@ -111,7 +120,7 @@ output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_interval
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="pycometh_meth_comp"
-input_d[rule_name]["tsv"]=[join("results","methylation","pycometh_interval_aggregate",f"{sample}.tsv.gz") for sample in sample_list]
+input_d[rule_name]["tsv"]=expand(join("results","methylation","pycometh_interval_aggregate","{sample}.tsv.gz"), sample=sample_list) # Aggregate samples
 input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 output_d[rule_name]["tsv"]=join("results","methylation","pycometh_meth_comp","meth_comp.tsv.gz")
 output_d[rule_name]["bed"]=join("results","methylation","pycometh_meth_comp","meth_comp.bed")
@@ -159,19 +168,24 @@ log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 # main rules
 run_rules = ["get_genome", "pbt_fastq_filter", "minimap2_index", "minimap2_align", "pbt_alignment_filter"]
 
-# Optional methylation analysis
-opt_rules = ["nanopolish_index", "nanopolish_call_methylation", "pycometh_cgi_finder", "pycometh_cpg_aggregate", "pycometh_interval_aggregate", "pycometh_meth_comp"]
-if all_in (config, opt_rules):
-    run_rules.extend (opt_rules)
+# Optional nanopolish analysis analysis
+np_rules = ["pbt_alignment_split", "nanopolish_index", "nanopolish_call_methylation"]
+if all_in (config, np_rules):
+    run_rules.extend (np_rules)
+
+# Optional pycoMeth analysis
+pcm_rules = ["pycometh_cgi_finder", "pycometh_cpg_aggregate", "pycometh_interval_aggregate", "pycometh_meth_comp"]
+if all_in (config, np_rules) and all_in (config, pcm_rules):
+    run_rules.extend (pcm_rules)
 
 # Optional SV analysis
-opt_rules = ["ngmlr", "sniffles"]
-if all_in (config, opt_rules):
-    run_rules.extend (opt_rules)
+SV_rules = ["ngmlr", "sniffles"]
+if all_in (config, SV_rules):
+    run_rules.extend (SV_rules)
 
 # Other optional orphan rules
-opt_rules = ["pycoqc", "samtools_qc", "bedtools_genomecov", "igvtools_count"]
-for r in opt_rules:
+orphan_rules = ["pycoqc", "samtools_qc", "bedtools_genomecov", "igvtools_count"]
+for r in orphan_rules:
     if r in config:
         run_rules.append(r)
 
@@ -180,11 +194,17 @@ for rule_name, rule_d in output_d.items():
     if rule_name in run_rules:
         for option, output in rule_d.items():
             all_output.append(output)
+all_output = flatten_list(all_output)
+
+all_expand = []
+for output in all_output:
+    all_expand.append(list(set(expand(output, sample=sample_list, chunk=chunk_list))))
+all_expand = flatten_list(all_expand)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RULES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 rule all:
-    input: [expand(o, sample=sample_list) for o in all_output]
+    input: all_expand
 
 rule_name="get_genome"
 rule get_genome:
@@ -245,6 +265,16 @@ rule nanopolish_index:
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
     wrapper: "nanopolish_index"
+
+rule_name="pbt_alignment_split"
+rule pbt_alignment_split:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name),
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "pbt_alignment_split"
 
 rule_name="nanopolish_call_methylation"
 rule nanopolish_call_methylation:

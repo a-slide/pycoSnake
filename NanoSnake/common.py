@@ -116,6 +116,13 @@ def all_in (collection, val_list):
             return False
     return True
 
+def flatten_list(l):
+    if l == []:
+        return l
+    if isinstance(l[0], list):
+        return flatten_list(l[0]) + flatten_list(l[1:])
+    return l[:1] + flatten_list(l[1:])
+
 def get_threads (config, rule_name, default=1):
     try:
         return config[rule_name]["threads"]
