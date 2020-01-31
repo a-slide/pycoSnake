@@ -1,7 +1,7 @@
 # Config file for lsf cluster
 
 # Configuration file version (do not change)
-config_version: 6
+config_version: 7
 
 # cluster command for lsf
 cluster_cores: 10000
@@ -10,25 +10,28 @@ cluster_cmd: "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {
 
 # DEFAULT CLUSTER OPTIONS
 __default__:
-    threads: 2
-    mem: 5000
     queue: "research-rh74"
-    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
-    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
-    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 # MAIN RULES
 get_genome:
     opt: ""
+    threads: 2
+    mem: 5000
     name : "nanosnake_DNA_ONT.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
 
 pbt_fastq_filter:
     opt: "--remove_duplicates --min_len 100 --min_qual 7"
+    threads: 2
+    mem: 5000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 minimap2_index:
     opt: ""
+    threads: 2
     mem : 20000
     name : "nanosnake_DNA_ONT.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
@@ -38,36 +41,72 @@ minimap2_align:
     opt: "-x map-ont -L"
     threads : 40
     mem : 40000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 pbt_alignment_filter:
     opt: "--min_align_len 100 --min_freq_identity 0.7 --skip_unmapped --skip_secondary --skip_supplementary"
+    threads: 2
+    mem: 5000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
-# OPTIONAL DNA METHYLATION RULES, can be commented to be skippe
+# OPTIONAL DNA METHYLATION RULES, Comment to skip
+pbt_alignment_split:
+    opt: ""
+    n_chunks: 20
+    threads: 2
+    mem: 5000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
+
 nanopolish_index:
     opt: ""
+    threads: 2
     mem: 10000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 nanopolish_call_methylation:
     opt: "--methylation cpg"
-    threads: 40
+    threads: 20
     mem: 10000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}_{wildcards.chunk}"
+    output : "logs/{rule}/{wildcards.sample}_{wildcards.chunk}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_{wildcards.chunk}_bsub_stderr.log"
 
+# OPTIONAL PYCOMETH RULES, Comment to skip
 pycometh_cgi_finder:
     opt: ""
+    threads: 2
+    mem: 5000
     name : "nanosnake_DNA_ONT.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
 
 pycometh_cpg_aggregate:
     opt: "--min_depth 5"
+    threads: 2
     mem: 50000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 pycometh_interval_aggregate:
     opt: "--min_cpg_per_interval 5"
+    threads: 2
     mem: 10000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 pycometh_meth_comp:
     opt: "--max_missing 1"
+    threads: 2
     mem: 10000
     name : "nanosnake_DNA_ONT.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
@@ -78,32 +117,48 @@ ngmlr:
     opt: "-x ont"
     threads: 40
     mem: 50000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 sniffles:
     opt: "--min_support 5 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
     threads: 5
     mem: 10000
-
-# pycosv_filter_variants:
-#     opt: ""
-#
-# pycosv_varcomp:
-#     opt: ""
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 # OPTIONAL QC RULES, can be commented to be skipped
 pycoqc:
     opt: "--filter_calibration --filter_duplicated --min_pass_len 100 --min_pass_qual 7"
+    threads: 2
     mem: 20000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 samtools_qc:
     opt: ""
+    threads: 2
     mem: 10000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 # OPTIONAL COVERAGE RULES, can be commented to be skipped
 bedtools_genomecov:
     opt: "-bg"
+    threads: 2
     mem: 20000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 igvtools_count:
     opt: "-w 10"
+    threads: 2
     mem: 20000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
