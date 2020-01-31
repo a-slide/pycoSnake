@@ -1,0 +1,11 @@
+name: nanosnake_pbt_alignment_filter
+
+channels:
+  - defaults
+  - aleg
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - python=3.6
+  - pyBioTools=0.2.0.8
