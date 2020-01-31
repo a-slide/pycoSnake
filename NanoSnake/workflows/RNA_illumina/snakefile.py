@@ -16,7 +16,7 @@ HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Minimum snakemake version
-config_version=5
+config_version=6
 if not "config_version" in config or config["config_version"]!= config_version:
     raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
 
@@ -96,7 +96,7 @@ output_d[rule_name]["bam_index"]=join("results","main","filtered_alignments","{s
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="star_count_merge"
-input_d[rule_name]["counts"]=[join("results","counts","star",f"{sample}_counts.tsv") for sample in sample_list]
+input_d[rule_name]["counts"]=expand(join("results","counts","star","{sample}_counts.tsv"),sample=sample_list)
 output_d[rule_name]["unstranded_counts"]=join("results","counts","star_merged","unstranded_counts.tsv")
 output_d[rule_name]["positive_counts"]=join("results","counts","star_merged","positive_counts.tsv")
 output_d[rule_name]["negative_counts"]=join("results","counts","star_merged","negative_counts.tsv")
@@ -111,8 +111,8 @@ output_d[rule_name]["isoforms_fpkm"]=join("results","counts","cufflinks","{sampl
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="cufflinks_fpkm_merge"
-input_d[rule_name]["fpkm_genes"]=[join("results","counts","cufflinks",f"{sample}_genes_fpkm.tsv") for sample in sample_list]
-input_d[rule_name]["fpkm_isoforms"]=[join("results","counts","cufflinks",f"{sample}_isoforms_fpkm.tsv") for sample in sample_list]
+input_d[rule_name]["fpkm_genes"]=expand(join("results","counts","cufflinks","{sample}_genes_fpkm.tsv"), sample=sample_list)
+input_d[rule_name]["fpkm_isoforms"]=expand(join("results","counts","cufflinks","{sample}_isoforms_fpkm.tsv"), sample=sample_list)
 output_d[rule_name]["fpkm_genes"]=join("results","counts","cufflinks_merged","fpkm_genes.tsv")
 output_d[rule_name]["fpkm_isoforms"]=join("results","counts","cufflinks_merged","fpkm_isoforms.tsv")
 log_d[rule_name]=join("logs",rule_name,"cufflinks_fpkm_merge.log")
@@ -124,7 +124,7 @@ output_d[rule_name]["counts"]=join("results","counts","featurecounts","{sample}_
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="subread_featurecounts_merge"
-input_d[rule_name]["counts"]=[join("results","counts","featurecounts",f"{sample}_counts.tsv") for sample in sample_list]
+input_d[rule_name]["counts"]=expand(join("results","counts","featurecounts","{sample}_counts.tsv"), sample=sample_list)
 output_d[rule_name]["counts"]=join("results","counts","featurecounts_merged","counts.tsv")
 output_d[rule_name]["tpm"]=join("results","counts","featurecounts_merged","tpm.tsv")
 log_d[rule_name]=join("logs",rule_name,"subread_featurecounts_merge.log")
@@ -161,7 +161,7 @@ output_d[rule_name]["counts"]=join("results","counts","salmon_quant","{sample}_c
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="salmon_count_merge"
-input_d[rule_name]["counts"]=[join("results","counts","salmon_quant",f"{sample}_counts.tsv") for sample in sample_list]
+input_d[rule_name]["counts"]=expand(join("results","counts","salmon_quant","{sample}_counts.tsv"), sample=sample_list)
 output_d[rule_name]["counts"]=join("results","counts","salmon_count_merge","counts.tsv")
 output_d[rule_name]["tpm"]=join("results","counts","salmon_count_merge","tpm.tsv")
 log_d[rule_name]=join("logs",rule_name,"salmon_count_merge.log")
@@ -194,11 +194,17 @@ for rule_name, rule_d in output_d.items():
     if rule_name in run_rules:
         for option, output in rule_d.items():
             all_output.append(output)
+all_output = flatten_list(all_output)
+
+all_expand = []
+for output in all_output:
+    all_expand.append(list(set(expand(output, sample=sample_list))))
+all_expand = flatten_list(all_expand)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RULES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 rule all:
-    input: [expand(o, sample=sample_list) for o in all_output]
+    input: all_expand
 
 rule_name="get_genome"
 rule get_genome:
