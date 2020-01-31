@@ -1,7 +1,7 @@
 # Config file for lsf cluster
 
 # Configuration file version (do not change)
-config_version: 5
+config_version: 6
 
 # cluster command for lsf
 cluster_cores: 10000
@@ -13,53 +13,71 @@ __default__:
     threads: 2
     mem: 5000
     queue: "research-rh74"
-    name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
-    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
-    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
+
 
 # INPUT FILES RULES
 get_genome:
+    opt: ""
+    threads: 2
+    mem: 5000
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
-    opt: ""
 
 get_transcriptome:
+    opt: ""
+    threads: 2
+    mem: 5000
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
-    opt: ""
 
 get_annotation:
+    opt: ""
+    threads: 2
+    mem: 5000
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
-    opt: ""
 
 fastp:
     opt: ""
     threads: 20
     mem: 10000
+    name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 # GENOME ALIGNMENT RULES
 star_index:
-    name : "nanosnake_RNA_illumina.{rule}"
-    output : "logs/{rule}/bsub_stdout.log"
-    error : "logs/{rule}/bsub_stderr.log"
     opt: ""
     threads: 20
     mem: 50000
+    name : "nanosnake_RNA_illumina.{rule}"
+    output : "logs/{rule}/bsub_stdout.log"
+    error : "logs/{rule}/bsub_stderr.log"
 
 star_align:
     opt: "--outFilterType BySJout  --outFilterMultimapNmax 20 --alignSJoverhangMin 8 --alignSJDBoverhangMin 1 --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.04 --alignIntronMin 20 --alignIntronMax 1000000 --alignMatesGapMax 1000000"
     threads: 20
     mem: 20000
+    name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
+
 
 pbt_alignment_filter:
     opt: "--min_align_len 50 --min_freq_identity 0.7 --skip_unmapped --skip_secondary --skip_supplementary"
+    threads: 2
+    mem: 5000
+    name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
+
 
 star_count_merge:
     opt: ""
+    threads: 2
     mem: 20000
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
@@ -82,9 +100,13 @@ subread_featurecounts:
     opt: "-p"
     threads: 20
     mem: 20000
+    name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 subread_featurecounts_merge:
     opt: ""
+    threads: 2
     mem: 20000
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"
@@ -92,15 +114,30 @@ subread_featurecounts_merge:
 
 samtools_qc:
     opt: ""
+    threads: 2
     mem: 10000
+    name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
+
 
 bedtools_genomecov:
     opt: "-bg"
+    threads: 2
     mem: 20000
+    name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
+
 
 igvtools_count:
     opt: "-w 10"
+    threads: 2
     mem: 20000
+    name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
+
 
 # TRANSCRIPTOME PSEUDO-ALIGNMENT RULES
 salmon_index:
@@ -115,9 +152,14 @@ salmon_quant:
     opt: "--libType A --validateMappings"
     threads: 20
     mem: 20000
+    name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
+
 
 salmon_count_merge:
     opt: ""
+    threads: 2
     mem: 20000
     name : "nanosnake_RNA_illumina.{rule}"
     output : "logs/{rule}/bsub_stdout.log"

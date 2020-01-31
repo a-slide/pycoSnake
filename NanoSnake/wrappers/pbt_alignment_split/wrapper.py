@@ -13,4 +13,4 @@ bam_input = snakemake.input.bam
 bam_output = snakemake.output.bam
 
 # Run shell command
-shell("pyBioTools Alignment Filter {opt} -i {bam_input} -o {bam_output} --verbose &> {snakemake.log}")
+shell("pyBioTools Alignment Split {opt} -i {bam_input} -l {bam_output} --verbose &> {snakemake.log}")

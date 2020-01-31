@@ -1,7 +1,7 @@
 # All the rules accept the following parameters: opt, threads, mem
 
 # Configuration file version (do not change)
-config_version: 5
+config_version: 6
 
 # INPUT FILES RULES
 get_genome:

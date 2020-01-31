@@ -1,7 +1,7 @@
 # All the rules accept the following parameters: opt, threads, mem
 
 # Configuration file version (do not change)
-config_version: 6
+config_version: 7
 
 # MAIN RULES
 get_genome:
@@ -20,7 +20,11 @@ minimap2_align:
 pbt_alignment_filter:
     opt: "--min_align_len 100 --min_freq_identity 0.7 --skip_unmapped --skip_secondary --skip_supplementary"
 
-# OPTIONAL DNA METHYLATION RULES, can be commented to be skipped
+# OPTIONAL DNA METHYLATION RULES, Comment to skip
+pbt_alignment_split:
+    opt: ""
+    n_chunks: 10
+
 nanopolish_index:
     opt: ""
 
@@ -28,6 +32,7 @@ nanopolish_call_methylation:
     opt: "--methylation cpg"
     threads: 4
 
+# OPTIONAL PYCOMETH RULES, Comment to skip
 pycometh_cgi_finder:
     opt: ""
 
@@ -40,7 +45,7 @@ pycometh_interval_aggregate:
 pycometh_meth_comp:
     opt: "--max_missing 1"
 
-# OPTIONAL STRUCTURAL VARIANT RULES, can be commented to be skipped
+# OPTIONAL STRUCTURAL VARIANT RULES, Comment to skip
 ngmlr:
     opt: "-x ont"
     threads: 4
@@ -48,20 +53,14 @@ ngmlr:
 sniffles:
     opt: "--min_support 5 --max_num_splits 7 --max_distance 1000 --min_length 30 --minmapping_qual 10"
 
-# pycosv_filter_variants:
-#     opt: ""
-#
-# pycosv_varcomp:
-#     opt: ""
-
-# OPTIONAL QC RULES, can be commented to be skipped
+# OPTIONAL QC RULES, Comment to skip
 pycoqc:
     opt: "--filter_calibration --filter_duplicated --min_pass_len 100 --min_pass_qual 7"
 
 samtools_qc:
     opt: ""
 
-# OPTIONAL COVERAGE RULES, can be commented to be skipped
+# OPTIONAL COVERAGE RULES, Comment to skip
 bedtools_genomecov:
     opt: "-bg"
 
