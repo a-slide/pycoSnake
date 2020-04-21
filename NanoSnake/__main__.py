@@ -69,14 +69,29 @@ def main(args=None):
     subparser_rna_illumina_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (required)")
     subparser_rna_illumina_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
+    # pycoMeth subparser
+    subparser_pycometh = subparsers.add_parser("pycoMeth", description="Workflow for DNA Analysis of Nanopore data")
+    subparser_pycometh.set_defaults(func=pycoMeth, type="workflow")
+    subparser_pycometh_IO = subparser_pycometh.add_argument_group("input/output options")
+    subparser_pycometh_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (required)")
+    subparser_pycometh_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (required)")
+    subparser_pycometh_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
+    subparser_pycometh_INT = subparser_pycometh.add_argument_group("Interval aggregation options")
+    subparser_pycometh_INT.add_argument("--interval_mode", "-i", nargs="?", default="cpg_islands", choices=["cpg_islands", "external_bed", "sliding_window"],
+        help="""How to aggregate CpG into intervals. (default: %(default)s)
+            * cpg_islands: Find CpG islands in the genome file.
+            * external_bed: use intervals provided in an external bed file.
+            * sliding_window: Use a sliding window along entire genome.""")
+    subparser_pycometh_INT.add_argument("--external_bed", "-b", default=None, type=str, help="Path to a bed file containing intervals, if interval_mode is set to external_bed")
+
     # Add common options for all parsers
-    for sp in [subparser_dna_ont, subparser_rna_illumina, subparser_tests]:
+    for sp in [subparser_dna_ont, subparser_rna_illumina, subparser_pycometh, subparser_tw]:
         sp_verbosity = sp.add_mutually_exclusive_group()
         sp_verbosity.add_argument("--verbose", "-v", action="store_true", default=False, help="Show additional debug output (default: %(default)s)")
         sp_verbosity.add_argument("--quiet", "-q", action="store_true", default=False, help="Reduce overall output (default: %(default)s)")
 
     # Add common options for workflow parsers
-    for sp in [subparser_dna_ont, subparser_rna_illumina]:
+    for sp in [subparser_dna_ont, subparser_rna_illumina, subparser_pycometh]:
         sp_IO = add_argument_group (sp, "input/output options")
         sp_IO.add_argument("--config", "-c", default=None, type=str, help="Snakemake configuration YAML file (required in local mode)")
         sp_IO.add_argument("--cluster_config", default=None, type=str, help="Snakemake cluster configuration YAML file (required in cluster mode)")
@@ -240,6 +255,32 @@ def RNA_illumina (args):
         "transcriptome":required_option("transcriptome", args.transcriptome),
         "annotation":required_option("annotation", args.annotation),
         "sample_sheet":get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq1", "fastq2"])}
+    log.debug (config)
+
+    # Filter other args option compatible with snakemake API
+    kwargs = filter_valid_snakemake_options (args)
+    log.debug (kwargs)
+
+    # Run Snakemake through the API
+    log.warning ("RUNNING SNAKEMAKE PIPELINE")
+    snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TEST SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+def pycoMeth (args):
+    """"""
+    # Get and check config files
+    log.warning ("CHECKING CONFIGURATION FILES")
+    snakefile = get_snakefile_fn(workflow_dir=WORKFLOW_DIR, workflow=args.subcommands)
+    configfile = get_config_fn(config=args.config)
+
+    # Store additionnal options to pass to snakemake
+    log.info ("Build config dict for snakemake")
+    config = {
+        "genome":required_option("genome", args.genome),
+        "annotation":required_option("annotation", args.annotation),
+        "sample_sheet":get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "methylation_calls"]),
+        "interval_mode":args.interval_mode,
+        "external_bed":args.external_bed}
     log.debug (config)
 
     # Filter other args option compatible with snakemake API
