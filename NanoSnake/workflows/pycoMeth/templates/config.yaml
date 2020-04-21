@@ -1,0 +1,21 @@
+# All the rules accept the following parameters: opt, threads, mem
+
+# Configuration file version (do not change)
+config_version: 1
+
+# MAIN RULES
+get_genome:
+    opt: ""
+
+# PYCOMETH RULES
+pycometh_cgi_finder:
+    opt: ""
+
+pycometh_cpg_aggregate:
+    opt: "--min_depth 5"
+
+pycometh_interval_aggregate:
+    opt: "--min_cpg_per_interval 5"
+
+pycometh_meth_comp:
+    opt: "--max_missing 1"

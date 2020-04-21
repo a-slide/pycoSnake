@@ -1,5 +1,3 @@
-name: nanosnake_subread_featurecounts
-
 channels:
   - defaults
   - bioconda

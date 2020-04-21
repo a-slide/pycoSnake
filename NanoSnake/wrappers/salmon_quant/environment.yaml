@@ -1,5 +1,3 @@
-name: nanosnake_salmon_quant
-
 channels:
   - defaults
   - bioconda

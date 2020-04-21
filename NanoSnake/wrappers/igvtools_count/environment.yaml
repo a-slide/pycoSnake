@@ -1,5 +1,3 @@
-name: nanosnake_igvtools_count
-
 channels:
   - defaults
   - bioconda

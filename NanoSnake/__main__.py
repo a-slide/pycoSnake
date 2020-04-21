@@ -43,23 +43,24 @@ def main(args=None):
     subparsers = parser.add_subparsers (description="%(prog)s implements the following subcommands", dest="subcommands")
     subparsers.required = True
 
-    # DNA subparser
-    subparser_tests = subparsers.add_parser("tests", description="Test all the wrappers")
-    subparser_tests.set_defaults(func=tests, type="test")
-    subparser_tests.add_argument("--wrappers", "-w", default=WRAPPERS, nargs='+', choices=WRAPPERS, type=str, help="List of wrappers to test (default: all)")
-    subparser_tests.add_argument("--keep_output", "-k", action="store_true", default=False, help="Keep temporary output files generated during tests (default: %(default)s)")
-    subparser_tests.add_argument("--clean_output", "-c", action="store_true", default=False, help="clean all temporary output files generated during tests (default: %(default)s)")
-    subparser_tests.add_argument("--cores", "-j", type=int, default=1, help="the number of provided cores (default: %(default)s)")
-    subparser_tests.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
+    # test_wrappers subparser
+    subparser_tw = subparsers.add_parser("test_wrappers", description="Test Nanosnake wrappers")
+    subparser_tw.set_defaults(func=test_wrappers, type="test")
+    subparser_tw.add_argument("--wrappers", "-w", default=WRAPPERS, nargs='+', choices=WRAPPERS, type=str, help="List of wrappers to test (default: all)")
+    subparser_tw.add_argument("--keep_output", "-k", action="store_true", default=False, help="Keep temporary output files generated during tests (default: %(default)s)")
+    subparser_tw.add_argument("--clean_output", "-c", action="store_true", default=False, help="clean all temporary output files generated during tests (default: %(default)s)")
+    subparser_tw.add_argument("--cores", "-j", type=int, default=1, help="the number of provided cores (default: %(default)s)")
+    subparser_tw.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
 
-    # DNA subparser
+    # DNA_ONT subparser
     subparser_dna_ont = subparsers.add_parser("DNA_ONT", description="Workflow for DNA Analysis of Nanopore data")
     subparser_dna_ont.set_defaults(func=DNA_ONT, type="workflow")
     subparser_dna_ont_IO = subparser_dna_ont.add_argument_group("input/output options")
     subparser_dna_ont_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (required)")
+    subparser_dna_ont_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (required)")
     subparser_dna_ont_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
-    # RNA subparser
+    # RNA_illumina subparser
     subparser_rna_illumina = subparsers.add_parser("RNA_illumina", description="Workflow for RNA Analysis of Illumina data")
     subparser_rna_illumina.set_defaults(func=RNA_illumina, type="workflow")
     subparser_rna_illumina_IO = subparser_rna_illumina.add_argument_group("input/output options")
@@ -68,14 +69,29 @@ def main(args=None):
     subparser_rna_illumina_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (required)")
     subparser_rna_illumina_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
+    # pycoMeth subparser
+    subparser_pycometh = subparsers.add_parser("pycoMeth", description="Workflow for DNA Analysis of Nanopore data")
+    subparser_pycometh.set_defaults(func=pycoMeth, type="workflow")
+    subparser_pycometh_IO = subparser_pycometh.add_argument_group("input/output options")
+    subparser_pycometh_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (required)")
+    subparser_pycometh_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (required)")
+    subparser_pycometh_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
+    subparser_pycometh_INT = subparser_pycometh.add_argument_group("Interval aggregation options")
+    subparser_pycometh_INT.add_argument("--interval_mode", "-i", nargs="?", default="cpg_islands", choices=["cpg_islands", "external_bed", "sliding_window"],
+        help="""How to aggregate CpG into intervals. (default: %(default)s)
+            * cpg_islands: Find CpG islands in the genome file.
+            * external_bed: use intervals provided in an external bed file.
+            * sliding_window: Use a sliding window along entire genome.""")
+    subparser_pycometh_INT.add_argument("--external_bed", "-b", default=None, type=str, help="Path to a bed file containing intervals, if interval_mode is set to external_bed")
+
     # Add common options for all parsers
-    for sp in [subparser_dna_ont, subparser_rna_illumina, subparser_tests]:
+    for sp in [subparser_dna_ont, subparser_rna_illumina, subparser_pycometh, subparser_tw]:
         sp_verbosity = sp.add_mutually_exclusive_group()
         sp_verbosity.add_argument("--verbose", "-v", action="store_true", default=False, help="Show additional debug output (default: %(default)s)")
         sp_verbosity.add_argument("--quiet", "-q", action="store_true", default=False, help="Reduce overall output (default: %(default)s)")
 
     # Add common options for workflow parsers
-    for sp in [subparser_dna_ont, subparser_rna_illumina]:
+    for sp in [subparser_dna_ont, subparser_rna_illumina, subparser_pycometh]:
         sp_IO = add_argument_group (sp, "input/output options")
         sp_IO.add_argument("--config", "-c", default=None, type=str, help="Snakemake configuration YAML file (required in local mode)")
         sp_IO.add_argument("--cluster_config", default=None, type=str, help="Snakemake cluster configuration YAML file (required in cluster mode)")
@@ -212,6 +228,7 @@ def DNA_ONT (args):
     log.info ("Build config dict for snakemake")
     config = {
         "genome":required_option("genome", args.genome),
+        "annotation":required_option("annotation", args.annotation),
         "sample_sheet":get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq", "fast5", "seq_summary"])}
     log.debug (config)
 
@@ -249,7 +266,33 @@ def RNA_illumina (args):
     snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TEST SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-def tests (args):
+def pycoMeth (args):
+    """"""
+    # Get and check config files
+    log.warning ("CHECKING CONFIGURATION FILES")
+    snakefile = get_snakefile_fn(workflow_dir=WORKFLOW_DIR, workflow=args.subcommands)
+    configfile = get_config_fn(config=args.config)
+
+    # Store additionnal options to pass to snakemake
+    log.info ("Build config dict for snakemake")
+    config = {
+        "genome":required_option("genome", args.genome),
+        "annotation":required_option("annotation", args.annotation),
+        "sample_sheet":get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "methylation_calls"]),
+        "interval_mode":args.interval_mode,
+        "external_bed":args.external_bed}
+    log.debug (config)
+
+    # Filter other args option compatible with snakemake API
+    kwargs = filter_valid_snakemake_options (args)
+    log.debug (kwargs)
+
+    # Run Snakemake through the API
+    log.warning ("RUNNING SNAKEMAKE PIPELINE")
+    snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TEST SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+def test_wrappers (args):
     """"""
     # Cleanup data and leave
     if args.clean_output:
