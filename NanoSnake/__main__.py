@@ -43,23 +43,24 @@ def main(args=None):
     subparsers = parser.add_subparsers (description="%(prog)s implements the following subcommands", dest="subcommands")
     subparsers.required = True
 
-    # DNA subparser
-    subparser_tests = subparsers.add_parser("tests", description="Test all the wrappers")
-    subparser_tests.set_defaults(func=tests, type="test")
-    subparser_tests.add_argument("--wrappers", "-w", default=WRAPPERS, nargs='+', choices=WRAPPERS, type=str, help="List of wrappers to test (default: all)")
-    subparser_tests.add_argument("--keep_output", "-k", action="store_true", default=False, help="Keep temporary output files generated during tests (default: %(default)s)")
-    subparser_tests.add_argument("--clean_output", "-c", action="store_true", default=False, help="clean all temporary output files generated during tests (default: %(default)s)")
-    subparser_tests.add_argument("--cores", "-j", type=int, default=1, help="the number of provided cores (default: %(default)s)")
-    subparser_tests.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
+    # test_wrappers subparser
+    subparser_tw = subparsers.add_parser("test_wrappers", description="Test Nanosnake wrappers")
+    subparser_tw.set_defaults(func=test_wrappers, type="test")
+    subparser_tw.add_argument("--wrappers", "-w", default=WRAPPERS, nargs='+', choices=WRAPPERS, type=str, help="List of wrappers to test (default: all)")
+    subparser_tw.add_argument("--keep_output", "-k", action="store_true", default=False, help="Keep temporary output files generated during tests (default: %(default)s)")
+    subparser_tw.add_argument("--clean_output", "-c", action="store_true", default=False, help="clean all temporary output files generated during tests (default: %(default)s)")
+    subparser_tw.add_argument("--cores", "-j", type=int, default=1, help="the number of provided cores (default: %(default)s)")
+    subparser_tw.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
 
-    # DNA subparser
+    # DNA_ONT subparser
     subparser_dna_ont = subparsers.add_parser("DNA_ONT", description="Workflow for DNA Analysis of Nanopore data")
     subparser_dna_ont.set_defaults(func=DNA_ONT, type="workflow")
     subparser_dna_ont_IO = subparser_dna_ont.add_argument_group("input/output options")
     subparser_dna_ont_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (required)")
+    subparser_dna_ont_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (required)")
     subparser_dna_ont_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
-    # RNA subparser
+    # RNA_illumina subparser
     subparser_rna_illumina = subparsers.add_parser("RNA_illumina", description="Workflow for RNA Analysis of Illumina data")
     subparser_rna_illumina.set_defaults(func=RNA_illumina, type="workflow")
     subparser_rna_illumina_IO = subparser_rna_illumina.add_argument_group("input/output options")
@@ -212,6 +213,7 @@ def DNA_ONT (args):
     log.info ("Build config dict for snakemake")
     config = {
         "genome":required_option("genome", args.genome),
+        "annotation":required_option("annotation", args.annotation),
         "sample_sheet":get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq", "fast5", "seq_summary"])}
     log.debug (config)
 
@@ -249,7 +251,7 @@ def RNA_illumina (args):
     snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TEST SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-def tests (args):
+def test_wrappers (args):
     """"""
     # Cleanup data and leave
     if args.clean_output:

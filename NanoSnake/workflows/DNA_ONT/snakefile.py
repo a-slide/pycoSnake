@@ -16,7 +16,7 @@ HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Minimum snakemake version
-config_version=7
+config_version=8
 if not "config_version" in config or config["config_version"]!= config_version:
     raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
 
@@ -45,12 +45,22 @@ output_d=defaultdict(OrderedDict)
 log_d=OrderedDict()
 
 rule_name="get_genome"
-if config["genome"].startswith("ftp"): input_d[rule_name]["ref"]=FTP.remote(config["genome"])
-elif config["genome"].startswith("http"): input_d[rule_name]["ref"]=HTTP.remote(config["genome"])
-else: input_d[rule_name]["ref"]=config["genome"]
-output_d[rule_name]["ref"]=join("results","input","genone","ref.fa")
-output_d[rule_name]["index"]=join("results","input","genone","ref.fa.fai")
-log_d[rule_name]=join("logs",rule_name,"ref.log")
+ref = config["genome"]
+if ref.startswith("ftp"): input_d[rule_name]["ref"]=FTP.remote(ref)
+elif ref.startswith("http"): input_d[rule_name]["ref"]=HTTP.remote(ref)
+else: input_d[rule_name]["ref"]=ref
+output_d[rule_name]["ref"]=join("results","input","genome","genome.fa")
+output_d[rule_name]["index"]=join("results","input","genome","genome.fa.fai")
+log_d[rule_name]=join("logs",rule_name,"get_genome.log")
+
+rule_name="get_annotation"
+gff3 = config["annotation"]
+if gff3.startswith("ftp"): input_d[rule_name]["gff3"]=FTP.remote(gff3)
+elif gff3.startswith("http"): input_d[rule_name]["gff3"]=HTTP.remote(gff3)
+else: input_d[rule_name]["gff3"]=gff3
+output_d[rule_name]["gff3"]=join("results","input","annotation","annotation.gff3")
+output_d[rule_name]["gtf"]=join("results","input","annotation","annotation.gtf")
+log_d[rule_name]=join("logs",rule_name,"get_annotation.log")
 
 rule_name="pbt_fastq_filter"
 input_d[rule_name]["fastq"]=get_fastq
@@ -127,6 +137,12 @@ output_d[rule_name]["bed"]=join("results","methylation","pycometh_meth_comp","me
 output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_meth_comp","meth_comp.bed.idx")
 log_d[rule_name]=join("logs",rule_name,"meth_comp.log")
 
+rule_name="pycometh_comp_report"
+input_d[rule_name]["tsv"]=output_d["pycometh_meth_comp"]["tsv"]
+input_d[rule_name]["gff3"]=output_d["get_annotation"]["gff3"]
+output_d[rule_name]["outdir"]=directory(join("results","methylation","pycometh_comp_report"))
+log_d[rule_name]=join("logs",rule_name,"comp_report.log")
+
 rule_name="ngmlr"
 input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 input_d[rule_name]["fastq"]=output_d["pbt_fastq_filter"]["fastq"]
@@ -166,7 +182,7 @@ log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define all output depending on config file~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 # main rules
-run_rules = ["get_genome", "pbt_fastq_filter", "minimap2_index", "minimap2_align", "pbt_alignment_filter"]
+run_rules = ["get_genome", "get_annotation", "pbt_fastq_filter", "minimap2_index", "minimap2_align", "pbt_alignment_filter"]
 
 # Optional nanopolish analysis analysis
 np_rules = ["pbt_alignment_split", "nanopolish_index", "nanopolish_call_methylation"]
@@ -174,7 +190,7 @@ if all_in (config, np_rules):
     run_rules.extend (np_rules)
 
 # Optional pycoMeth analysis
-pcm_rules = ["pycometh_cgi_finder", "pycometh_cpg_aggregate", "pycometh_interval_aggregate", "pycometh_meth_comp"]
+pcm_rules = ["pycometh_cgi_finder", "pycometh_cpg_aggregate", "pycometh_interval_aggregate", "pycometh_meth_comp", "pycometh_comp_report"]
 if all_in (config, np_rules) and all_in (config, pcm_rules):
     run_rules.extend (pcm_rules)
 
@@ -215,6 +231,16 @@ rule get_genome:
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
     wrapper: "get_genome"
+
+rule_name="get_annotation"
+rule get_annotation:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name)
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "get_annotation"
 
 rule_name="pbt_fastq_filter"
 rule pbt_fastq_filter:
@@ -325,6 +351,16 @@ rule pycometh_meth_comp:
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
     wrapper: "pycometh_meth_comp"
+
+rule_name="pycometh_comp_report"
+rule pycometh_comp_report:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name),
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "pycometh_comp_report"
 
 rule_name="ngmlr"
 rule ngmlr:
