@@ -1,5 +1,3 @@
-name: nanosnake_get_transcriptome
-
 channels:
   - defaults
   - aleg

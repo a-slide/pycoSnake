@@ -25,5 +25,5 @@ with tempfile.TemporaryDirectory(dir=outdir) as temp_dir:
         input_gff3 = temp_gff3
 
     # Convert and clean annotations
-    shell("gffread {input_gff3} {opt} -F -o {output_gff3} &>> {snakemake.log}")
-    shell("gffread {input_gff3} {opt} -F -T -o {output_gtf} &>> {snakemake.log}")
+    shell("gffread {input_gff3} {opt} -F --keep-genes -o {output_gff3} &>> {snakemake.log}")
+    shell("gffread {input_gff3} {opt} -F --keep-genes -T -o {output_gtf} &>> {snakemake.log}")

@@ -1,5 +1,3 @@
-name: nanosnake_pycoqc
-
 channels:
   - defaults
   - bioconda
