@@ -40,8 +40,8 @@ ref = config["genome"]
 if ref.startswith("ftp"): input_d[rule_name]["ref"]=FTP.remote(ref)
 elif ref.startswith("http"): input_d[rule_name]["ref"]=HTTP.remote(ref)
 else: input_d[rule_name]["ref"]=ref
-output_d[rule_name]["ref"]=join("results","input","genone","genome.fa")
-output_d[rule_name]["index"]=join("results","input","genone","genome.fa.fai")
+output_d[rule_name]["ref"]=join("results","input","genome","genome.fa")
+output_d[rule_name]["index"]=join("results","input","genome","genome.fa.fai")
 log_d[rule_name]=join("logs",rule_name,"get_genome.log")
 
 rule_name="get_transcriptome"

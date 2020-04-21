@@ -1,7 +1,7 @@
 # Config file for lsf cluster
 
 # Configuration file version (do not change)
-config_version: 8
+config_version: 7
 
 # cluster command for lsf
 cluster_cores: 10000
@@ -14,14 +14,6 @@ __default__:
 
 # MAIN RULES
 get_genome:
-    opt: ""
-    threads: 2
-    mem: 5000
-    name : "nanosnake_DNA_ONT.{rule}"
-    output : "logs/{rule}/bsub_stdout.log"
-    error : "logs/{rule}/bsub_stderr.log"
-
-get_annotation:
     opt: ""
     threads: 2
     mem: 5000
@@ -97,7 +89,7 @@ pycometh_cgi_finder:
     error : "logs/{rule}/bsub_stderr.log"
 
 pycometh_cpg_aggregate:
-    opt: "--min_depth 5 --min_llr 2"
+    opt: "--min_depth 5"
     threads: 2
     mem: 50000
     name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
@@ -105,7 +97,7 @@ pycometh_cpg_aggregate:
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 pycometh_interval_aggregate:
-    opt: "--min_cpg_per_interval 5 --min_llr 2"
+    opt: "--min_cpg_per_interval 5"
     threads: 2
     mem: 10000
     name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
@@ -113,15 +105,7 @@ pycometh_interval_aggregate:
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
 pycometh_meth_comp:
-    opt: "--max_missing 1 --min_diff_llr 1 --pvalue_threshold 0.01"
-    threads: 2
-    mem: 10000
-    name : "nanosnake_DNA_ONT.{rule}"
-    output : "logs/{rule}/bsub_stdout.log"
-    error : "logs/{rule}/bsub_stderr.log"
-
-pycometh_comp_report:
-    opt: "--max_tss_distance 500000 --pvalue_threshold 0.01 --min_diff_llr 1"
+    opt: "--max_missing 1"
     threads: 2
     mem: 10000
     name : "nanosnake_DNA_ONT.{rule}"

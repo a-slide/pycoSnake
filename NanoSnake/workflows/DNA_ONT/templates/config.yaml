@@ -1,10 +1,13 @@
 # All the rules accept the following parameters: opt, threads, mem
 
 # Configuration file version (do not change)
-config_version: 7
+config_version: 8
 
 # MAIN RULES
 get_genome:
+    opt: ""
+
+get_annotation:
     opt: ""
 
 pbt_fastq_filter:
@@ -37,13 +40,16 @@ pycometh_cgi_finder:
     opt: ""
 
 pycometh_cpg_aggregate:
-    opt: "--min_depth 5"
+    opt: "--min_depth 5 --min_llr 2"
 
 pycometh_interval_aggregate:
-    opt: "--min_cpg_per_interval 5"
+    opt: "--min_cpg_per_interval 5 --min_llr 2"
 
 pycometh_meth_comp:
-    opt: "--max_missing 1"
+    opt: "--max_missing 1 --min_diff_llr 2 --pvalue_threshold 0.01"
+
+pycometh_comp_report:
+    opt: "--max_tss_distance 100000 --pvalue_threshold 0.01 --min_diff_llr 1"
 
 # OPTIONAL STRUCTURAL VARIANT RULES, Comment to skip
 ngmlr:

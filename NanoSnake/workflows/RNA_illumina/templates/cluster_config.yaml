@@ -14,7 +14,6 @@ __default__:
     mem: 5000
     queue: "research-rh74"
 
-
 # INPUT FILES RULES
 get_genome:
     opt: ""
@@ -42,7 +41,7 @@ get_annotation:
 
 fastp:
     opt: ""
-    threads: 20
+    threads: 16
     mem: 10000
     name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
@@ -64,7 +63,6 @@ star_align:
     name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
-
 
 pbt_alignment_filter:
     opt: "--min_align_len 50 --min_freq_identity 0.7 --skip_unmapped --skip_secondary --skip_supplementary"
@@ -120,7 +118,6 @@ samtools_qc:
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
-
 bedtools_genomecov:
     opt: "-bg"
     threads: 2
@@ -129,7 +126,6 @@ bedtools_genomecov:
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
-
 igvtools_count:
     opt: "-w 10"
     threads: 2
@@ -137,7 +133,6 @@ igvtools_count:
     name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
-
 
 # TRANSCRIPTOME PSEUDO-ALIGNMENT RULES
 salmon_index:
@@ -155,7 +150,6 @@ salmon_quant:
     name : "nanosnake_RNA_illumina.{rule}.{wildcards.sample}"
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
-
 
 salmon_count_merge:
     opt: ""

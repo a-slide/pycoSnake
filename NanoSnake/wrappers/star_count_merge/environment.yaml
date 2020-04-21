@@ -1,5 +1,3 @@
-name: nanosnake_star_count_merge
-
 channels:
   - defaults
   - bioconda

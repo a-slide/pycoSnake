@@ -1,5 +1,3 @@
-name: nanosnake_star_index
-
 channels:
   - defaults
   - bioconda

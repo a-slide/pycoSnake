@@ -1,5 +1,3 @@
-name: nanosnake_salmon_index
-
 channels:
   - defaults
   - bioconda

@@ -1,5 +1,3 @@
-name: nanosnake_samtools_qc
-
 channels:
   - defaults
   - bioconda
