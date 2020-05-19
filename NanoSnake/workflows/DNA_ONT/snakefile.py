@@ -140,6 +140,7 @@ log_d[rule_name]=join("logs",rule_name,"meth_comp.log")
 rule_name="pycometh_comp_report"
 input_d[rule_name]["tsv"]=output_d["pycometh_meth_comp"]["tsv"]
 input_d[rule_name]["gff3"]=output_d["get_annotation"]["gff3"]
+input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
 output_d[rule_name]["outdir"]=directory(join("results","methylation","pycometh_comp_report"))
 log_d[rule_name]=join("logs",rule_name,"comp_report.log")
 
