@@ -24,7 +24,7 @@ shell("echo '#### MINIMAP2 + SAMTOOLS VIEW & SORT LOG ####' > {snakemake.log}")
 
 with tempfile.TemporaryDirectory(dir=outdir) as temp_dir:
     shell("minimap2 -t {align_threads} -a -L {opt} {index} {fastq} 2>> {snakemake.log}|\
-        samtools view -@ {view_threads}  -bh 2>> {snakemake.log} |\
+        samtools view -@ {view_threads} -bh 2>> {snakemake.log} |\
         samtools sort -@ {sort_threads} -T {temp_dir} -O bam > {bam} 2>> {snakemake.log}")
 
 shell("samtools index {bam}")
