@@ -12,7 +12,8 @@ from snakemake.shell import shell
 opt = snakemake.params.get("opt", "")
 tsv = snakemake.input.tsv
 gff3 = snakemake.input.gff3
+ref = snakemake.input.ref
 outdir = snakemake.output.outdir
 
 # Run shell command
-shell(f"pycoMeth Comp_Report {opt} -i {tsv} -g {gff3} -o {outdir} 2> {snakemake.log}")
+shell(f"pycoMeth Comp_Report {opt} -i {tsv} -f {ref} -g {gff3} -o {outdir} 2> {snakemake.log}")

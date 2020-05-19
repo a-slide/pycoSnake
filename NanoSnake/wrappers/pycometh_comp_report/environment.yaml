@@ -6,4 +6,4 @@ channels:
 
 dependencies:
   - python=3.6
-  - pycoMeth=0.4.3
+  - pycoMeth=0.4.6
