@@ -119,7 +119,7 @@ def main(args=None):
         sp_snakemake.add_argument("--printrulegraph", action="store_true", default=False, help="print the graph of rules in the graphviz dot language (default: %(default)s)")
         sp_snakemake.add_argument("--printd3dag", action="store_true", default=False, help="print a D3.js compatible JSON representation of the DAG (default: %(default)s)")
         sp_snakemake.add_argument("--nocolor", action="store_true", default=False, help="do not print colored output (default: %(default)s)")
-        sp_snakemake.add_argument("--keepgoing", action="store_true", default=False, help="keep goind upon errors (default: %(default)s)")
+        sp_snakemake.add_argument("--keepgoing", action="store_true", default=False, help="keep going upon errors (default: %(default)s)")
         sp_snakemake.add_argument("--cluster", type=str, default=None, help="submission command of a cluster or batch system to use, e.g. qsub (default: %(default)s)")
         sp_snakemake.add_argument("--drmaa_log_dir", type=str, default=None, help="the path to stdout and stderr output of DRMAA jobs (default: %(default)s)")
         sp_snakemake.add_argument("--jobname", type=str, default='snakejob.{rulename}.{jobid}.sh', help="naming scheme for cluster job scripts (default: %(default)s)")
@@ -178,6 +178,7 @@ def main(args=None):
     # Parse args and and define logger verbose level
     args = parser.parse_args()
     set_log_level(quiet=args.quiet, verbose=args.verbose)
+    log.warning ("RUNNING {} v{}".format(package_name, package_version))
 
     if args.type == "workflow":
 
