@@ -16,7 +16,7 @@ HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Minimum snakemake version
-config_version=8
+config_version=9
 if not "config_version" in config or config["config_version"]!= config_version:
     raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
 
@@ -53,7 +53,7 @@ output_d[rule_name]["ref"]=join("results","input","genome","genome.fa")
 output_d[rule_name]["index"]=join("results","input","genome","genome.fa.fai")
 log_d[rule_name]=join("logs",rule_name,"get_genome.log")
 
-rule_name="get_annotation"
+rule_name="get_annotation"  ################################################################## Should be only if pycoMeth is required
 gff3 = config["annotation"]
 if gff3.startswith("ftp"): input_d[rule_name]["gff3"]=FTP.remote(gff3)
 elif gff3.startswith("http"): input_d[rule_name]["gff3"]=HTTP.remote(gff3)
@@ -152,8 +152,29 @@ log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 
 rule_name="sniffles"
 input_d[rule_name]["bam"]=output_d["ngmlr"]["bam"]
-output_d[rule_name]["vcf"]=join("results","SV","sniffles_calls","{sample}.vcf")
+output_d[rule_name]["vcf"]=join("results","SV","sniffles","{sample}_raw.vcf")
 log_d[rule_name]=join("logs",rule_name,"{sample}.log")
+
+rule_name="survivor_filter"
+input_d[rule_name]["vcf"]=output_d["sniffles"]["vcf"]
+output_d[rule_name]["vcf"]=join("results","SV","sniffles","{sample}_filtered.vcf")
+log_d[rule_name]=join("logs",rule_name,"{sample}.log")
+
+rule_name="survivor_merge"
+input_d[rule_name]["vcf"]=expand(join("results","SV","sniffles","{sample}_filtered.vcf"), sample=sample_list) # Aggregate samples
+output_d[rule_name]["vcf"]=join("results","SV","sniffles","merged.vcf")
+log_d[rule_name]=join("logs",rule_name,"merged.log")
+
+rule_name="sniffles_all"
+input_d[rule_name]["bam"]=output_d["ngmlr"]["bam"]
+input_d[rule_name]["vcf"]=output_d["survivor_merge"]["vcf"]
+output_d[rule_name]["vcf"]=join("results","SV","sniffles_all","{sample}_raw.vcf")
+log_d[rule_name]=join("logs",rule_name,"{sample}.log")
+
+rule_name="survivor_merge_all"
+input_d[rule_name]["vcf"]=expand(join("results","SV","sniffles_all","{sample}_raw.vcf"), sample=sample_list) # Aggregate samples
+output_d[rule_name]["vcf"]=join("results","SV","sniffles_all","merged.vcf")
+log_d[rule_name]=join("logs",rule_name,"merged.log")
 
 rule_name="pycoqc"
 input_d[rule_name]["seqsum"]=get_seqsum
@@ -185,7 +206,7 @@ log_d[rule_name]=join("logs",rule_name,"{sample}.log")
 # main rules
 run_rules = ["get_genome", "get_annotation", "pbt_fastq_filter", "minimap2_index", "minimap2_align", "pbt_alignment_filter"]
 
-# Optional nanopolish analysis analysis
+# Optional nanopolish analysis
 np_rules = ["pbt_alignment_split", "nanopolish_index", "nanopolish_call_methylation"]
 if all_in (config, np_rules):
     run_rules.extend (np_rules)
@@ -196,7 +217,7 @@ if all_in (config, np_rules) and all_in (config, pcm_rules):
     run_rules.extend (pcm_rules)
 
 # Optional SV analysis
-SV_rules = ["ngmlr", "sniffles"]
+SV_rules = ["ngmlr", "sniffles", "survivor_filter", "survivor_merge", "sniffles_all", "survivor_merge_all"]
 if all_in (config, SV_rules):
     run_rules.extend (SV_rules)
 
@@ -382,6 +403,46 @@ rule sniffles:
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
     wrapper: "sniffles"
+
+rule_name="survivor_filter"
+rule survivor_filter:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name),
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "survivor_filter"
+
+rule_name="survivor_merge"
+rule survivor_merge:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name),
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "survivor_merge"
+
+rule_name="sniffles_all"
+rule sniffles_all:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name),
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "sniffles"
+
+rule_name="survivor_merge_all"
+rule survivor_merge_all:
+    input: **input_d[rule_name]
+    output: **output_d[rule_name]
+    log: log_d[rule_name]
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name),
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "survivor_merge"
 
 rule_name="pycoqc"
 rule pycoqc:
