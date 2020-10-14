@@ -58,8 +58,8 @@ At the moment there is only 2 workflows available in NanoSnake:
     * Alignment cleaning
     * Generate coverage plots IGV and bedgraph (optional)
     * Run Nanopore QC with pycoQC (optional)
-    * Run DNA methylation analysing with Nanoplolish + pycoMeth (optional)
-    * Run SV analysis with Sniffles + pycoSV (optional)
+    * Run DNA methylation analysing with Nanopolish + pycoMeth (optional)
+    * Run SV analysis with Sniffles + filtering + multi-sample merging (optional)
 
 * RNA_illumina : Analyse Illumina long RNA-seq sequencing data.
     * Download and cleanup genome, transcriptome and annotations
@@ -171,3 +171,6 @@ Adrien Leger. (2019, July 30). a-slide/NanoSnake. Zenodo. http://doi.org/10.5281
 ## Authors and contributors
 
 * Adrien Leger (@a-slide) - aleg {at} ebi.ac.uk
+
+The SV analysis pipeline is inspired from [nano-snakemake](https://github.com/wdecoster/nano-snakemake) by [Wouter De Coster](https://github.com/wdecoster)
+and [pipeline-structural-variation](https://github.com/nanoporetech/pipeline-structural-variation) by [Oxford Nanopore Technologies](https://github.com/nanoporetech)
