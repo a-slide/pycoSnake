@@ -20,7 +20,7 @@ ref = snakemake.input.ref
 bam = snakemake.output.bam
 
 # Run shell commands
-shell("echo '#### NGMLR + SAMTOOLS VIEW & SORT LOG ####' > {snakemake.log}")
+shell("echo '#### NGMLR + SAMTOOLS LOG ####' > {snakemake.log}")
 
 with tempfile.TemporaryDirectory(dir=outdir) as temp_dir:
     shell("ngmlr -t {align_threads} {opt} -r {ref} -q {fastq} 2>> {snakemake.log}|\
