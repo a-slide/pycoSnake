@@ -9,19 +9,16 @@ HTTP = HTTPRemoteProvider()
 ref1_input = join(config["data_dir"], "reference", "small_ref.fa")
 ref2_input = join(config["data_dir"], "reference", "ref.fa.gz")
 ref3_input = "ftp://ftp.ensembl.org/pub/release-98/fasta/danio_rerio/dna/Danio_rerio.GRCz11.dna.chromosome.MT.fa.gz"
-ref4_input = "https://www.ebi.ac.uk/~aleg/extra/Danio_rerio.GRCz11.dna.chromosome.MT.fa.gz"
 ref1_output = "ref1.fa"
 ref1_index = ref1_output+".fai"
 ref2_output = "ref2.fa"
 ref2_index = ref2_output+".fai"
 ref3_output = "ref3.fa"
 ref3_index = ref3_output+".fai"
-ref4_output = "ref4.fa"
-ref4_index = ref4_output+".fai"
 
 # Rules
 rule all:
-    input: [ref1_output, ref1_index, ref2_output, ref2_index, ref3_output, ref3_index, ref4_output, ref4_index]
+    input: [ref1_output, ref1_index, ref2_output, ref2_index, ref3_output, ref3_index]
 
 rule get_genome_from_fa:
     input: ref=ref1_input
@@ -39,10 +36,4 @@ rule get_genome_from_ftp:
     input: ref=FTP.remote(ref3_input)
     output: ref=ref3_output, index=ref3_index
     log: "get_genome_from_ftp.log"
-    wrapper: "get_genome"
-
-rule get_genome_from_http:
-    input: ref=HTTP.remote(ref4_input)
-    output: ref=ref4_output, index=ref4_index
-    log: "get_genome_from_http.log"
     wrapper: "get_genome"

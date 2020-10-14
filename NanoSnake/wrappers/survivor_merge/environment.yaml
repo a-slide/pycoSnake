@@ -1,0 +1,8 @@
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+dependencies:
+  - survivor==1.0.7
+  - bcftools==1.11
