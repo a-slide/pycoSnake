@@ -18,6 +18,7 @@ from loguru import logger as log
 from NanoSnake import __version__ as package_version
 from NanoSnake import __name__ as package_name
 from NanoSnake import __description__ as package_description
+from NanoSnake import workflows_versions
 from NanoSnake.common import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~GLOBAL DIRS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
@@ -44,8 +45,10 @@ def main(args=None):
     subparsers.required = True
 
     # test_wrappers subparser
-    subparser_tw = subparsers.add_parser("test_wrappers", description="Test Nanosnake wrappers")
-    subparser_tw.set_defaults(func=test_wrappers, type="test")
+    workflow_name = "test_wrappers"
+    workflow_version=workflows_versions[workflow_name]
+    subparser_tw = subparsers.add_parser(workflow_name, description="Test Nanosnake wrappers. {} v{}".format(workflow_name, workflow_version))
+    subparser_tw.set_defaults(parser_func=test_wrappers, parser_type="test", workflow_name=workflow_name, workflow_version=workflow_version)
     subparser_tw.add_argument("--wrappers", "-w", default=WRAPPERS, nargs='+', choices=WRAPPERS, type=str, help="List of wrappers to test (default: all)")
     subparser_tw.add_argument("--keep_output", "-k", action="store_true", default=False, help="Keep temporary output files generated during tests (default: %(default)s)")
     subparser_tw.add_argument("--clean_output", "-c", action="store_true", default=False, help="clean all temporary output files generated during tests (default: %(default)s)")
@@ -53,45 +56,34 @@ def main(args=None):
     subparser_tw.add_argument("--workdir", "-d", default="./", type=str, help="Path to the working dir where to deploy the workflow (default: %(default)s)")
 
     # DNA_ONT subparser
-    subparser_dna_ont = subparsers.add_parser("DNA_ONT", description="Workflow for DNA Analysis of Nanopore data")
-    subparser_dna_ont.set_defaults(func=DNA_ONT, type="workflow")
+    workflow_name = "DNA_ONT"
+    workflow_version=workflows_versions[workflow_name]
+    subparser_dna_ont = subparsers.add_parser(workflow_name, description="Workflow for DNA Analysis of Nanopore data. {} v{}".format(workflow_name, workflow_version))
+    subparser_dna_ont.set_defaults(parser_func=DNA_ONT, parser_type="workflow", workflow_name=workflow_name, workflow_version=workflow_version)
     subparser_dna_ont_IO = subparser_dna_ont.add_argument_group("input/output options")
     subparser_dna_ont_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (required)")
     subparser_dna_ont_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (required)")
     subparser_dna_ont_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
     # RNA_illumina subparser
-    subparser_rna_illumina = subparsers.add_parser("RNA_illumina", description="Workflow for RNA Analysis of Illumina data")
-    subparser_rna_illumina.set_defaults(func=RNA_illumina, type="workflow")
+    workflow_name = "RNA_illumina"
+    workflow_version=workflows_versions[workflow_name]
+    subparser_rna_illumina = subparsers.add_parser(workflow_name, description="Workflow for RNA Analysis of Illumina data. {} v{}".format(workflow_name, workflow_version))
+    subparser_rna_illumina.set_defaults(parser_func=RNA_illumina, parser_type="workflow", workflow_name=workflow_name, workflow_version=workflow_version)
     subparser_rna_illumina_IO = subparser_rna_illumina.add_argument_group("input/output options")
     subparser_rna_illumina_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (required)")
     subparser_rna_illumina_IO.add_argument("--transcriptome", "-t", default=None, type=str, help="Path to an ENSEMBL cDNA FASTA reference transcriptome file/URL to be used for read counting (required)")
     subparser_rna_illumina_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (required)")
     subparser_rna_illumina_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
 
-    # pycoMeth subparser
-    subparser_pycometh = subparsers.add_parser("pycoMeth", description="Workflow for DNA Analysis of Nanopore data")
-    subparser_pycometh.set_defaults(func=pycoMeth, type="workflow")
-    subparser_pycometh_IO = subparser_pycometh.add_argument_group("input/output options")
-    subparser_pycometh_IO.add_argument("--genome", "-g", default=None, type=str, help="Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (required)")
-    subparser_pycometh_IO.add_argument("--annotation", "-a", default=None, type=str, help="Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (required)")
-    subparser_pycometh_IO.add_argument("--sample_sheet", "-s", default=None, type=str, help="Path to a tabulated sample sheet (required)")
-    subparser_pycometh_INT = subparser_pycometh.add_argument_group("Interval aggregation options")
-    subparser_pycometh_INT.add_argument("--interval_mode", "-i", nargs="?", default="cpg_islands", choices=["cpg_islands", "external_bed", "sliding_window"],
-        help="""How to aggregate CpG into intervals. (default: %(default)s)
-            * cpg_islands: Find CpG islands in the genome file.
-            * external_bed: use intervals provided in an external bed file.
-            * sliding_window: Use a sliding window along entire genome.""")
-    subparser_pycometh_INT.add_argument("--external_bed", "-b", default=None, type=str, help="Path to a bed file containing intervals, if interval_mode is set to external_bed")
-
     # Add common options for all parsers
-    for sp in [subparser_dna_ont, subparser_rna_illumina, subparser_pycometh, subparser_tw]:
+    for sp in [subparser_dna_ont, subparser_rna_illumina, subparser_tw]:
         sp_verbosity = sp.add_mutually_exclusive_group()
         sp_verbosity.add_argument("--verbose", "-v", action="store_true", default=False, help="Show additional debug output (default: %(default)s)")
         sp_verbosity.add_argument("--quiet", "-q", action="store_true", default=False, help="Reduce overall output (default: %(default)s)")
 
     # Add common options for workflow parsers
-    for sp in [subparser_dna_ont, subparser_rna_illumina, subparser_pycometh]:
+    for sp in [subparser_dna_ont, subparser_rna_illumina]:
         sp_IO = add_argument_group (sp, "input/output options")
         sp_IO.add_argument("--config", "-c", default=None, type=str, help="Snakemake configuration YAML file (required in local mode)")
         sp_IO.add_argument("--cluster_config", default=None, type=str, help="Snakemake cluster configuration YAML file (required in cluster mode)")
@@ -180,7 +172,7 @@ def main(args=None):
     set_log_level(quiet=args.quiet, verbose=args.verbose)
     log.warning ("RUNNING {} v{}".format(package_name, package_version))
 
-    if args.type == "workflow":
+    if args.parser_type == "workflow":
 
         # Unlock locked dir and exit
         if args.unlock:
@@ -215,11 +207,13 @@ def main(args=None):
             raise NanoSnakeError("A configuration file `--config` or a cluster configuration file `--cluster_config` is required")
 
     # Run workflow
-    args.func(args)
+    args.parser_func(args)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DNA_ONT SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def DNA_ONT (args):
     """"""
+    log.warning ("RUNNING WORKFLOW {} v{}".format(args.workflow_name, args.workflow_version))
+
     # Get and check config files
     log.warning ("CHECKING CONFIGURATION FILES")
     snakefile = get_snakefile_fn(workflow_dir=WORKFLOW_DIR, workflow=args.subcommands)
@@ -238,12 +232,13 @@ def DNA_ONT (args):
     log.debug (kwargs)
 
     # Run Snakemake through the API
-    log.warning ("RUNNING SNAKEMAKE PIPELINE")
     snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RNA_illumina SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def RNA_illumina (args):
     """"""
+    log.warning ("RUNNING WORKFLOW {} v{}".format(args.workflow_name, args.workflow_version))
+
     # Get and check config files
     log.warning ("CHECKING CONFIGURATION FILES")
     snakefile = get_snakefile_fn(workflow_dir=WORKFLOW_DIR, workflow=args.subcommands)
@@ -263,38 +258,13 @@ def RNA_illumina (args):
     log.debug (kwargs)
 
     # Run Snakemake through the API
-    log.warning ("RUNNING SNAKEMAKE PIPELINE")
-    snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TEST SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-def pycoMeth (args):
-    """"""
-    # Get and check config files
-    log.warning ("CHECKING CONFIGURATION FILES")
-    snakefile = get_snakefile_fn(workflow_dir=WORKFLOW_DIR, workflow=args.subcommands)
-    configfile = get_config_fn(config=args.config)
-
-    # Store additionnal options to pass to snakemake
-    log.info ("Build config dict for snakemake")
-    config = {
-        "genome":required_option("genome", args.genome),
-        "annotation":required_option("annotation", args.annotation),
-        "sample_sheet":get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "methylation_calls"]),
-        "interval_mode":args.interval_mode,
-        "external_bed":args.external_bed}
-    log.debug (config)
-
-    # Filter other args option compatible with snakemake API
-    kwargs = filter_valid_snakemake_options (args)
-    log.debug (kwargs)
-
-    # Run Snakemake through the API
-    log.warning ("RUNNING SNAKEMAKE PIPELINE")
     snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TEST SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def test_wrappers (args):
     """"""
+    log.warning ("RUNNING TEST {} v{}".format(args.workflow_name, args.workflow_version))
+
     # Cleanup data and leave
     if args.clean_output:
         log.info("Removing output data")
