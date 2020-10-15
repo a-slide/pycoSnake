@@ -15,7 +15,6 @@ FTP = FTPRemoteProvider()
 HTTP = HTTPRemoteProvider()
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# Minimum snakemake version
 config_version=9
 if not "config_version" in config or config["config_version"]!= config_version:
     raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
