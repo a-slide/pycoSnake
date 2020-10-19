@@ -14,11 +14,11 @@ import pandas as pd
 from loguru import logger as log
 
 #~~~~~~~~~~~~~~CUSTOM EXCEPTION CLASS~~~~~~~~~~~~~~#
-class NanoSnakeError (Exception):
+class pycoSnakeError (Exception):
     """ Basic exception class"""
     pass
 
-class NanoSnakeWarning (Warning):
+class pycoSnakeWarning (Warning):
     """ Basic Warning class"""
     pass
 
@@ -162,7 +162,7 @@ def unlock_dir (workdir):
     try:
         shutil.rmtree(lockdir)
     except:
-        raise NanoSnakeError ("Cannot remove lock")
+        raise pycoSnakeError ("Cannot remove lock")
 
 def generate_template (workflow_dir, templates, workflow, workdir="./", overwrite=False, verbose=False, quiet=False):
     """"""
@@ -203,7 +203,7 @@ def get_config_fn (config):
         with open(config) as fp:
             yaml.load(fp, Loader=yaml.FullLoader)
     except:
-        raise NanoSnakeError ("The provided config file is not readeable or not a valid yaml file")
+        raise pycoSnakeError ("The provided config file is not readeable or not a valid yaml file")
 
     return os.path.abspath(config)
 
@@ -211,24 +211,24 @@ def get_snakefile_fn (workflow_dir, workflow):
     """"""
     snakefile = os.path.join (workflow_dir, workflow, "snakefile.py")
     if not access_file(snakefile):
-        raise NanoSnakeError ("The snakefile file is not readable")
+        raise pycoSnakeError ("The snakefile file is not readable")
     return os.path.abspath(snakefile)
 
 def get_sample_sheet (sample_sheet, required_fields=[]):
     """"""
     if not sample_sheet:
-        raise NanoSnakeError ("A sample_sheet file (--sample_sheet) is required to run the workflow")
+        raise pycoSnakeError ("A sample_sheet file (--sample_sheet) is required to run the workflow")
     try:
         sample_df = pd.read_csv (sample_sheet, comment="#", skip_blank_lines=True, sep="\t")
     except:
-        raise NanoSnakeError ("Cannot open provided sample sheet")
+        raise pycoSnakeError ("Cannot open provided sample sheet")
     for f in required_fields:
         if not f in sample_df.columns:
-            raise NanoSnakeError ("The provided sample sheet does not contain the required fieds: {}".format(" ".join(required_fields)))
+            raise pycoSnakeError ("The provided sample sheet does not contain the required fieds: {}".format(" ".join(required_fields)))
     return os.path.abspath(sample_sheet)
 
 def required_option (name, var):
     """"""
     if not var:
-        raise NanoSnakeError (f"Option --{name} is required to run the workflow")
+        raise pycoSnakeError (f"Option --{name} is required to run the workflow")
     return var

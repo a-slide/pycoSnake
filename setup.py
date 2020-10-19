@@ -5,17 +5,17 @@ from setuptools import setup
 from glob import glob
 
 # Define package info
-name= "NanoSnake"
-version = '0.0.3.11'
-description = "NanoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
+name= "pycoSnake"
+version = '0.1a1'
+description = "pycoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 # Collect all package data to add
 package_data = []
-package_data.extend([fn.partition("/")[-1] for fn in glob("NanoSnake/test_data/**", recursive=True)])
-package_data.extend([fn.partition("/")[-1] for fn in glob("NanoSnake/workflows/**", recursive=True)])
-package_data.extend([fn.partition("/")[-1] for fn in glob("NanoSnake/wrappers/**", recursive=True)])
+package_data.extend([fn.partition("/")[-1] for fn in glob("pycoSnake/test_data/**", recursive=True)])
+package_data.extend([fn.partition("/")[-1] for fn in glob("pycoSnake/workflows/**", recursive=True)])
+package_data.extend([fn.partition("/")[-1] for fn in glob("pycoSnake/wrappers/**", recursive=True)])
 
 setup(
     name = name,
@@ -23,7 +23,7 @@ setup(
     version = version,
     long_description = long_description,
     long_description_content_type="text/markdown",
-    url = "https://github.com/a-slide/NanoSnake",
+    url = "https://github.com/a-slide/pycoSnake",
     author = 'Adrien Leger',
     author_email = 'aleg@ebi.ac.uk',
     license = 'MIT',
@@ -42,5 +42,5 @@ setup(
     packages = [name],
     package_dir = {name: name},
     package_data = {name: package_data},
-    entry_points = {'console_scripts': ['NanoSnake=NanoSnake.__main__:main']}
+    entry_points = {'console_scripts': ['pycoSnake=pycoSnake.__main__:main']}
 )

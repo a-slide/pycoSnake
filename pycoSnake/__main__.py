@@ -15,11 +15,11 @@ from snakemake import snakemake
 from loguru import logger as log
 
 # Local imports
-from NanoSnake import __version__ as package_version
-from NanoSnake import __name__ as package_name
-from NanoSnake import __description__ as package_description
-from NanoSnake import workflows_versions
-from NanoSnake.common import *
+from pycoSnake import __version__ as package_version
+from pycoSnake import __name__ as package_name
+from pycoSnake import __description__ as package_description
+from pycoSnake import workflows_versions
+from pycoSnake.common import *
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~GLOBAL DIRS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 WORKFLOW_DIR = pkg_resources.resource_filename (package_name, "workflows")
@@ -36,7 +36,7 @@ for w in glob.glob(os.path.join(WRAPPER_DIR, "*")):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~CLI ENTRY POINT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 def main(args=None):
-    """ Main entry point for NanoSnake command line interface """
+    """ Main entry point for pycoSnake command line interface """
 
     # Parser and subparsers for command
     parser = argparse.ArgumentParser (description=package_description)
@@ -204,7 +204,7 @@ def main(args=None):
         elif args.config :
             log.warning (f"INITIALISING WORKFLOW IN LOCAL MODE")
         else:
-            raise NanoSnakeError("A configuration file `--config` or a cluster configuration file `--cluster_config` is required")
+            raise pycoSnakeError("A configuration file `--config` or a cluster configuration file `--cluster_config` is required")
 
     # Run workflow
     args.parser_func(args)

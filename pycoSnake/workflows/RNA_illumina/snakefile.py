@@ -8,7 +8,7 @@ from os.path import join
 import pandas as pd
 
 # Local imports
-from NanoSnake.common import *
+from pycoSnake.common import *
 from snakemake.remote.FTP import RemoteProvider as FTPRemoteProvider
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
 FTP = FTPRemoteProvider()
@@ -18,7 +18,7 @@ HTTP = HTTPRemoteProvider()
 # Minimum snakemake version
 config_version=6
 if not "config_version" in config or config["config_version"]!= config_version:
-    raise NanoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
+    raise pycoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define samples sheet reference and getters~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 sample_df=pd.read_csv (config["sample_sheet"], comment="#", skip_blank_lines=True, sep="\t", index_col=0)

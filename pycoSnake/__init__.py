@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # Overall package version
-__version__ = '0.0.3.11'
-__description__="NanoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
+__version__ = '0.1a1'
+__description__="pycoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
 
 # workflow version
 workflows_versions = {

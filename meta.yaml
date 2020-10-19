@@ -1,5 +1,5 @@
-{% set version = '0.0.3.11' %}
-{% set name = "NanoSnake" %}
+{% set version = '0.1a1' %}
+{% set name = "pycoSnake" %}
 
 package:
   name: {{ name|lower }}
@@ -12,7 +12,7 @@ build:
   number: 0
   script: "pip install {{ name }}-{{ version }}.tar.gz --no-deps --ignore-installed -v "
   entry_points:
-    - NanoSnake=NanoSnake.__main__:main
+    - pycoSnake=pycoSnake.__main__:main
   noarch: "python"
 
 requirements:
@@ -29,12 +29,12 @@ requirements:
 
 test:
   commands:
-    - NanoSnake --help
-    - NanoSnake RNA_illumina --help
-    - NanoSnake DNA_ONT --help
-    - NanoSnake test_wrappers --help
+    - pycoSnake --help
+    - pycoSnake RNA_illumina --help
+    - pycoSnake DNA_ONT --help
+    - pycoSnake test_wrappers --help
 
 about:
-  home: "https://github.com/a-slide/NanoSnake"
+  home: "https://github.com/a-slide/pycoSnake"
   license: "MIT"
-  summary: "NanoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
+  summary: "pycoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"

@@ -1,15 +1,15 @@
-# Contributing to NanoSnakeAcknowledgements
+# Contributing to pycoSnake
 
-First of all, thanks for considering contributing to `NanoSnake`! 👍 It's people like you that make it rewarding for us to work on `NanoSnake`.
+First of all, thanks for considering contributing to `pycoSnake`! 👍 It's people like you that make it rewarding for us to work on `pycoSnake`.
 
-`NanoSnake` is an open source project, maintained by publicly funded academic researchers.
+`pycoSnake` is an open source project, maintained by publicly funded academic researchers.
 
-[repo]: https://github.com/a-slide/NanoSnake
-[issues]: https://github.com/a-slide/NanoSnake/issues
-[new_issue]: https://github.com/a-slide/NanoSnake/issues/new
+[repo]: https://github.com/a-slide/pycoSnake
+[issues]: https://github.com/a-slide/pycoSnake/issues
+[new_issue]: https://github.com/a-slide/pycoSnake/issues/new
 [citation]: https://zenodo.org/badge/latestdoi/173960745
 [email]: aleg@ebi.ac.uk
-[code_of_conduct]: https://github.com/a-slide/NanoSnake/blob/master/CODE_OF_CONDUCT.md
+[code_of_conduct]: https://github.com/a-slide/pycoSnake/blob/master/CODE_OF_CONDUCT.md
 
 ## Code of conduct
 
@@ -21,13 +21,13 @@ There are several ways you can contribute to this project. If you want to know m
 
 ### Share the love ❤️
 
-Think `NanoSnake` is useful? Let others discover it, by telling them in person, via Twitter or a blog post.
+Think `pycoSnake` is useful? Let others discover it, by telling them in person, via Twitter or a blog post.
 
-Using `NanoSnake` for a paper you are writing? Please cite it using this [DOI][citation]
+Using `pycoSnake` for a paper you are writing? Please cite it using this [DOI][citation]
 
 ### Ask a question ⁉️
 
-Using `NanoSnake` and got stuck? Browse the [documentation][repo] to see if you can find a solution.
+Using `pycoSnake` and got stuck? Browse the [documentation][repo] to see if you can find a solution.
 
 Still stuck? Post your question as an [issue on GitHub][new_issue].
 While we cannot offer user support, we'll try to do our best to address it, as questions often lead to better documentation or the discovery of bugs.
@@ -36,7 +36,7 @@ Want to ask a question in private? Contact the package maintainer by [email][ema
 
 ### Propose an idea 💡
 
-Have an idea for a new `NanoSnake` feature? Take a look at the [issue list][issues] to see if it isn't included or suggested yet. If not, suggest your idea as an [issue on GitHub][new_issue]. While we can't promise to implement your idea, it helps to:
+Have an idea for a new `pycoSnake` feature? Take a look at the [issue list][issues] to see if it isn't included or suggested yet. If not, suggest your idea as an [issue on GitHub][new_issue]. While we can't promise to implement your idea, it helps to:
 
 * Explain in detail how it would work.
 * Keep the scope as narrow as possible.
@@ -45,7 +45,7 @@ See below if you want to contribute code for your idea as well.
 
 ### Report a bug 🐛
 
-Using `NanoSnake` and discovered a bug? That's annoying! Don't let others have the same experience and report it as an [issue on GitHub][new_issue] so we can fix it. A good bug report makes it easier for us to do so, so please include:
+Using `pycoSnake` and discovered a bug? That's annoying! Don't let others have the same experience and report it as an [issue on GitHub][new_issue] so we can fix it. A good bug report makes it easier for us to do so, so please include:
 
 * Your operating system name and version (e.g. Mac OS 10.13.6).
 * Any details about your local setup that might be helpful in troubleshooting.
@@ -60,7 +60,7 @@ Noticed a typo on the website? Think a function could use a better example? Good
 
 ### Contribute code 📝
 
-Care to fix bugs or implement new functionality for `NanoSnake`? Awesome! 👏 Have a look at the [issue list][issues] and leave a comment on the things you want to work on. See also the development guidelines below.
+Care to fix bugs or implement new functionality for `pycoSnake`? Awesome! 👏 Have a look at the [issue list][issues] and leave a comment on the things you want to work on. See also the development guidelines below.
 
 ## Development guidelines
 
