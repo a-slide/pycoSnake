@@ -1,14 +1,15 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.3"
-
 # Imports
 from snakemake.shell import shell
 from pyfaidx import Fasta
 from math import log2
 import os
+
+# Wrapper info
+wrapper_name = "star_index"
+wrapper_version = "0.0.4"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
 
 # Shortcuts
 opt = snakemake.params.get("opt", "")
@@ -33,4 +34,4 @@ shell("STAR {opt} \
     --genomeFastaFiles {ref} \
     --sjdbGTFfile {annotation} \
     --outFileNamePrefix {index_dir} \
-    &> {snakemake.log}")
+    &>> {snakemake.log}")

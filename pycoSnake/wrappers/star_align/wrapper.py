@@ -1,13 +1,14 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.2"
-
 # Imports
 from snakemake.shell import shell
 import tempfile
 import os
+
+# Wrapper info
+wrapper_name = "star_align"
+wrapper_version = "0.0.3"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
 
 # Shortcuts
 opt = snakemake.params.get("opt", "")
@@ -42,7 +43,7 @@ with tempfile.TemporaryDirectory(dir=outdir) as temp_dir:
         --readFilesIn {fastq1} {fastq2}\
         --outFileNamePrefix {temp_dir}\
         --quantMode GeneCounts\
-        &> {snakemake.log}")
+        &>> {snakemake.log}")
 
     if sj:
         temp_file = os.path.join(temp_dir, "SJ.out.tab")

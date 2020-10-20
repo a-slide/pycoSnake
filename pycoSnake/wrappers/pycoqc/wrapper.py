@@ -1,12 +1,13 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.1"
-
 # Imports
-import os
 from snakemake.shell import shell
+import os
+
+# Wrapper info
+wrapper_name = "pycoqc"
+wrapper_version = "0.0.2"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
 
 # Shortcuts
 opt = snakemake.params.get("opt", "")
@@ -38,4 +39,5 @@ elif json:
     output = f"-j {json}"
 
 # Run shell command
-shell (f"pycoQC {opt} {input} {output} &> {snakemake.log}")
+shell(f"pycoQC --version >> {snakemake.log}")
+shell (f"pycoQC {opt} {input} {output} &>> {snakemake.log}")

@@ -1,12 +1,14 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.1"
-
 # Imports
-import os
 from snakemake.shell import shell
+import os
+
+# Wrapper info
+wrapper_name = "pycometh_meth_comp"
+wrapper_version = "0.0.4"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
+
 
 # Shortcuts
 opt = snakemake.params.get("opt", "")
@@ -41,7 +43,8 @@ if output_bed:
     output += f" -b {output_bed} "
 
 # Run shell command
-shell(f"pycoMeth Meth_Comp {opt} -i {input_tsv} -f {ref} {output} -s {sample_id_list} 2> {snakemake.log}")
+shell("pycoMeth --version >> {snakemake.log}")
+shell(f"pycoMeth Meth_Comp {opt} -i {input_tsv} -f {ref} {output} -s {sample_id_list} 2>> {snakemake.log}")
 
 # Optional Indexing with igv
 if output_bed_index and output_bed_index.endswith(".idx") and output_bed and output_bed.endswith(".bed"):

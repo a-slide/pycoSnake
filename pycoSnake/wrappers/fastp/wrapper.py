@@ -1,11 +1,12 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.1"
-
 # Imports
 from snakemake.shell import shell
+
+# Wrapper info
+wrapper_name = "fastp"
+wrapper_version = "0.0.2"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
 
 ## Shortcuts
 opt = snakemake.params.get("opt", "")
@@ -18,8 +19,8 @@ json = snakemake.output.json
 
 # Paired end
 if input_fastq2:
-    shell("fastp {opt} -w {snakemake.threads} -i {input_fastq1} -I {input_fastq2} -o {output_fastq1} -O {output_fastq2} -h {html} -j {json} &> {snakemake.log}")
+    shell("fastp {opt} -w {snakemake.threads} -i {input_fastq1} -I {input_fastq2} -o {output_fastq1} -O {output_fastq2} -h {html} -j {json} &>> {snakemake.log}")
 
 # Single end
 else:
-    shell("fastp {opt} -w {snakemake.threads} -i {input_fastq1} -o {output_fastq1} -h {html} -j {json} &> {snakemake.log}")
+    shell("fastp {opt} -w {snakemake.threads} -i {input_fastq1} -o {output_fastq1} -h {html} -j {json} &>> {snakemake.log}")

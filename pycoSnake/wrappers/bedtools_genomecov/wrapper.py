@@ -1,11 +1,12 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.2"
-
 # Imports
 from snakemake.shell import shell
+
+# Wrapper info
+wrapper_name = "bedtools_genomecov"
+wrapper_version = "0.0.2"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
 
 # Shortcuts
 opt = snakemake.params.get("opt", "")
@@ -21,4 +22,4 @@ if not sample_id:
         sample_id = "Sample"
 
 # Run shell commands
-shell("bedtools genomecov {opt} -bg -ibam {bam} -trackopts 'type=bedGraph name={sample_id}' > {bedgraph} 2> {snakemake.log}")
+shell("bedtools genomecov {opt} -bg -ibam {bam} -trackopts 'type=bedGraph name={sample_id}' > {bedgraph} 2>> {snakemake.log}")

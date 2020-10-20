@@ -1,13 +1,14 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.1"
-
 # Imports
 from snakemake.shell import shell
 import tempfile
 import os
+
+# Wrapper info
+wrapper_name = "ngmlr"
+wrapper_version = "0.0.2"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
 
 # Shortcuts
 opt = snakemake.params.get("opt", "")
@@ -20,7 +21,7 @@ ref = snakemake.input.ref
 bam = snakemake.output.bam
 
 # Run shell commands
-shell("echo '#### NGMLR + SAMTOOLS LOG ####' > {snakemake.log}")
+shell("echo '#### NGMLR + SAMTOOLS LOG ####' >> {snakemake.log}")
 
 with tempfile.TemporaryDirectory(dir=outdir) as temp_dir:
     shell("ngmlr -t {align_threads} {opt} -r {ref} -q {fastq} 2>> {snakemake.log}|\

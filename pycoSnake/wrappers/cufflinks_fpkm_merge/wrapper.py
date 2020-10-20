@@ -1,13 +1,14 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.1"
-
 # Imports
 from snakemake.shell import shell
 import pandas as pd
 import os
+
+# Wrapper info
+wrapper_name = "cufflinks_fpkm_merge"
+wrapper_version = "0.0.2"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
 
 # Shortcuts
 input_fpkm_genes = snakemake.input.get("fpkm_genes", None)

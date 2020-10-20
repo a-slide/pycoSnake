@@ -1,14 +1,16 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.2"
-
 # Imports
+from snakemake.shell import shell
 from collections import OrderedDict
 import pandas as pd
 from pyBioTools import Fasta
 from pyfaidx import Faidx
+
+# Wrapper info
+wrapper_name = "get_transcriptome"
+wrapper_version = "0.0.3"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
 
 # Shortcuts
 ref_input = str(snakemake.input.ref)

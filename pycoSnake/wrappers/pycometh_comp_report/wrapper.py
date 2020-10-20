@@ -1,12 +1,12 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.1"
-
 # Imports
-import os
 from snakemake.shell import shell
+
+# Wrapper info
+wrapper_name = "pycometh_comp_report"
+wrapper_version = "0.0.4"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
 
 # Shortcuts
 opt = snakemake.params.get("opt", "")
@@ -16,4 +16,5 @@ ref = snakemake.input.ref
 outdir = snakemake.output.outdir
 
 # Run shell command
-shell(f"pycoMeth Comp_Report {opt} -i {tsv} -f {ref} -g {gff3} -o {outdir} 2> {snakemake.log}")
+shell("pycoMeth --version >> {snakemake.log}")
+shell(f"pycoMeth Comp_Report {opt} -i {tsv} -f {ref} -g {gff3} -o {outdir} 2>> {snakemake.log}")

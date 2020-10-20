@@ -1,12 +1,13 @@
-__author__ = "Adrien Leger"
-__copyright__ = "Copyright 2019, Adrien Leger"
-__email__ = "aleg@ebi.ac.uk"
-__license__ = "MIT"
-__version__ = "0.0.3"
-
 # Imports
 from snakemake.shell import shell
 import os
+
+# Wrapper info
+wrapper_name = "salmon_quant"
+wrapper_version = "0.0.4"
+author = "Adrien Leger"
+license = "MIT"
+shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
 
 # Shortcuts
 opt = snakemake.params.get("opt", "")
@@ -18,7 +19,7 @@ counts = snakemake.output.get("counts", None)
 os.makedirs(quant_dir, exist_ok=True)
 
 # Run shell command
-shell("salmon quant {opt} -p {snakemake.threads} -i {index_dir} -1 {fastq1} -2 {fastq2} -o {quant_dir} &> {snakemake.log}")
+shell("salmon quant {opt} -p {snakemake.threads} -i {index_dir} -1 {fastq1} -2 {fastq2} -o {quant_dir} &>> {snakemake.log}")
 
 # Move counts if given
 if counts:
