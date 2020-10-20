@@ -1,18 +1,18 @@
-![](pictures/NanoSnake_logo.png)
+![](pictures/pycoSnake_logo.png)
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥5.4.2-brightgreen.svg)](https://snakemake.bitbucket.io)
-[![Licence](https://anaconda.org/aleg/nanosnake/badges/license.svg)](https://anaconda.org/aleg/nanosnake)
-[![Build Status](https://travis-ci.com/a-slide/NanoSnake.svg?branch=master)](https://travis-ci.com/a-slide/NanoSnake)
+[![Licence](https://anaconda.org/aleg/pycoSnake/badges/license.svg)](https://anaconda.org/aleg/pycoSnake)
+[![Build Status](https://travis-ci.com/a-slide/pycoSnake.svg?branch=master)](https://travis-ci.com/a-slide/pycoSnake)
 [![DOI](https://zenodo.org/badge/173960745.svg)](https://zenodo.org/badge/latestdoi/173960745)
 
-[![Anaconda version](https://anaconda.org/aleg/nanosnake/badges/version.svg)](https://anaconda.org/aleg/nanosnake)
-[![Anaconda last release](https://anaconda.org/aleg/nanosnake/badges/latest_release_relative_date.svg)](https://anaconda.org/aleg/nanosnake)
-[![Anaconda platforms](https://anaconda.org/aleg/nanosnake/badges/platforms.svg)](https://anaconda.org/aleg/nanosnake)
-[![Anaconda Downloads](https://anaconda.org/aleg/nanosnake/badges/downloads.svg)](https://anaconda.org/aleg/nanosnake)
+[![Anaconda version](https://anaconda.org/aleg/pycoSnake/badges/version.svg)](https://anaconda.org/aleg/pycoSnake)
+[![Anaconda last release](https://anaconda.org/aleg/pycoSnake/badges/latest_release_relative_date.svg)](https://anaconda.org/aleg/pycoSnake)
+[![Anaconda platforms](https://anaconda.org/aleg/pycoSnake/badges/platforms.svg)](https://anaconda.org/aleg/pycoSnake)
+[![Anaconda Downloads](https://anaconda.org/aleg/pycoSnake/badges/downloads.svg)](https://anaconda.org/aleg/pycoSnake)
 
 ---
 
-**NanoSnake is a collection of [Snakemake](https://github.com/snakemake/snakemake) pipelines neatly wrapped in a convenient python package interface.
+**pycoSnake is a collection of [Snakemake](https://github.com/snakemake/snakemake) pipelines neatly wrapped in a convenient python package interface.
 It is easy to install with conda and to simple to run on a local computer or in a cluster environment.**
 
 ---
@@ -31,25 +31,51 @@ https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html
 
 ### Install the package in a conda environment
 
-You might not need all the extra channels depending on you conda configuration, but you need to add at least my channel: `aleg`
+#### Recommended installation from Anaconda Cloud
+
+You might not need all the extra channels depending on you conda configuration, but you need to add my channel: `aleg`
 
 ```
-conda create -n nanosnake -c aleg -c anaconda -c bioconda -c conda-forge python=3.6 nanosnake
+conda create -y -n pycoSnake -c aleg -c anaconda -c bioconda -c conda-forge python=3.6 pycosnake
 
-conda activate nanosnake
+conda activate pycoSnake
 ```
 
-To update the package, from the package directory
+To update the package
 
 ```
-conda activate nanosnake
+conda activate pycoSnake
 
-conda update nanosnake -c aleg
+conda update pycoSnake -c aleg
 ```
 
-## Running NanoSnake workflows
+#### Local installation in develop mode
 
-At the moment there is only 2 workflows available in NanoSnake:
+Clone pycoSnake repository to your local machine
+
+```
+git clone git@github.com:a-slide/pycoSnake.git
+
+cd pycoSnake
+```
+
+Create a new conda environment
+
+```
+conda create -y -n pycoSnake python=3.6
+
+conda activate pycoSnake
+```
+
+Install pycoSnake with pip in develop MODE
+
+```
+pip install -e ./
+```
+
+## pycoSnake workflows
+
+At the moment there is only 2 workflows available in pycoSnake:
 
 * DNA_ONT : Analyse Basecalled Nanopore sequencing data.
     * Download and cleanup genome
@@ -78,29 +104,29 @@ At the moment there is only 2 workflows available in NanoSnake:
 Generate the sample sheet and config template files required for the workflow you want to run.
 
 ```
-conda activate NanoSnake
+conda activate pycoSnake
 
-NanoSnake {WORKFLOW NAME} --generate_template config sample_sheet --overwrite_template
+pycoSnake {WORKFLOW NAME} --generate_template config sample_sheet --overwrite_template
 
 # Or for a cluster environment
 
-NanoSnake {WORKFLOW NAME} --generate_template cluster_config sample_sheet --overwrite_template
+pycoSnake {WORKFLOW NAME} --generate_template cluster_config sample_sheet --overwrite_template
 ```
 
-The `samples.tsv` file needs to be filled with the required informations detailed in the file header and passed to NanoSnake (`--sample_sheet`).
+The `samples.tsv` file needs to be filled with the required informations detailed in the file header and passed to pycoSnake (`--sample_sheet`).
 
-The `config.yaml` can be modified and passed to NanoSnake (`--config`). It is generally recommended to stick to the default parameters.
+The `config.yaml` can be modified and passed to pycoSnake (`--config`). It is generally recommended to stick to the default parameters.
 
-The `cluster_config.yaml` can be modified and passed to NanoSnake (`--cluster_config`). Use the file instead of config.yaml if you are executing the pipeline in a cluster environment. By default the file is for an LSF cluster, but it can be modified for other HPC platforms.
+The `cluster_config.yaml` can be modified and passed to pycoSnake (`--cluster_config`). Use the file instead of config.yaml if you are executing the pipeline in a cluster environment. By default the file is for an LSF cluster, but it can be modified for other HPC platforms.
 
 ### Execute a workflow
 
-Call NanoSnake and choose your workflow
+Call pycoSnake and choose your workflow
 
 ```
-conda activate NanoSnake
+conda activate pycoSnake
 
-NanoSnake {WORKFLOW NAME} {OPTIONS}
+pycoSnake {WORKFLOW NAME} {OPTIONS}
 ```
 
 #### Example for the DNA workflow
@@ -108,69 +134,83 @@ NanoSnake {WORKFLOW NAME} {OPTIONS}
 **Usage on a local machine**
 
 ```
-conda activate NanoSnake
+conda activate pycoSnake
 
-NanoSnake DNA_ONT -r ref.fa  -s sample_sheet.tsv --config config.yaml --cores 10
+pycoSnake DNA_ONT -r ref.fa  -s sample_sheet.tsv --config config.yaml --cores 10
 ```
 
 **Usage in an LSF cluster environment**
 
 Use the cluster_config option instead of the config file.
-The cluster_config provided with NanoSnake is configured to work on an LSF cluster environment
+The cluster_config provided with pycoSnake is configured to work on an LSF cluster environment
 It contains the "prototype bsub command" to be used by Snakemake  `bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {cluster.name} -oo {cluster.output} -eo {cluster.error}` as well as the maximal number of cores and nodes to use.
 
 ```
-conda activate NanoSnake
+conda activate pycoSnake
 
-NanoSnake DNA_ONT -r ref.fa -s sample_sheet.tsv --cluster_config cluster_config.yaml
+pycoSnake DNA_ONT -r ref.fa -s sample_sheet.tsv --cluster_config cluster_config.yaml
 ```
 
 ## Wrapper library
 
-This repository contains snakemake wrappers for [NanoSnake](https://github.com/a-slide/NanoSnake).
+This repository contains snakemake wrappers for [pycoSnake](https://github.com/a-slide/pycoSnake).
 
 ### Using the wrappers library
 
-Wrappers can also be used outside of `NanoSnake` in any Snakemake file by using the following option:
+Wrappers can also be used outside of `pycoSnake` in any Snakemake file by using the following option:
 
 ```
---wrapper-prefix https://raw.githubusercontent.com/a-slide/NanoSnake/master/NanoSnake/wrappers/
+--wrapper-prefix https://raw.githubusercontent.com/a-slide/pycoSnake/master/pycoSnake/wrappers/
 ```
 
 ### Testing Wrappers
 
-The package contains test data and integrated tests all the wrappers.
-
-### Command line help message
+The package contains test data and integrated tests for all the wrappers.
 
 ```
-usage: NanoSnake tests [-h]
-                       [--wrappers ...]]
-                       [--keep_output] [--clean_output] [--cores CORES]
-                       [--workdir WORKDIR] [--verbose | --quiet]
+# Test all the wrappers
 
-Test all the wrappers
+pycoSnake test_wrappers --cores 8
+
+# Test individual wrappers
+
+pycoSnake test_wrappers --wrappers get_annotation star_count_merge pycometh_comp_report --cores 8
+
+# Keep of test output files generated by the wrappers
+
+pycoSnake test_wrappers --keep_output --cores 8
+```
+
+## Command line help message
+
+```
+usage: pycoSnake [-h] [--version] {test_wrappers,DNA_ONT,RNA_illumina} ...
+
+pycoSnake is a neatly wrapped collection of snakemake workflows for analysing
+nanopore sequencing data
 
 optional arguments:
-  -h, --help                    show this help message and exit
-  --wrappers ...]               List of wrappers to test (default: all)
-  --keep_output, -k             Keep temporary output files generated during tests (default: False)
-  --clean_output, -c            clean all temporary output files generated during tests (default: False)
-  --cores CORES, -j CORES       the number of provided cores (default: 1)
-  --workdir WORKDIR, -d WORKDIR Path to the working dir where to deploy the workflow (default: ./)
-  --verbose, -v                 Show additional debug output (default: False)
-  --quiet, -q                   Reduce overall output (default: False)
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+
+subcommands:
+  pycoSnake implements the following subcommands
+
+  {test_wrappers,DNA_ONT,RNA_illumina}
 ```
 
 ### Citing
 
-The repository is archived at Zenodo. If you use `NanoSnake` please cite as follow:
+The repository is archived at Zenodo. If you use `pycoSnake` please cite as follow:
 
-Adrien Leger. (2019, July 30). a-slide/NanoSnake. Zenodo. http://doi.org/10.5281/zenodo.3352283
+Adrien Leger. (2019, July 30). a-slide/pycoSnake. Zenodo. http://doi.org/10.5281/zenodo.3352283
 
 ## Authors and contributors
 
 * Adrien Leger (@a-slide) - aleg {at} ebi.ac.uk
 
-The SV analysis pipeline is inspired from [nano-snakemake](https://github.com/wdecoster/nano-snakemake) by [Wouter De Coster](https://github.com/wdecoster)
-and [pipeline-structural-variation](https://github.com/nanoporetech/pipeline-structural-variation) by [Oxford Nanopore Technologies](https://github.com/nanoporetech)
+
+The SV analysis pipeline is inspired from:
+
+* [nano-snakemake](https://github.com/wdecoster/nano-snakemake) by [Wouter De Coster](https://github.com/wdecoster)
+* [pipeline-structural-variation](https://github.com/nanoporetech/pipeline-structural-variation) by [Oxford Nanopore Technologies](https://github.com/nanoporetech)

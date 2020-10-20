@@ -1,0 +1,11 @@
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+  - aleg
+
+dependencies:
+  - openjdk=11.0.1
+  - igvtools=2.5.3
+  - python=3.6
+  - pycoMeth=0.4.25
