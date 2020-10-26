@@ -1,4 +1,4 @@
-{% set version = '0.1a2' %}
+{% set version = '0.1a3' %}
 {% set name = "pycoSnake" %}
 
 package:

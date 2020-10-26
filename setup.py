@@ -6,7 +6,7 @@ from glob import glob
 
 # Define package info
 name= "pycoSnake"
-version = '0.1a2'
+version = '0.1a3'
 description = "pycoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
 with open("README.md", "r") as fh:
     long_description = fh.read()
