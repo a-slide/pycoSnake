@@ -5,4 +5,3 @@ channels:
 
 dependencies:
   - sniffles==1.0.12
-  - bcftools==1.11
