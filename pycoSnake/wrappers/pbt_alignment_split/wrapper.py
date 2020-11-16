@@ -3,7 +3,7 @@ from snakemake.shell import shell
 
 # Wrapper info
 wrapper_name = "pbt_alignment_split"
-wrapper_version = "0.0.2"
+wrapper_version = "0.0.3"
 author = "Adrien Leger"
 license = "MIT"
 shell("echo 'Wrapper {wrapper_name} v{wrapper_version} / {author} / Licence {license}' > {snakemake.log}")
