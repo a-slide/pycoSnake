@@ -1,4 +1,4 @@
-{% set version = '0.1a3' %}
+{% set version = "0.2.0.dev3" %}
 {% set name = "pycoSnake" %}
 
 package:
@@ -10,7 +10,7 @@ source:
 
 build:
   number: 0
-  script: "pip install {{ name }}-{{ version }}.tar.gz --no-deps --ignore-installed -v "
+  script: "pip install {{ name }}-{{ version }}.tar.gz --no-deps --ignore-installed -vv "
   entry_points:
     - pycoSnake=pycoSnake.__main__:main
   noarch: "python"
@@ -19,13 +19,11 @@ requirements:
   build:
     - python>=3.6
     - pip>=19.2.1
-    - ripgrep=11.0.1
+    - ripgrep>=11.0.1
   run:
-    - python>=3.6
-    - snakemake=5.5.4
-    - pandas=0.24.1
-    - loguru=0.3.2
-    - ftputil=3.4
+    - pandas==1.1.4
+    - snakemake==5.28.0
+    - ftputil==3.4
 
 test:
   commands:
@@ -35,6 +33,11 @@ test:
     - pycoSnake test_wrappers --help
 
 about:
-  home: "https://github.com/a-slide/pycoSnake"
-  license: "MIT"
-  summary: "pycoSnake is a neatly wrapped collection of snakemake workflows for analysing nanopore sequencing data"
+  home: https://github.com/a-slide/pycoSnake
+  license: MIT
+  summary: pycoSnake is a neatly wrapped collection of snakemake workflows for analysing Illumina and nanopore sequencing datasets. It is easy to install with conda and simple to run on a local computer or in a cluster environment
+
+extra:
+  author: Adrien Leger
+  author_email: aleg@ebi.ac.uk
+  author_url: https://adrienleger.com

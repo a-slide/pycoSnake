@@ -1,0 +1,38 @@
+version:
+  major: 0
+  minor: 2
+  micro: 0
+  a: null
+  b: null
+  rc: null
+  post: null
+  dev: 3
+managed_values:
+  __package_name__: pycoSnake
+  __package_description__: pycoSnake is a neatly wrapped collection of snakemake workflows
+    for analysing Illumina and nanopore sequencing datasets. It is easy to install
+    with conda and simple to run on a local computer or in a cluster environment
+  __package_url__: https://github.com/a-slide/pycoSnake
+  __author_name__: Adrien Leger
+  __author_email__: aleg@ebi.ac.uk
+  __author_url__: https://adrienleger.com
+  __package_licence__: MIT
+  __minimal_python__: '>=3.6'
+  __entry_point1__: pycoSnake=pycoSnake.__main__:main
+  __dependency_1__: pandas==1.1.4
+  __dependency_2__: snakemake==5.28.0
+  __dependency_3__: ftputil==3.4
+  __classifiers_1__: 'Development Status :: 3 - Alpha'
+  __classifiers_2__: 'Intended Audience :: Science/Research'
+  __classifiers_3__: 'Topic :: Scientific/Engineering :: Bio-Informatics'
+  __classifiers_4__: 'License :: OSI Approved :: MIT License'
+  __classifiers_5__: 'Programming Language :: Python :: 3'
+  __citation__: 'Adrien Leger. a-slide/pycoSnake: (2020). doi:10.5281/zenodo.4110611'
+  __DNA_ONT_pipeline_version__: '0.3'
+  __RNA_illumina_pipeline_version__: '0.1'
+  __test_wrappers_pipeline_version__: '0.3'
+managed_files:
+  .versipy/setup.py: setup.py
+  .versipy/meta.yaml: meta.yaml
+  .versipy/__init__.py: pycoSnake/__init__.py
+  .versipy/README.md: README.md

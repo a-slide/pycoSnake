@@ -1,0 +1,4 @@
+2020-11-13 15:35:42.459818	0.0.0	Initialise versipy history
+2020-11-16 16:43:39.149100	0.2.0.dev1	setting first version with versipy
+2020-11-16 16:47:24.984031	0.2.0.dev2	fixing versipy conf
+2020-11-16 16:49:54.370083	0.2.0.dev3	updating snakemake dep

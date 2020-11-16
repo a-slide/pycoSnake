@@ -1,4 +1,4 @@
-# pycoSnake v0.2.0.dev3
+# __package_name__ v__package_version__
 
 ![](pictures/pycoSnake_logo.png)
 
@@ -13,7 +13,7 @@
 [![Anaconda Downloads](https://anaconda.org/aleg/pycoSnake/badges/downloads.svg)](https://anaconda.org/aleg/pycoSnake)
 ---
 
-**pycoSnake is a neatly wrapped collection of snakemake workflows for analysing Illumina and nanopore sequencing datasets. It is easy to install with conda and simple to run on a local computer or in a cluster environment**
+**__package_description__**
 
 ---
 
@@ -202,22 +202,22 @@ subcommands:
 
 ## Classifiers
 
-* Development Status :: 3 - Alpha
-* Intended Audience :: Science/Research
-* Topic :: Scientific/Engineering :: Bio-Informatics
-* License :: OSI Approved :: MIT License
-* Programming Language :: Python :: 3
+* __classifiers_1__
+* __classifiers_2__
+* __classifiers_3__
+* __classifiers_4__
+* __classifiers_5__
 
 ## citation
 
-Adrien Leger. a-slide/pycoSnake: (2020). doi:10.5281/zenodo.4110611
+__citation__
 
 ## licence
 
-MIT
+__package_licence__
 
-Copyright © 2020 Adrien Leger
+Copyright © 2020 __author_name__
 
 ## Authors
 
-* Adrien Leger / aleg@ebi.ac.uk / https://adrienleger.com
+* __author_name__ / __author_email__ / __author_url__
