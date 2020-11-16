@@ -1,8 +1,7 @@
 # Config file for lsf cluster
-# All the rules accept the following parameters: opt, threads, mem, name, output, error
 
 # Configuration file version (do not change)
-config_version: 9
+config_version: 11
 
 # cluster command for lsf
 cluster_cores: 10000
@@ -13,7 +12,14 @@ cluster_cmd: "bsub -q {cluster.queue} -n {cluster.threads} -M {cluster.mem} -J {
 __default__:
     queue: "research-rh74"
 
-# MAIN RULES
+# Conditional execution of pipeline
+differential_methylation: True
+dna_methylation_call: True
+structural_variants_call: True
+quality_control: True
+genome_coverage: True
+
+# All the rules accept the following parameters: opt, threads, mem, name, output, error
 get_genome:
     opt: ""
     threads: 2
@@ -62,9 +68,8 @@ pbt_alignment_filter:
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
-# OPTIONAL DNA METHYLATION RULES, Comment to skip
 pbt_alignment_split:
-    opt: ""
+    opt: "--index"
     n_chunks: 20
     threads: 2
     mem: 5000
@@ -88,7 +93,14 @@ nanopolish_call_methylation:
     output : "logs/{rule}/{wildcards.sample}_{wildcards.chunk}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_{wildcards.chunk}_bsub_stderr.log"
 
-# OPTIONAL PYCOMETH RULES, Comment to skip
+nanopolish_concat:
+    opt: ""
+    threads: 2
+    mem: 5000
+    name : "nanosnake_DNA_ONT.{rule}.{wildcards.sample}"
+    output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
+    error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
+
 pycometh_cgi_finder:
     opt: ""
     threads: 2
@@ -129,7 +141,6 @@ pycometh_comp_report:
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
 
-# OPTIONAL STRUCTURAL VARIANT RULES, Comment to skip
 ngmlr:
     opt: "-x ont"
     threads: 40
@@ -178,7 +189,6 @@ survivor_merge_all:
     output : "logs/{rule}/bsub_stdout.log"
     error : "logs/{rule}/bsub_stderr.log"
 
-# OPTIONAL QC RULES, Comment to skip
 pycoqc:
     opt: "--filter_calibration --filter_duplicated --min_pass_len 100 --min_pass_qual 7"
     threads: 2
@@ -195,7 +205,6 @@ samtools_qc:
     output : "logs/{rule}/{wildcards.sample}_bsub_stdout.log"
     error : "logs/{rule}/{wildcards.sample}_bsub_stderr.log"
 
-# OPTIONAL COVERAGE RULES, Comment to skip
 bedtools_genomecov:
     opt: "-bg"
     threads: 2

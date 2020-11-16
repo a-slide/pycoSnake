@@ -1,9 +1,14 @@
-# All the rules accept the following parameters: opt, threads, mem
-
 # Configuration file version (do not change)
-config_version: 9
+config_version: 11
 
-# MAIN RULES
+# Conditional execution of pipeline
+differential_methylation: True
+dna_methylation_call: True
+structural_variants_call: True
+quality_control: True
+genome_coverage: True
+
+# All the rules accept the following parameters: opt, threads, mem
 get_genome:
     opt: ""
 
@@ -23,9 +28,8 @@ minimap2_align:
 pbt_alignment_filter:
     opt: "--min_align_len 100 --min_freq_identity 0.7 --skip_unmapped --skip_secondary --skip_supplementary"
 
-# OPTIONAL DNA METHYLATION RULES, Comment to skip
 pbt_alignment_split:
-    opt: ""
+    opt: "--index"
     n_chunks: 10
 
 nanopolish_index:
@@ -35,7 +39,9 @@ nanopolish_call_methylation:
     opt: "--methylation cpg"
     threads: 4
 
-# OPTIONAL PYCOMETH RULES, Comment to skip
+nanopolish_concat:
+    opt: ""
+
 pycometh_cgi_finder:
     opt: ""
 
@@ -51,7 +57,6 @@ pycometh_meth_comp:
 pycometh_comp_report:
     opt: "--max_tss_distance 100000 --pvalue_threshold 0.01 --min_diff_llr 1"
 
-# OPTIONAL STRUCTURAL VARIANT RULES, Comment to skip
 ngmlr:
     opt: "-x ont"
     threads: 4
@@ -73,14 +78,12 @@ sniffles_all:
 survivor_merge_all:
     opt: "1000 -1 1 -1 -1 -1"
 
-# OPTIONAL QC RULES, Comment to skip
 pycoqc:
     opt: "--filter_calibration --filter_duplicated --min_pass_len 100 --min_pass_qual 7"
 
 samtools_qc:
     opt: ""
 
-# OPTIONAL COVERAGE RULES, Comment to skip
 bedtools_genomecov:
     opt: "-bg"
 
