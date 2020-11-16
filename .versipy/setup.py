@@ -10,7 +10,7 @@ with open("README.md", "r") as fh:
 
 # Collect all package data to add
 package_data = []
-package_data.extend([fn.partition("/")[-1] for fn in glob("pycoSnake/test_data/**", recursive=True)])
+#package_data.extend([fn.partition("/")[-1] for fn in glob("pycoSnake/test_data/**", recursive=True)])
 package_data.extend([fn.partition("/")[-1] for fn in glob("pycoSnake/workflows/**", recursive=True)])
 package_data.extend([fn.partition("/")[-1] for fn in glob("pycoSnake/wrappers/**", recursive=True)])
 
