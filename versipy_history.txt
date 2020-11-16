@@ -3,3 +3,4 @@
 2020-11-16 16:47:24.984031	0.2.0.dev2	fixing versipy conf
 2020-11-16 16:49:54.370083	0.2.0.dev3	updating snakemake dep
 2020-11-16 17:35:11.046006	0.2.0.dev4	first test of versipy + travis on tag deploy
+2020-11-16 17:43:16.920213	0.2.0.dev5	try to remove test data from package
