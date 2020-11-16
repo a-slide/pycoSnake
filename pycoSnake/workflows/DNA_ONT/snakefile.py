@@ -1,28 +1,21 @@
 # -*- coding: utf-8 -*-
 
-##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Imports~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Imports~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 # Std lib
 from os.path import join
 
 # Third party lib
 import pandas as pd
+from snakemake.logging import logger
 
 # Local imports
 from pycoSnake.common import *
 from snakemake.remote.FTP import RemoteProvider as FTPRemoteProvider
 from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-FTP = FTPRemoteProvider()
-HTTP = HTTPRemoteProvider()
+FTP=FTPRemoteProvider()
+HTTP=HTTPRemoteProvider()
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~check config file version~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-config_version=9
-if not "config_version" in config or config["config_version"]!= config_version:
-    raise pycoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define samples sheet reference and getters~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-sample_df=pd.read_csv (config["sample_sheet"], comment="#", skip_blank_lines=True, sep="\t", index_col=0)
-sample_list=list(sample_df.index)
-
+##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Getters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def get_fastq (wildcards):
     return sample_df.loc[wildcards.sample, "fastq"]
 def get_fast5 (wildcards):
@@ -30,224 +23,81 @@ def get_fast5 (wildcards):
 def get_seqsum (wildcards):
     return sample_df.loc[wildcards.sample, "seq_summary"]
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define number of chunks for nanopolish~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Initialise~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+logger.info("Checking configuration file version")
+config_version=11
+if not "config_version" in config or config["config_version"]!= config_version:
+    raise pycoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
+
+logger.info("Loading sample file")
+sample_df=pd.read_csv (config["sample_sheet"], comment="#", skip_blank_lines=True, sep="\t", index_col=0)
+sample_list=list(sample_df.index)
+
+logger.info("Define number of chunks")
 try:
-    nchunk = int(config["pbt_alignment_split"]["n_chunks"])
+    nchunk=int(config["pbt_alignment_split"]["n_chunks"])
 except:
-    nchunk = 2
-chunk_list = list(range(nchunk))
+    nchunk=2
+chunk_list=list(range(nchunk))
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define IO for each rule~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
-# Build output files dictionnary
-input_d=defaultdict(OrderedDict)
-output_d=defaultdict(OrderedDict)
-log_d=OrderedDict()
+logger.info("Specify way to download reference files")
+ref=config["genome"]
+if ref.startswith("ftp"):
+    ref=FTPRemoteProvider().remote(ref)
+elif ref.startswith("http"):
+    ref=HTTPRemoteProvider().remote(ref)
 
-rule_name="get_genome"
-ref = config["genome"]
-if ref.startswith("ftp"): input_d[rule_name]["ref"]=FTP.remote(ref)
-elif ref.startswith("http"): input_d[rule_name]["ref"]=HTTP.remote(ref)
-else: input_d[rule_name]["ref"]=ref
-output_d[rule_name]["ref"]=join("results","input","genome","genome.fa")
-output_d[rule_name]["index"]=join("results","input","genome","genome.fa.fai")
-log_d[rule_name]=join("logs",rule_name,"get_genome.log")
-
-rule_name="get_annotation"  ################################################################## Should be only if pycoMeth is required
-gff3 = config["annotation"]
-if gff3.startswith("ftp"): input_d[rule_name]["gff3"]=FTP.remote(gff3)
-elif gff3.startswith("http"): input_d[rule_name]["gff3"]=HTTP.remote(gff3)
-else: input_d[rule_name]["gff3"]=gff3
-output_d[rule_name]["gff3"]=join("results","input","annotation","annotation.gff3")
-output_d[rule_name]["gtf"]=join("results","input","annotation","annotation.gtf")
-log_d[rule_name]=join("logs",rule_name,"get_annotation.log")
-
-rule_name="pbt_fastq_filter"
-input_d[rule_name]["fastq"]=get_fastq
-output_d[rule_name]["fastq"]=join("results","input","merged_fastq","{sample}.fastq")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="minimap2_index"
-input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
-output_d[rule_name]["index"]=join("results","main","minimap2_index","ref.mmi")
-log_d[rule_name]=join("logs",rule_name,"ref.log")
-
-rule_name="minimap2_align"
-input_d[rule_name]["index"]=output_d["minimap2_index"]["index"]
-input_d[rule_name]["fastq"]=output_d["pbt_fastq_filter"]["fastq"]
-output_d[rule_name]["bam"]=join("results","main","minimap2_alignments","{sample}.bam")
-output_d[rule_name]["bam_index"]=join("results","main","minimap2_alignments","{sample}.bam.bai")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="pbt_alignment_filter"
-input_d[rule_name]["bam"]=output_d["minimap2_align"]["bam"]
-output_d[rule_name]["bam"]=join("results","main","filtered_alignments","{sample}.bam")
-output_d[rule_name]["bam_index"]=join("results","main","filtered_alignments","{sample}.bam.bai")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="nanopolish_index"
-input_d[rule_name]["fastq"]=output_d["pbt_fastq_filter"]["fastq"]
-input_d[rule_name]["fast5"]=get_fast5
-input_d[rule_name]["seqsum"]=get_seqsum
-output_d[rule_name]["index"]=join("results","input","merged_fastq","{sample}.fastq.index")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="pbt_alignment_split"
-input_d[rule_name]["bam"]=output_d["pbt_alignment_filter"]["bam"]
-output_d[rule_name]["bam"]=expand(join("results","methylation","split_alignments","{{sample}}","{chunk}.bam"), chunk=chunk_list) # Expand chunks
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="nanopolish_call_methylation"
-input_d[rule_name]["fastq"]=output_d["pbt_fastq_filter"]["fastq"]
-input_d[rule_name]["fastq_index"]=output_d["nanopolish_index"]["index"]
-input_d[rule_name]["bam"]=join("results","methylation","split_alignments","{sample}","{chunk}.bam")
-input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
-output_d[rule_name]["tsv"]=join("results","methylation","nanopolish_calls","{sample}","{chunk}.tsv")
-log_d[rule_name]=join("logs",rule_name,"{sample}","{chunk}.log")
-
-rule_name="pycometh_cgi_finder"
-input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
-output_d[rule_name]["tsv"]=join("results","methylation","pycometh_cgi_finder","CGI.tsv.gz")
-output_d[rule_name]["bed"]=join("results","methylation","pycometh_cgi_finder","CGI.bed")
-output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_cgi_finder","CGI.bed.idx")
-log_d[rule_name]=join("logs",rule_name,"ref.log")
-
-rule_name="pycometh_cpg_aggregate"
-input_d[rule_name]["tsv"]=expand(join("results","methylation","nanopolish_calls","{{sample}}","{chunk}.tsv"), chunk=chunk_list) # Aggregate chunks
-input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
-output_d[rule_name]["tsv"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.tsv.gz")
-output_d[rule_name]["bed"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.bed")
-output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_cpg_aggregate","{sample}.bed.idx")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="pycometh_interval_aggregate"
-input_d[rule_name]["tsv"]=output_d["pycometh_cpg_aggregate"]["tsv"]
-input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
-input_d[rule_name]["annot"]=output_d["pycometh_cgi_finder"]["bed"]
-output_d[rule_name]["tsv"]=join("results","methylation","pycometh_interval_aggregate","{sample}.tsv.gz")
-output_d[rule_name]["bed"]=join("results","methylation","pycometh_interval_aggregate","{sample}.bed")
-output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_interval_aggregate","{sample}.bed.idx")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="pycometh_meth_comp"
-input_d[rule_name]["tsv"]=expand(join("results","methylation","pycometh_interval_aggregate","{sample}.tsv.gz"), sample=sample_list) # Aggregate samples
-input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
-output_d[rule_name]["tsv"]=join("results","methylation","pycometh_meth_comp","meth_comp.tsv.gz")
-output_d[rule_name]["bed"]=join("results","methylation","pycometh_meth_comp","meth_comp.bed")
-output_d[rule_name]["bed_index"]=join("results","methylation","pycometh_meth_comp","meth_comp.bed.idx")
-log_d[rule_name]=join("logs",rule_name,"meth_comp.log")
-
-rule_name="pycometh_comp_report"
-input_d[rule_name]["tsv"]=output_d["pycometh_meth_comp"]["tsv"]
-input_d[rule_name]["gff3"]=output_d["get_annotation"]["gff3"]
-input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
-output_d[rule_name]["outdir"]=directory(join("results","methylation","pycometh_comp_report"))
-log_d[rule_name]=join("logs",rule_name,"comp_report.log")
-
-rule_name="ngmlr"
-input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
-input_d[rule_name]["fastq"]=output_d["pbt_fastq_filter"]["fastq"]
-output_d[rule_name]["bam"]=join("results","SV","ngmlr_alignments","{sample}.bam")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="sniffles"
-input_d[rule_name]["bam"]=output_d["ngmlr"]["bam"]
-output_d[rule_name]["vcf"]=join("results","SV","sniffles","{sample}_raw.vcf")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="survivor_filter"
-input_d[rule_name]["vcf"]=output_d["sniffles"]["vcf"]
-output_d[rule_name]["vcf"]=join("results","SV","sniffles","{sample}_filtered.vcf")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="survivor_merge"
-input_d[rule_name]["vcf"]=expand(join("results","SV","sniffles","{sample}_filtered.vcf"), sample=sample_list) # Aggregate samples
-output_d[rule_name]["vcf"]=join("results","SV","sniffles","merged.vcf")
-log_d[rule_name]=join("logs",rule_name,"merged.log")
-
-rule_name="sniffles_all"
-input_d[rule_name]["bam"]=output_d["ngmlr"]["bam"]
-input_d[rule_name]["vcf"]=output_d["survivor_merge"]["vcf"]
-output_d[rule_name]["vcf"]=join("results","SV","sniffles_all","{sample}_raw.vcf")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="survivor_merge_all"
-input_d[rule_name]["vcf"]=expand(join("results","SV","sniffles_all","{sample}_raw.vcf"), sample=sample_list) # Aggregate samples
-output_d[rule_name]["vcf"]=join("results","SV","sniffles_all","merged.vcf")
-log_d[rule_name]=join("logs",rule_name,"merged.log")
-
-rule_name="pycoqc"
-input_d[rule_name]["seqsum"]=get_seqsum
-input_d[rule_name]["bam"]=output_d["minimap2_align"]["bam"]
-output_d[rule_name]["html"]=join("results","QC","pycoqc","{sample}_pycoqc.html")
-output_d[rule_name]["json"]=join("results","QC","pycoqc","{sample}_pycoqc.json")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="samtools_qc"
-input_d[rule_name]["bam"]=output_d["minimap2_align"]["bam"]
-output_d[rule_name]["stats"]=join("results","QC","samtools_qc","{sample}_samtools_stats.txt")
-output_d[rule_name]["flagstat"]=join("results","QC","samtools_qc","{sample}_samtools_flagstat.txt")
-output_d[rule_name]["idxstats"]=join("results","QC","samtools_qc","{sample}_samtools_idxstats.txt")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="bedtools_genomecov"
-input_d[rule_name]["bam"]=output_d["pbt_alignment_filter"]["bam"]
-output_d[rule_name]["bedgraph"]=join("results","coverage","bedgraph","{sample}.bedgraph")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
-
-rule_name="igvtools_count"
-input_d[rule_name]["bam"]=output_d["pbt_alignment_filter"]["bam"]
-input_d[rule_name]["ref"]=output_d["get_genome"]["ref"]
-output_d[rule_name]["tdf"]=join("results","coverage","igv_tdf","{sample}.tdf")
-log_d[rule_name]=join("logs",rule_name,"{sample}.log")
+gff3=config["annotation"]
+if ref.startswith("ftp"):
+    ref=FTPRemoteProvider().remote(gff3)
+elif ref.startswith("http"):
+    ref=HTTPRemoteProvider().remote(gff3)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define all output depending on config file~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
+logger.info("Define conditional target files")
+target_files=[]
+target_files.extend(expand(join("results","main","filtered_alignments","{sample}.bam"), sample=sample_list))
 
-# main rules
-run_rules = ["get_genome", "get_annotation", "pbt_fastq_filter", "minimap2_index", "minimap2_align", "pbt_alignment_filter"]
+if config["dna_methylation_call"] is True:
+    logger.info("\tInclude rules for 'dna_methylation_call' module")
+    target_files.extend(expand(join("results","methylation","nanopolish_calls","{sample}.tsv.gz"), sample=sample_list))
 
-# Optional nanopolish analysis
-np_rules = ["pbt_alignment_split", "nanopolish_index", "nanopolish_call_methylation"]
-if all_in (config, np_rules):
-    run_rules.extend (np_rules)
+if config["differential_methylation"] is True:
+    logger.info("\tInclude rules for 'differential_methylation' module")
+    target_files.append(join("results","methylation","pycometh_comp_report", "pycoMeth_summary_report.html"))
 
-# Optional pycoMeth analysis
-pcm_rules = ["pycometh_cgi_finder", "pycometh_cpg_aggregate", "pycometh_interval_aggregate", "pycometh_meth_comp", "pycometh_comp_report"]
-if all_in (config, np_rules) and all_in (config, pcm_rules):
-    run_rules.extend (pcm_rules)
+if config["structural_variants_call"] is True:
+    logger.info("\tInclude rules for 'structural_variants_call' module")
+    target_files.append(join("results","SV","sniffles_all","merged.vcf"))
 
-# Optional SV analysis
-SV_rules = ["ngmlr", "sniffles", "survivor_filter", "survivor_merge", "sniffles_all", "survivor_merge_all"]
-if all_in (config, SV_rules):
-    run_rules.extend (SV_rules)
+if config["quality_control"] is True:
+    logger.info("\tInclude rules for 'quality_control' module")
+    target_files.extend(expand(join("results","QC","pycoqc","{sample}_pycoqc.html"), sample=sample_list))
+    target_files.extend(expand(join("results","QC","pycoqc","{sample}_pycoqc.json"), sample=sample_list))
+    target_files.extend(expand(join("results","QC","samtools_qc","{sample}_samtools_stats.txt"), sample=sample_list))
+    target_files.extend(expand(join("results","QC","samtools_qc","{sample}_samtools_flagstat.txt"), sample=sample_list))
+    target_files.extend(expand(join("results","QC","samtools_qc","{sample}_samtools_idxstats.txt"), sample=sample_list))
 
-# Other optional orphan rules
-orphan_rules = ["pycoqc", "samtools_qc", "bedtools_genomecov", "igvtools_count"]
-for r in orphan_rules:
-    if r in config:
-        run_rules.append(r)
+if config["genome_coverage"] is True:
+    logger.info("\tInclude rules for 'genome_coverage' module")
+    target_files.extend(expand(join("results","coverage","bedgraph","{sample}.bedgraph"), sample=sample_list))
+    target_files.extend(expand(join("results","coverage","igv_tdf","{sample}.tdf"), sample=sample_list))
 
-all_output=[]
-for rule_name, rule_d in output_d.items():
-    if rule_name in run_rules:
-        for option, output in rule_d.items():
-            all_output.append(output)
-all_output = flatten_list(all_output)
-
-all_expand = []
-for output in all_output:
-    all_expand.append(list(set(expand(output, sample=sample_list, chunk=chunk_list))))
-all_expand = flatten_list(all_expand)
+for fn in target_files:
+    logger.debug(f"\t{fn}")
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RULES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 rule all:
-    input: all_expand
+    input: target_files
 
 rule_name="get_genome"
 rule get_genome:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: ref=ref
+    output:
+        ref=join("results","input","genome","genome.fa"),
+        index=join("results","input","genome","genome.fa.fai")
+    log: join("logs",rule_name,"out.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
@@ -255,9 +105,11 @@ rule get_genome:
 
 rule_name="get_annotation"
 rule get_annotation:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: gff3=gff3
+    output:
+        gff3=join("results","input","annotation","annotation.gff3"),
+        gtf=join("results","input","annotation","annotation.gtf")
+    log: join("logs", rule_name, "out.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
@@ -265,9 +117,9 @@ rule get_annotation:
 
 rule_name="pbt_fastq_filter"
 rule pbt_fastq_filter:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: fastq=get_fastq
+    output: fastq=join("results","input","merged_fastq","{sample}.fastq")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
@@ -275,9 +127,9 @@ rule pbt_fastq_filter:
 
 rule_name="minimap2_index"
 rule minimap2_index:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: ref=rules.get_genome.output.ref
+    output: index=join("results","main","minimap2_index","ref.mmi")
+    log: join("logs",rule_name,"ref.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
@@ -285,19 +137,25 @@ rule minimap2_index:
 
 rule_name="minimap2_align"
 rule minimap2_align:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
-    threads: get_threads(config, rule_name, 4)
+    input:
+        index=rules.minimap2_index.output.index,
+        fastq=rules.pbt_fastq_filter.output.fastq
+    output:
+        bam=temp(join("results","main","minimap2_alignments","{sample}.bam")),
+        bam_index=temp(join("results","main","minimap2_alignments","{sample}.bam.bai"))
+    log: join("logs",rule_name,"{sample}.log")
+    threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
     wrapper: "minimap2_align"
 
 rule_name="pbt_alignment_filter"
 rule pbt_alignment_filter:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: bam=rules.minimap2_align.output.bam
+    output:
+        bam=join("results","main","filtered_alignments","{sample}.bam"),
+        bam_index=join("results","main","filtered_alignments","{sample}.bam.bai")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
@@ -305,9 +163,12 @@ rule pbt_alignment_filter:
 
 rule_name="nanopolish_index"
 rule nanopolish_index:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input:
+        fastq=rules.pbt_fastq_filter.output.fastq,
+        fast5=get_fast5,
+        seqsum=get_seqsum
+    output: index=join("results","input","merged_fastq","{sample}.fastq.index")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -315,9 +176,11 @@ rule nanopolish_index:
 
 rule_name="pbt_alignment_split"
 rule pbt_alignment_split:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: bam=rules.minimap2_align.output.bam
+    output:
+        bam=temp(expand(join("results","methylation","split_alignments","{{sample}}","{chunk}.bam"), chunk=chunk_list)),
+        bam_index=temp(expand(join("results","methylation","split_alignments","{{sample}}","{chunk}.bam.bai"), chunk=chunk_list))
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -325,19 +188,37 @@ rule pbt_alignment_split:
 
 rule_name="nanopolish_call_methylation"
 rule nanopolish_call_methylation:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
-    threads: get_threads(config, rule_name, 4)
+    input:
+        fastq=rules.pbt_fastq_filter.output.fastq,
+        fastq_index=rules.nanopolish_index.output.index,
+        bam=join("results","methylation","split_alignments","{sample}","{chunk}.bam"),
+        bam_index=join("results","methylation","split_alignments","{sample}","{chunk}.bam.bai"),
+        ref=rules.get_genome.output.ref
+    output: tsv=temp(join("results","methylation","nanopolish_calls","{sample}","{chunk}.tsv"))
+    log: join("logs",rule_name,"{sample}","{chunk}.log")
+    threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
     wrapper: "nanopolish_call_methylation"
 
+rule_name="nanopolish_concat"
+rule nanopolish_concat:
+    input: tsv_list=expand(join("results","methylation","nanopolish_calls","{{sample}}","{chunk}.tsv"), chunk=chunk_list)
+    output: tsv=protected(join("results","methylation","nanopolish_calls","{sample}.tsv.gz"))
+    log: join("logs",rule_name,"{sample}.log")
+    threads: get_threads(config, rule_name)
+    params: opt=get_opt(config, rule_name),
+    resources: mem_mb=get_mem(config, rule_name)
+    wrapper: "nanopolish_concat"
+
 rule_name="pycometh_cgi_finder"
 rule pycometh_cgi_finder:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: ref=rules.get_genome.output.ref
+    output:
+        tsv=join("results","methylation","pycometh_cgi_finder","CGI.tsv.gz"),
+        bed=join("results","methylation","pycometh_cgi_finder","CGI.bed"),
+        bed_index=join("results","methylation","pycometh_cgi_finder","CGI.bed.idx")
+    log: join("logs",rule_name,"ref.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -345,9 +226,14 @@ rule pycometh_cgi_finder:
 
 rule_name="pycometh_cpg_aggregate"
 rule pycometh_cpg_aggregate:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input:
+        tsv= rules.nanopolish_concat.output.tsv,
+        ref=rules.get_genome.output.ref
+    output:
+        tsv=join("results","methylation","pycometh_cpg_aggregate","{sample}.tsv.gz"),
+        bed=join("results","methylation","pycometh_cpg_aggregate","{sample}.bed"),
+        bed_index=join("results","methylation","pycometh_cpg_aggregate","{sample}.bed.idx")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -355,9 +241,15 @@ rule pycometh_cpg_aggregate:
 
 rule_name="pycometh_interval_aggregate"
 rule pycometh_interval_aggregate:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input:
+        tsv=rules.pycometh_cpg_aggregate.output.tsv,
+        ref=rules.get_genome.output.ref,
+        annot=rules.pycometh_cgi_finder.output.bed
+    output:
+        tsv=join("results","methylation","pycometh_interval_aggregate","{sample}.tsv.gz"),
+        bed=join("results","methylation","pycometh_interval_aggregate","{sample}.bed"),
+        bed_index=join("results","methylation","pycometh_interval_aggregate","{sample}.bed.idx")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -365,9 +257,14 @@ rule pycometh_interval_aggregate:
 
 rule_name="pycometh_meth_comp"
 rule pycometh_meth_comp:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input:
+        tsv=expand(join("results","methylation","pycometh_interval_aggregate","{sample}.tsv.gz"), sample=sample_list),
+        ref=rules.get_genome.output.ref
+    output:
+        tsv=join("results","methylation","pycometh_meth_comp","meth_comp.tsv.gz"),
+        bed=join("results","methylation","pycometh_meth_comp","meth_comp.bed"),
+        bed_index=join("results","methylation","pycometh_meth_comp","meth_comp.bed.idx")
+    log: join("logs",rule_name,"meth_comp.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -375,9 +272,12 @@ rule pycometh_meth_comp:
 
 rule_name="pycometh_comp_report"
 rule pycometh_comp_report:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input:
+        tsv=rules.pycometh_meth_comp.output.tsv,
+        gff3=rules.get_annotation.output.gff3,
+        ref=rules.get_genome.output.ref
+    output: summary_report=join("results","methylation","pycometh_comp_report", "pycoMeth_summary_report.html")
+    log: join("logs",rule_name,"comp_report.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -385,19 +285,21 @@ rule pycometh_comp_report:
 
 rule_name="ngmlr"
 rule ngmlr:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
-    threads: get_threads(config, rule_name, 4)
+    input:
+        ref=rules.get_genome.output.ref,
+        fastq=rules.pbt_fastq_filter.output.fastq
+    output: bam=join("results","SV","ngmlr_alignments","{sample}.bam")
+    log: join("logs",rule_name,"{sample}.log")
+    threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
     wrapper: "ngmlr"
 
 rule_name="sniffles"
 rule sniffles:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: bam=rules.ngmlr.output.bam
+    output: vcf=join("results","SV","sniffles","{sample}_raw.vcf")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -405,9 +307,9 @@ rule sniffles:
 
 rule_name="survivor_filter"
 rule survivor_filter:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: vcf=rules.sniffles.output.vcf
+    output: vcf=join("results","SV","sniffles","{sample}_filtered.vcf")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -415,9 +317,9 @@ rule survivor_filter:
 
 rule_name="survivor_merge"
 rule survivor_merge:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: vcf=expand(join("results","SV","sniffles","{sample}_filtered.vcf"), sample=sample_list)
+    output: vcf=join("results","SV","sniffles","merged.vcf")
+    log: join("logs",rule_name,"merged.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -425,9 +327,11 @@ rule survivor_merge:
 
 rule_name="sniffles_all"
 rule sniffles_all:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input:
+        bam=rules.ngmlr.output.bam,
+        vcf=rules.survivor_merge.output.vcf
+    output: vcf=join("results","SV","sniffles_all","{sample}_raw.vcf")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -435,9 +339,9 @@ rule sniffles_all:
 
 rule_name="survivor_merge_all"
 rule survivor_merge_all:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: vcf=expand(join("results","SV","sniffles_all","{sample}_raw.vcf"), sample=sample_list)
+    output: vcf=join("results","SV","sniffles_all","merged.vcf")
+    log: join("logs",rule_name,"merged.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name),
     resources: mem_mb=get_mem(config, rule_name)
@@ -445,9 +349,13 @@ rule survivor_merge_all:
 
 rule_name="pycoqc"
 rule pycoqc:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input:
+        seqsum=get_seqsum,
+        bam=rules.minimap2_align.output.bam
+    output:
+        html=join("results","QC","pycoqc","{sample}_pycoqc.html"),
+        json=join("results","QC","pycoqc","{sample}_pycoqc.json")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
@@ -455,9 +363,12 @@ rule pycoqc:
 
 rule_name="samtools_qc"
 rule samtools_qc:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: bam=rules.minimap2_align.output.bam
+    output:
+        stats=join("results","QC","samtools_qc","{sample}_samtools_stats.txt"),
+        flagstat=join("results","QC","samtools_qc","{sample}_samtools_flagstat.txt"),
+        idxstats=join("results","QC","samtools_qc","{sample}_samtools_idxstats.txt")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
@@ -465,9 +376,9 @@ rule samtools_qc:
 
 rule_name="bedtools_genomecov"
 rule bedtools_genomecov:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input: bam=rules.pbt_alignment_filter.output.bam
+    output: bedgraph=join("results","coverage","bedgraph","{sample}.bedgraph")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
@@ -475,9 +386,11 @@ rule bedtools_genomecov:
 
 rule_name="igvtools_count"
 rule igvtools_count:
-    input: **input_d[rule_name]
-    output: **output_d[rule_name]
-    log: log_d[rule_name]
+    input:
+        bam=rules.pbt_alignment_filter.output.bam,
+        ref=rules.get_genome.output.ref
+    output: tdf=join("results","coverage","igv_tdf","{sample}.tdf")
+    log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)
     resources: mem_mb=get_mem(config, rule_name)
