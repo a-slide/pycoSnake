@@ -11,7 +11,6 @@ import inspect
 
 # Third party lib
 import pandas as pd
-from loguru import logger as log
 
 #~~~~~~~~~~~~~~CUSTOM EXCEPTION CLASS~~~~~~~~~~~~~~#
 class pycoSnakeError (Exception):
@@ -34,19 +33,6 @@ def mkdir (fn, exist_ok=False):
 def access_file (fn, **kwargs):
     """ Check if the file is readable """
     return os.path.isfile (fn) and os.access (fn, os.R_OK)
-
-def get_log_level(quiet=False, verbose=False):
-    """return logging level depending on verbosity args"""
-    if quiet:
-        return "WARNING"
-    if verbose:
-        return "DEBUG"
-    return "INFO"
-
-def set_log_level(quiet=False, verbose=False):
-    level = get_log_level(quiet,verbose)
-    log.remove()
-    log.add (sys.stderr, level=level)
 
 def jhelp (f:"python function or method"):
     """
@@ -140,12 +126,6 @@ def get_mem (config, rule_name, default=1000):
         return config[rule_name]["mem"]
     except KeyError:
         return default
-
-def get_output (out, rule_name, val):
-    try:
-        return out[rule_name][val]
-    except KeyError:
-        return val
 
 #~~~~~~~~~~~~~~MAIN HELPER FUNCTIONS~~~~~~~~~~~~~~#
 

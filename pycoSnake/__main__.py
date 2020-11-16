@@ -12,7 +12,7 @@ import glob
 
 # Third party library
 from snakemake import snakemake
-from loguru import logger as log
+from snakemake.logging import logger, setup_logger
 
 # Local imports
 from pycoSnake import __version__ as package_version
@@ -169,20 +169,20 @@ def main(args=None):
 
     # Parse args and and define logger verbose level
     args = parser.parse_args()
-    set_log_level(quiet=args.quiet, verbose=args.verbose)
-    log.warning ("RUNNING {} v{}".format(package_name, package_version))
+    setup_logger(quiet=args.quiet, debug=args.verbose)
+    logger.warning ("RUNNING {} v{}".format(package_name, package_version))
 
     if args.parser_type == "workflow":
 
         # Unlock locked dir and exit
         if args.unlock:
-            log.warning (f"Unlocking working directory")
+            logger.warning (f"Unlocking working directory")
             unlock_dir (workdir=args.workdir)
             sys.exit()
 
         # Generate templates and exit
         if args.generate_template:
-            log.warning (f"Generate template files in working directory")
+            logger.warning (f"Generate template files in working directory")
             generate_template (
                 workflow_dir=WORKFLOW_DIR,
                 templates=args.generate_template,
@@ -195,14 +195,14 @@ def main(args=None):
 
         # Cluster stuff to simplify options
         if args.cluster_config:
-            log.warning (f"INITIALISING WORKFLOW IN CLUSTER MODE")
+            logger.warning (f"INITIALISING WORKFLOW IN CLUSTER MODE")
             args.local_cores = get_yaml_val(yaml_fn=args.cluster_config, val_name="cluster_cores", default=args.cores)
             args.nodes = get_yaml_val(yaml_fn=args.cluster_config, val_name="cluster_nodes", default=args.nodes)
             args.cluster = get_yaml_val(yaml_fn=args.cluster_config, val_name="cluster_cmd", default=args.cluster)
             args.config = args.cluster_config
-            log.debug (f"Cores:{args.local_cores} / Nodes:{args.nodes} / Cluster_cmd:{args.cluster}")
+            logger.debug (f"Cores:{args.local_cores} / Nodes:{args.nodes} / Cluster_cmd:{args.cluster}")
         elif args.config :
-            log.warning (f"INITIALISING WORKFLOW IN LOCAL MODE")
+            logger.warning (f"INITIALISING WORKFLOW IN LOCAL MODE")
         else:
             raise pycoSnakeError("A configuration file `--config` or a cluster configuration file `--cluster_config` is required")
 
@@ -212,62 +212,62 @@ def main(args=None):
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~DNA_ONT SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def DNA_ONT (args):
     """"""
-    log.warning ("RUNNING WORKFLOW {} v{}".format(args.workflow_name, args.workflow_version))
+    logger.warning ("RUNNING WORKFLOW {} v{}".format(args.workflow_name, args.workflow_version))
 
     # Get and check config files
-    log.warning ("CHECKING CONFIGURATION FILES")
+    logger.warning ("CHECKING CONFIGURATION FILES")
     snakefile = get_snakefile_fn(workflow_dir=WORKFLOW_DIR, workflow=args.subcommands)
     configfile = get_config_fn(config=args.config)
 
     # Store additionnal options to pass to snakemake
-    log.info ("Build config dict for snakemake")
+    logger.info ("Build config dict for snakemake")
     config = {
         "genome":required_option("genome", args.genome),
         "annotation":required_option("annotation", args.annotation),
         "sample_sheet":get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq", "fast5", "seq_summary"])}
-    log.debug (config)
+    logger.debug (config)
 
     # Filter other args option compatible with snakemake API
     kwargs = filter_valid_snakemake_options (args)
-    log.debug (kwargs)
+    logger.debug (kwargs)
 
     # Run Snakemake through the API
-    snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
+    snakemake (snakefile=snakefile, configfiles=[configfile], config=config, use_conda=True, **kwargs)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~RNA_illumina SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def RNA_illumina (args):
     """"""
-    log.warning ("RUNNING WORKFLOW {} v{}".format(args.workflow_name, args.workflow_version))
+    logger.warning ("RUNNING WORKFLOW {} v{}".format(args.workflow_name, args.workflow_version))
 
     # Get and check config files
-    log.warning ("CHECKING CONFIGURATION FILES")
+    logger.warning ("CHECKING CONFIGURATION FILES")
     snakefile = get_snakefile_fn(workflow_dir=WORKFLOW_DIR, workflow=args.subcommands)
     configfile = get_config_fn(config=args.config)
 
     # Store additionnal options to pass to snakemake
-    log.info ("Build config dict for snakemake")
+    logger.info ("Build config dict for snakemake")
     config = {
         "genome":required_option("genome", args.genome),
         "transcriptome":required_option("transcriptome", args.transcriptome),
         "annotation":required_option("annotation", args.annotation),
         "sample_sheet":get_sample_sheet(sample_sheet=args.sample_sheet, required_fields=["sample_id", "fastq1", "fastq2"])}
-    log.debug (config)
+    logger.debug (config)
 
     # Filter other args option compatible with snakemake API
     kwargs = filter_valid_snakemake_options (args)
-    log.debug (kwargs)
+    logger.debug (kwargs)
 
     # Run Snakemake through the API
-    snakemake (snakefile=snakefile, configfile=configfile, config=config, use_conda=True, **kwargs)
+    snakemake (snakefile=snakefile, configfiles=[configfile], config=config, use_conda=True, **kwargs)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~TEST SUBPARSER FUNCTION~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def test_wrappers (args):
     """"""
-    log.warning ("RUNNING TEST {} v{}".format(args.workflow_name, args.workflow_version))
+    logger.warning ("RUNNING TEST {} v{}".format(args.workflow_name, args.workflow_version))
 
     # Cleanup data and leave
     if args.clean_output:
-        log.info("Removing output data")
+        logger.info("Removing output data")
         for wrapper_name in args.wrappers:
             wrapper_workdir = os.path.join(args.workdir, wrapper_name)
             shutil.rmtree(wrapper_workdir, ignore_errors=True)
@@ -275,11 +275,11 @@ def test_wrappers (args):
 
     # Test wrappers
     for wrapper_name in args.wrappers:
-        log.warning("Testing Wrapper {}".format(wrapper_name))
+        logger.warning("Testing Wrapper {}".format(wrapper_name))
         try:
             snakefile = get_snakefile_fn(workflow_dir=WRAPPER_DIR, workflow=wrapper_name)
             wrapper_workdir = os.path.join(args.workdir, wrapper_name)
-            log.debug("Working in directory: {}".format(wrapper_workdir))
+            logger.debug("Working in directory: {}".format(wrapper_workdir))
 
             #Run Snakemake through the API
             snakemake (
@@ -293,10 +293,10 @@ def test_wrappers (args):
                 quiet = args.quiet)
 
         finally:
-            log.debug("List of file generated: {}".format(os.listdir(wrapper_workdir)))
+            logger.debug("List of file generated: {}".format(os.listdir(wrapper_workdir)))
             shutil.rmtree(os.path.join(wrapper_workdir, ".snakemake"), ignore_errors=True)
             if not args.keep_output:
-                log.debug("Removing temporary directory")
+                logger.debug("Removing temporary directory")
                 shutil.rmtree(wrapper_workdir, ignore_errors=True)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Helper functions~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
