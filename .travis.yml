@@ -2,7 +2,7 @@ dist: xenial
 language: python
 python: 3.6
 branches:
-  only:
+  except:
   - master
   - dev
 
@@ -10,16 +10,28 @@ install: skip
 script: skip
 
 deploy:
-  # Deploy to Anaconda
-  - provider: script
-    skip_cleanup: true
-    script: bash ./deploy_anaconda.sh $ANACONDA_TOKEN
-    on:
-      branch: master
 
-  # Deploy to Anaconda
   - provider: script
     skip_cleanup: true
     script: bash ./deploy_anaconda.sh $ANACONDA_DEV_TOKEN
     on:
-      branch: dev
+      all_branches: true
+      tags: true
+      condition: $TRAVIS_TAG == *.dev*
+
+  # Production version deployment
+  - provider: script
+    skip_cleanup: true
+    script: bash ./deploy_anaconda.sh $ANACONDA_TOKEN
+    on:
+      tags: true
+      all_branches: true
+      condition: $TRAVIS_TAG != *.dev*
+
+  - provider: releases
+    api_key: $GH_TOKEN
+    skip_cleanup: true
+    on:
+      tags: true
+      all_branches: true
+      condition: $TRAVIS_TAG != *.dev*
