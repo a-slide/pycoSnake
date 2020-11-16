@@ -4,3 +4,5 @@
 2020-11-16 16:49:54.370083	0.2.0.dev3	updating snakemake dep
 2020-11-16 17:35:11.046006	0.2.0.dev4	first test of versipy + travis on tag deploy
 2020-11-16 17:43:16.920213	0.2.0.dev5	try to remove test data from package
+2020-11-16 18:32:10.429200	0.2.0.dev6	try to fix conda build memory issue
+2020-11-16 18:45:00.244400	0.2.0.dev7	try to remove test data from package

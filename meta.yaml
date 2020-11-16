@@ -1,4 +1,4 @@
-{% set version = "0.2.0.dev5" %}
+{% set version = "0.2.0.dev7" %}
 {% set name = "pycoSnake" %}
 
 package:
@@ -21,9 +21,9 @@ requirements:
     - pip>=19.2.1
     - ripgrep>=11.0.1
   run:
-    - pandas==1.1.4
-    - snakemake==5.28.0
-    - ftputil==3.4
+    - pandas>=1.0.0
+    - snakemake>=5.28.0
+    - ftputil>=3.0
 
 test:
   commands:
