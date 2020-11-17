@@ -1,12 +1,12 @@
 version:
   major: 0
   minor: 2
-  micro: 0
+  micro: 1
   a: null
   b: null
   rc: null
   post: null
-  dev: 17
+  dev: 1
 managed_values:
   __package_name__: pycoSnake
   __package_description__: pycoSnake is a neatly wrapped collection of snakemake workflows

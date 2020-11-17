@@ -18,3 +18,4 @@
 2020-11-16 21:42:48.022108	0.2.0.dev15	try to fix conda build memory issue
 2020-11-17 09:48:55.087156	0.2.0.dev16	try to fix conda build memory issue
 2020-11-17 10:01:48.059826	0.2.0.dev17	try to fix conda build memory issue
+2020-11-17 10:24:32.437903	0.2.1.dev1	Fixed snakemake dependency issue by using snakemake minimal
