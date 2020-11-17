@@ -25,3 +25,4 @@
 2020-11-17 12:22:08.076934	0.2.2	Deep refactoring of DNA-ONT pipeline and add nanopolish concat wrapper
 2020-11-17 14:09:22.327801	0.2.2.dev1	yet another dependency issue
 2020-11-17 14:43:16.923106	0.2.3	hot fix for template generation logging issue
+2020-11-17 17:35:49.705195	0.2.4	hot fix for annotation getter error
