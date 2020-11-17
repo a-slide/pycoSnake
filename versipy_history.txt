@@ -22,3 +22,4 @@
 2020-11-17 11:54:50.973790	0.2.1.dev2	Fixed snakemake dependency issue by using snakemake minimal
 2020-11-17 12:01:10.263496	0.2.1.dev3	Fixed snakemake dependency issue by using snakemake minimal
 2020-11-17 12:13:33.336619	0.2.1.dev4	fix conda deplot error
+2020-11-17 12:22:08.076934	0.2.2	Deep refactoring of DNA-ONT pipeline and add nanopolish concat wrapper
