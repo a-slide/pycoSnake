@@ -21,3 +21,4 @@
 2020-11-17 10:24:32.437903	0.2.1.dev1	Fixed snakemake dependency issue by using snakemake minimal
 2020-11-17 11:54:50.973790	0.2.1.dev2	Fixed snakemake dependency issue by using snakemake minimal
 2020-11-17 12:01:10.263496	0.2.1.dev3	Fixed snakemake dependency issue by using snakemake minimal
+2020-11-17 12:13:33.336619	0.2.1.dev4	fix conda deplot error
