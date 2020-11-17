@@ -11,6 +11,7 @@ import inspect
 
 # Third party lib
 import pandas as pd
+from snakemake.logging import logger, setup_logger
 
 #~~~~~~~~~~~~~~CUSTOM EXCEPTION CLASS~~~~~~~~~~~~~~#
 class pycoSnakeError (Exception):
@@ -146,7 +147,7 @@ def unlock_dir (workdir):
 
 def generate_template (workflow_dir, templates, workflow, workdir="./", overwrite=False, verbose=False, quiet=False):
     """"""
-    set_log_level(quiet=quiet, verbose=verbose)
+    setup_logger(quiet=quiet, debug=verbose)
 
     templates_to_fname = {
         "sample_sheet":"sample_sheet.tsv" ,
@@ -163,9 +164,9 @@ def generate_template (workflow_dir, templates, workflow, workdir="./", overwrit
             dest_fn = os.path.join(workdir, fname)
             if not os.path.isfile(dest_fn) or overwrite:
                 shutil.copy2 (src_fn, dest_fn)
-                log.info(f"{template} file created in working directory ")
+                logger.info(f"{template} file created in working directory ")
             else:
-                log.info(f"{template} file already exist in working directory. Use --overwrite_template to overwrite existing file")
+                logger.info(f"{template} file already exist in working directory. Use --overwrite_template to overwrite existing file")
 
 def get_yaml_val(yaml_fn, val_name, default):
     """"""
