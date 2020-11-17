@@ -14,11 +14,18 @@ conda update -q conda
 echo "Install packages needed for package build and upload"
 conda install -q python=3.6 conda-build anaconda-client ripgrep conda-verify
 
+echo "Cleanup to reduce mem usage"
+conda clean --index-cache
+conda clean --lock
+conda clean --tarballs -y
+conda clean --packages -y
+conda build purge
+
 echo "compile package from setup.py"
 python setup.py sdist
 
 echo "Build noarch package..."
-conda build meta.yaml --python 3.6 --numpy 1.1 --output-folder conda_build  -c bioconda -c conda-forge --no-include-recipe
+conda build meta.yaml --python 3.6 --numpy 1.1 --output-folder conda_build  -c bioconda --no-include-recipe
 
 echo "Deploying to Anaconda.org..."
 anaconda -v -t $1 upload conda_build/**/*.tar.bz2
