@@ -48,10 +48,10 @@ elif ref.startswith("http"):
     ref=HTTPRemoteProvider().remote(ref)
 
 gff3=config["annotation"]
-if ref.startswith("ftp"):
-    ref=FTPRemoteProvider().remote(gff3)
-elif ref.startswith("http"):
-    ref=HTTPRemoteProvider().remote(gff3)
+if gff3.startswith("ftp"):
+    gff3=FTPRemoteProvider().remote(gff3)
+elif gff3.startswith("http"):
+    gff3=HTTPRemoteProvider().remote(gff3)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define all output depending on config file~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 logger.info("Define conditional target files")
