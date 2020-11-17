@@ -6,7 +6,7 @@ version:
   b: null
   rc: null
   post: null
-  dev: null
+  dev: 1
 managed_values:
   __package_name__: pycoSnake
   __package_description__: pycoSnake is a neatly wrapped collection of snakemake workflows
@@ -19,7 +19,8 @@ managed_values:
   __package_licence__: MIT
   __minimal_python__: '>=3.6'
   __entry_point1__: pycoSnake=pycoSnake.__main__:main
-  __dependency_1__: snakemake-minimal
+  __dependency_1_pypi__: snakemake
+  __dependency_1_conda__: snakemake-minimal
   __dependency_2__: pandas
   __dependency_3__: ftputil
   __classifiers_1__: 'Development Status :: 3 - Alpha'

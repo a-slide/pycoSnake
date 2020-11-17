@@ -20,7 +20,7 @@ requirements:
     - python__minimal_python__
   run:
     - python__minimal_python__
-    - __dependency_1__
+    - __dependency_1_conda__
     - __dependency_2__
     - __dependency_3__
 

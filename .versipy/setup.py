@@ -27,7 +27,7 @@ setup(
     license="__package_licence__",
     python_requires="__minimal_python__",
     classifiers=["__classifiers_1__", "__classifiers_2__", "__classifiers_3__", "__classifiers_4__", "__classifiers_5__"],
-    install_requires=["__dependency_1__", "__dependency_2__", "__dependency_3__"],
+    install_requires=["__dependency_1_pypi__", "__dependency_2__", "__dependency_3__"],
     packages=["__package_name__"],
     package_dir = {"__package_name__": "__package_name__"},
     package_data = {"__package_name__": package_data},

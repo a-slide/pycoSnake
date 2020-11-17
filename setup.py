@@ -18,7 +18,7 @@ package_data.extend([fn.partition("/")[-1] for fn in glob("pycoSnake/wrappers/**
 setup(
     name="pycoSnake",
     description="pycoSnake is a neatly wrapped collection of snakemake workflows for analysing Illumina and nanopore sequencing datasets. It is easy to install with conda and simple to run on a local computer or in a cluster environment",
-    version="0.2.2",
+    version="0.2.2.dev1",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/a-slide/pycoSnake",
@@ -27,7 +27,7 @@ setup(
     license="MIT",
     python_requires=">=3.6",
     classifiers=["Development Status :: 3 - Alpha", "Intended Audience :: Science/Research", "Topic :: Scientific/Engineering :: Bio-Informatics", "License :: OSI Approved :: MIT License", "Programming Language :: Python :: 3"],
-    install_requires=["snakemake-minimal", "pandas", "ftputil"],
+    install_requires=["snakemake", "pandas", "ftputil"],
     packages=["pycoSnake"],
     package_dir = {"pycoSnake": "pycoSnake"},
     package_data = {"pycoSnake": package_data},
