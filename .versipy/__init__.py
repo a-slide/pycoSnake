@@ -7,7 +7,13 @@ __url__ = "__package_url__"
 __licence__ = "__package_licence__"
 __author__ = "__author_name__"
 
-workflows_versions = {
-    "DNA_ONT" : "__DNA_ONT_pipeline_version__",
-    "RNA_illumina" : "__RNA_illumina_pipeline_version__",
-    "test_wrappers" : "__test_wrappers_pipeline_version__"}
+workflows_info = {
+    "DNA_ONT" : {
+        "version" : "__DNA_ONT_pipeline_version__",
+        "description" : "__DNA_ONT_pipeline_description__"},
+    "RNA_illumina" : {
+        "version" : "__RNA_illumina_pipeline_version__",
+        "description" : "__RNA_illumina_pipeline_description__"},
+    "test_wrappers" : {
+        "version" : "__test_wrappers_pipeline_version__",
+        "description" : "__test_wrappers_pipeline_description__"}}
