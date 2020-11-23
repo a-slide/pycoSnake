@@ -10,10 +10,8 @@ from snakemake.logging import logger
 
 # Local imports
 from pycoSnake.common import *
-from snakemake.remote.FTP import RemoteProvider as FTPRemoteProvider
-from snakemake.remote.HTTP import RemoteProvider as HTTPRemoteProvider
-FTP=FTPRemoteProvider()
-HTTP=HTTPRemoteProvider()
+from snakemake.remote.FTP import RemoteProvider as FTP
+from snakemake.remote.HTTP import RemoteProvider as HTTP
 
 ##~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Getters~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 def get_fastq (wildcards):
@@ -25,33 +23,39 @@ def get_seqsum (wildcards):
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Initialise~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 logger.info("Checking configuration file version")
-config_version=11
+config_version=12
 if not "config_version" in config or config["config_version"]!= config_version:
-    raise pycoSnakeError ("Wrong configuration file version. Please regenerate config with `--generate_template config -o`")
+    logger.error ("Wrong configuration file version. Please regenerate a template file with `--generate_template config -o`")
+    sys.exit()
+logger.debug(config)
 
 logger.info("Loading sample file")
 sample_df=pd.read_csv (config["sample_sheet"], comment="#", skip_blank_lines=True, sep="\t", index_col=0)
+if not sample_df.index.name=="sample_id" and not all_in(sample_df.columns, ["fastq","fast5","seq_summary"]):
+    logger.error ("The provided sample sheet is in the correct format, Please regenerate a template file with `--generate_template sample_sheet -o`")
+    sys.exit()
+logger.debug(sample_df)
 sample_list=list(sample_df.index)
 
 logger.info("Define number of chunks")
 try:
     nchunk=int(config["pbt_alignment_split"]["n_chunks"])
 except:
-    nchunk=2
+    nchunk=4
 chunk_list=list(range(nchunk))
 
 logger.info("Specify way to download reference files")
 ref=config["genome"]
 if ref.startswith("ftp"):
-    ref=FTPRemoteProvider().remote(ref)
+    ref=FTP().remote(ref)
 elif ref.startswith("http"):
-    ref=HTTPRemoteProvider().remote(ref)
+    ref=HTTP().remote(ref)
 
 gff3=config["annotation"]
 if gff3.startswith("ftp"):
-    gff3=FTPRemoteProvider().remote(gff3)
+    gff3=FTP().remote(gff3)
 elif gff3.startswith("http"):
-    gff3=HTTPRemoteProvider().remote(gff3)
+    gff3=HTTP().remote(gff3)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~Define all output depending on config file~~~~~~~~~~~~~~~~~~~~~~~~~~~~#
 logger.info("Define conditional target files")
@@ -141,8 +145,8 @@ rule minimap2_align:
         index=rules.minimap2_index.output.index,
         fastq=rules.pbt_fastq_filter.output.fastq
     output:
-        bam=temp(join("results","main","minimap2_alignments","{sample}.bam")),
-        bam_index=temp(join("results","main","minimap2_alignments","{sample}.bam.bai"))
+        bam=join("results","main","minimap2_alignments","{sample}.bam"),
+        bam_index=join("results","main","minimap2_alignments","{sample}.bam.bai")
     log: join("logs",rule_name,"{sample}.log")
     threads: get_threads(config, rule_name)
     params: opt=get_opt(config, rule_name)

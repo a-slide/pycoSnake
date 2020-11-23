@@ -1,7 +1,17 @@
 # Config file for lsf cluster
 
 # Configuration file version (do not change)
-config_version: 6
+config_version: 7
+
+# Source files
+# Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (local, FTP or HTTP)
+genome:
+# Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (local, FTP or HTTP)
+annotation:
+# Path to an ENSEMBL cDNA FASTA reference transcriptome file/URL to be used for read counting (local, FTP or HTTP)
+transcriptome:
+# Path to a tabulated sample sheet
+sample_sheet:
 
 # cluster command for lsf
 cluster_cores: 10000

@@ -1,5 +1,13 @@
 # Configuration file version (do not change)
-config_version: 11
+config_version: 12
+
+# Source files
+# Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (local, FTP or HTTP)
+genome:
+# Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (local, FTP or HTTP)
+annotation:
+# Path to a tabulated sample sheet
+sample_sheet:
 
 # Conditional execution of pipeline
 differential_methylation: True
@@ -30,7 +38,7 @@ pbt_alignment_filter:
 
 pbt_alignment_split:
     opt: "--index"
-    n_chunks: 10
+    n_chunks: 4
 
 nanopolish_index:
     opt: ""

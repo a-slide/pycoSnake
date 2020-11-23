@@ -1,9 +1,25 @@
+ Configuration file version (do not change)
+config_version: 7
+
+# Source files
+# Path to an ENSEMBL FASTA reference genome file/URL to be used for read mapping (local, FTP or HTTP)
+genome:
+# Path to an ENSEMBL GFF3 annotation file/URL containing transcript annotations (local, FTP or HTTP)
+annotation:
+# Path to an ENSEMBL cDNA FASTA reference transcriptome file/URL to be used for read counting (local, FTP or HTTP)
+transcriptome:
+# Path to a tabulated sample sheet
+sample_sheet:
+
+# Conditional execution of pipeline
+cufflinks: True
+featurecounts: True
+salmon: True
+quality_control: True
+genome_coverage: True
+
 # All the rules accept the following parameters: opt, threads, mem
 
-# Configuration file version (do not change)
-config_version: 6
-
-# INPUT FILES RULES
 get_genome:
     opt: ""
 
@@ -17,7 +33,6 @@ fastp:
     opt: ""
     threads: 2
 
-# GENOME ALIGNMENT RULES
 star_index:
     opt: ""
     threads: 4
@@ -33,13 +48,12 @@ pbt_alignment_filter:
 star_count_merge:
     opt: ""
 
-# OPTIONAL ALIGNMENT RULES (comment to be skip)
-# cufflinks:
-#     opt: "--library-type fr-firststrand --upper-quartile-norm"
-#     threads: 4
+cufflinks:
+    opt: "--library-type fr-firststrand --upper-quartile-norm"
+    threads: 4
 
-# cufflinks_fpkm_merge:
-#     opt: ""
+cufflinks_fpkm_merge:
+    opt: ""
 
 subread_featurecounts:
     opt: "-p"
@@ -57,7 +71,6 @@ bedtools_genomecov:
 igvtools_count:
     opt: "-w 10"
 
-# TRANSCRIPTOME PSEUDO-ALIGNMENT RULES
 salmon_index:
     opt: ""
     threads: 4
