@@ -1,12 +1,12 @@
 version:
   major: 0
   minor: 2
-  micro: 4
+  micro: 5
   a: null
   b: null
   rc: null
   post: null
-  dev: 3
+  dev: null
 managed_values:
   __package_name__: pycoSnake
   __package_description__: pycoSnake is a neatly wrapped collection of snakemake workflows
@@ -30,7 +30,7 @@ managed_values:
   __classifiers_5__: 'Programming Language :: Python :: 3'
   __citation__: 'Adrien Leger. a-slide/pycoSnake: (2020). doi:10.5281/zenodo.4110611'
   __DNA_ONT_pipeline_version__: '0.4'
-  __RNA_illumina_pipeline_version__: '0.2.dev'
+  __RNA_illumina_pipeline_version__: 0.2.dev
   __test_wrappers_pipeline_version__: '0.4'
   __DNA_ONT_pipeline_description__: Workflow for DNA analysis of Nanopore data including,
     alignment, methylation calling and SV calling
