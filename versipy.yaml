@@ -6,7 +6,7 @@ version:
   b: null
   rc: null
   post: null
-  dev: null
+  dev: 3
 managed_values:
   __package_name__: pycoSnake
   __package_description__: pycoSnake is a neatly wrapped collection of snakemake workflows
@@ -29,9 +29,14 @@ managed_values:
   __classifiers_4__: 'License :: OSI Approved :: MIT License'
   __classifiers_5__: 'Programming Language :: Python :: 3'
   __citation__: 'Adrien Leger. a-slide/pycoSnake: (2020). doi:10.5281/zenodo.4110611'
-  __DNA_ONT_pipeline_version__: '0.3'
-  __RNA_illumina_pipeline_version__: '0.1'
-  __test_wrappers_pipeline_version__: '0.3'
+  __DNA_ONT_pipeline_version__: '0.4'
+  __RNA_illumina_pipeline_version__: '0.2.dev'
+  __test_wrappers_pipeline_version__: '0.4'
+  __DNA_ONT_pipeline_description__: Workflow for DNA analysis of Nanopore data including,
+    alignment, methylation calling and SV calling
+  __RNA_illumina_pipeline_description__: Workflow for RNA analysis of Illumina data
+    including, alignment and gene abundance estimation
+  __test_wrappers_pipeline_description__: Test Nanosnake wrappers
 managed_files:
   .versipy/setup.py: setup.py
   .versipy/meta.yaml: meta.yaml

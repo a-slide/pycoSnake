@@ -26,3 +26,6 @@
 2020-11-17 14:09:22.327801	0.2.2.dev1	yet another dependency issue
 2020-11-17 14:43:16.923106	0.2.3	hot fix for template generation logging issue
 2020-11-17 17:35:49.705195	0.2.4	hot fix for annotation getter error
+2020-11-23 16:31:22.218760	0.2.4.dev1	Versipy auto bump-up
+2020-11-23 16:32:28.635209	0.2.4.dev2	Versipy auto bump-up
+2020-11-23 16:33:06.416612	0.2.4.dev3	Versipy auto bump-up
