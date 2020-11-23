@@ -213,3 +213,79 @@ def required_option (name, var):
     if not var:
         raise pycoSnakeError (f"Option --{name} is required to run the workflow")
     return var
+
+def autocast(val):
+    """"""
+    if not val:
+        return None
+    try:
+        return int(val)
+    except ValueError:
+        pass
+    try:
+        return float(val)
+    except ValueError:
+        pass
+    if val.lower() == "true":
+        return True
+    elif val.lower() == "false":
+        return False
+    else:
+        return val
+
+def cast_val(val_list):
+    """"""
+    if not val_list:
+        return True
+    elif len(val_list) == 1:
+        return val_list[0]
+    else:
+        return val_list
+
+def autobuild_args(args, extra):
+    """"""
+    args_dict = vars(args)
+
+    # Parse extra args
+    arg_name = ""
+    val_list = []
+    for element in extra:
+        if element.startswith("-"):
+
+            # Store previous val
+            if arg_name:
+                args_dict[arg_name] = cast_val(val_list)
+            # Reset val
+            arg_name = ""
+            val_list = []
+            # Start new key
+            arg_name = element.strip("-")
+
+        else:
+            val_list.append(autocast(element))
+
+    # Last element
+    if arg_name:
+        args_dict[arg_name] = cast_val(val_list)
+
+    return args_dict
+
+def filter_out_options (args_dict):
+    """Filter out options that are not in the snakemake API"""
+    #valid_options = list(inspect.signature(snakemake).parameters.keys())
+    filter_list = [
+        "config",
+        "snakefile",
+        "configfiles",
+        "use_conda",
+        "wrapper_prefix",
+        "subcommand",
+        "generate_template",
+        "overwrite_template",
+        "parser_func",
+        "workflow_version"]
+    valid_kwargs = OrderedDict()
+    for k,v in args_dict.items():
+        if not k in filter_list:
+            valid_kwargs[k] = v
+    return valid_kwargs
