@@ -168,7 +168,7 @@ def generate_template (workflow_dir, templates, workflow, workdir="./", overwrit
             else:
                 logger.info(f"{template} file already exist in working directory. Use --overwrite_template to overwrite existing file")
 
-def get_yaml_val(yaml_fn, val_name, default):
+def get_yaml_val(yaml_fn, val_name, default=None):
     """"""
     try:
         with open(yaml_fn) as fp:
