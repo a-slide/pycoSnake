@@ -18,7 +18,7 @@ package_data.extend([fn.partition("/")[-1] for fn in glob("pycoSnake/wrappers/**
 setup(
     name="pycoSnake",
     description="pycoSnake is a neatly wrapped collection of snakemake workflows for analysing Illumina and nanopore sequencing datasets. It is easy to install with conda and simple to run on a local computer or in a cluster environment",
-    version="0.2.5.post1",
+    version="0.2.5.post2",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/a-slide/pycoSnake",

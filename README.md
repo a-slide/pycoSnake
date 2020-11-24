@@ -1,4 +1,4 @@
-# pycoSnake v0.2.5.post1
+# pycoSnake v0.2.5.post2
 
 ![](pictures/pycoSnake_logo.png)
 
