@@ -131,8 +131,8 @@ def workflow_parser (args_dict):
     if args_dict["cluster_config"]:
         logger.warning ("INITIALISING WORKFLOW IN CLUSTER MODE")
         cluster_config_fn = args_dict["cluster_config"]
-        args_dict["local_cores"] = get_yaml_val(yaml_fn=cluster_config_fn, val_name="cluster_cores", 10000)
-        args_dict["nodes"] = get_yaml_val(yaml_fn=cluster_config_fn, val_name="cluster_nodes", 500)
+        args_dict["local_cores"] = get_yaml_val(yaml_fn=cluster_config_fn, val_name="cluster_cores", default=10000)
+        args_dict["nodes"] = get_yaml_val(yaml_fn=cluster_config_fn, val_name="cluster_nodes", default=500)
         args_dict["cluster"] = get_yaml_val(yaml_fn=cluster_config_fn, val_name="cluster_cmd")
         args_dict["config"] = args_dict["cluster_config"]
         logger.debug ("Cores:{} / Nodes:{} / Cluster_cmd:{}".format(args_dict['local_cores'], args_dict['nodes'], args_dict['cluster']))
