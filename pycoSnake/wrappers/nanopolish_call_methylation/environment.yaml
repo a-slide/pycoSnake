@@ -4,4 +4,6 @@ channels:
   - conda-forge
 
 dependencies:
-  - nanopolish=0.11.1
+  - nanopolish=0.13.2
+  - hdf5=1.8.18
+  - h5py=2.8.0

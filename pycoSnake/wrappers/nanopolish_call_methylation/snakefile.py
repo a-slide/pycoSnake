@@ -32,7 +32,7 @@ rule nanopolish_index:
     log: "nanopolish_index.log"
     wrapper: "nanopolish_index"
 
-# Index reads
+# Index call_methylation
 rule nanopolish_call_methylation:
     input: fastq=output_fastq, bam=bam, ref=ref, index=index
     output: tsv=tsv
