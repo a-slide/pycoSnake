@@ -33,3 +33,4 @@
 2020-11-24 09:39:21.957442	0.2.5.post1	fix cluster config error
 2020-11-24 09:50:03.964177	0.2.5.post2	fix cluster config error
 2020-12-09 10:10:15.842930	0.2.5.post2.dev1	Update nanopolish wrapper
+2020-12-09 10:17:33.460397	0.2.6	Update nanopolish wrapper
